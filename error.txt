@@ -1,0 +1,1 @@
+javax.swing.tree.DefaultMutableTreeNode cannot be cast to info.ata4.vpk.VPKEntry
