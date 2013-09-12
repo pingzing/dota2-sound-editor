@@ -21,6 +21,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import static java.nio.file.StandardCopyOption.*;
+import java.util.Enumeration;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -700,7 +701,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            Path destPath = Paths.get(installDir + "\\dota\\" + selectedFile.getPath());
+            String wavePath = getWavePath(selectedFile);
+            Path destPath = Paths.get(installDir + "\\dota\\" + wavePath);
 
             try
             {
@@ -765,5 +767,28 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 frequencyField.setText("00000.0 Hz");
             }
         }
+    }
+
+    private String getWavePath(TreeNode selectedFile)
+    {
+        Enumeration e = selectedFile.children();
+        while(e.hasMoreElements())
+        {
+            Object currentElement = e.nextElement();
+            if (currentElement.toString().contains("\"rndwave\""))
+            {
+                Enumeration innerE = ((TreeNode)currentElement).children();
+                while(innerE.hasMoreElements())
+                {
+                    Object currentInnerElement = innerE.nextElement();
+                    if(currentInnerElement.toString().contains("\"wave\""))
+                    {
+                        //Maybe do some string massaging here before we just hand it back
+                        return ((TreeNode)currentInnerElement).toString();
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
