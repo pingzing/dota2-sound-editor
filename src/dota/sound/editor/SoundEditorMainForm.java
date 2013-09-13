@@ -29,8 +29,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.ListModel;
 import javax.swing.UIManager;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -52,7 +55,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         installDir = _installDir;
         portraitFinder = new PortraitFinder(fileName);
         initComponents();
-        jMenuBar1.setVisible(false);
+        jMenuBar1.setVisible(false);        
         populateDropdownBox();
 
         /* Create and display the form */
@@ -78,7 +81,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         heroDropdown = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        heroSoundList = new javax.swing.JList();
+        jTree1 = new javax.swing.JTree();
         heroImageLabel = new javax.swing.JLabel();
         replaceButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
@@ -92,8 +95,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         exportButton = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -106,7 +107,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dota 2 Sound Editor");
-        setMinimumSize(new java.awt.Dimension(400, 300));
+        setMinimumSize(new java.awt.Dimension(353, 485));
+        setPreferredSize(new java.awt.Dimension(353, 485));
 
         heroDropdown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         heroDropdown.setName("heroDropdownBox"); // NOI18N
@@ -123,21 +125,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jScrollPane1.setName("heroListFrame"); // NOI18N
 
-        heroSoundList.setModel(new javax.swing.AbstractListModel()
-        {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
-        heroSoundList.setName("heroSoundList"); // NOI18N
-        heroSoundList.addListSelectionListener(new javax.swing.event.ListSelectionListener()
-        {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt)
-            {
-                heroSoundListValueChanged(evt);
-            }
-        });
-        jScrollPane1.setViewportView(heroSoundList);
+        jTree1.setPreferredSize(new java.awt.Dimension(323, 64));
+        jScrollPane1.setViewportView(jTree1);
 
         heroImageLabel.setMaximumSize(new java.awt.Dimension(128, 72));
         heroImageLabel.setMinimumSize(new java.awt.Dimension(128, 72));
@@ -228,8 +217,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
-        jScrollPane2.setViewportView(jTree1);
-
         jMenu1.setText("File");
 
         jMenuItem1.setText("Close");
@@ -275,37 +262,38 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(heroDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(525, Short.MAX_VALUE))
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(heroDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)))
+                .addGap(10, 10, 10))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(133, 133, 133))
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(exportButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(replaceButton))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2)
+                .addComponent(exportButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(replaceButton)
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 310, Short.MAX_VALUE)
+                    .addGap(0, 176, Short.MAX_VALUE)
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 310, Short.MAX_VALUE)))
+                    .addGap(0, 175, Short.MAX_VALUE)))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(310, Short.MAX_VALUE)
+                    .addContainerGap(176, Short.MAX_VALUE)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(310, Short.MAX_VALUE)))
+                    .addContainerGap(175, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -314,28 +302,26 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(heroDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jScrollPane1))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(replaceButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(replaceButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 243, Short.MAX_VALUE)
+                    .addGap(0, 232, Short.MAX_VALUE)
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 243, Short.MAX_VALUE)))
+                    .addGap(0, 232, Short.MAX_VALUE)))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(240, Short.MAX_VALUE)
+                    .addContainerGap(227, Short.MAX_VALUE)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(233, Short.MAX_VALUE)))
+                    .addContainerGap(224, Short.MAX_VALUE)))
         );
 
         pack();
@@ -345,7 +331,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         if (evt.getStateChange() == ItemEvent.SELECTED)
         {
             System.out.println(heroDropdown.getSelectedItem().toString());
-            populateSoundList((NamedHero) heroDropdown.getSelectedItem());
+            //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
+            populateSoundListAsTree((NamedHero)heroDropdown.getSelectedItem());
+            jTree1.setRootVisible(false);
+            jTree1.setShowsRootHandles(true);
             try
             {
                 fillImageFrame((NamedHero) heroDropdown.getSelectedItem());
@@ -358,10 +347,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     }//GEN-LAST:event_heroDropdownStateChanged
 
     private void replaceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replaceButtonActionPerformed
-        if (heroSoundList.getSelectedValue() != null)
+        if (jTree1.getSelectionRows() != null && 
+                ((TreeNode)jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            //TODO: Just get the TreeNode from the soundList.
-            TreeNode selectedFile = (TreeNode) heroSoundList.getSelectedValue();
+            TreeNode selectedFile = ((TreeNode)jTree1.getSelectionPath().getLastPathComponent());                       
 
             //See if they have an autoexec.cfg
             String autoExecPath = checkForAutoExec();
@@ -377,21 +366,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }                        
 
             //Prompt user to pick a file to replace with
-            File newSoundFile = promptUserForNewFile(selectedFile);
-
+            File newSoundFile = promptUserForNewFile(selectedFile.toString());           
             //Check for file type sameness, *OPTIONAL* check for sound-length, stereo-ness and frequency matching
             //Copy file into relevant folder, rename it as necessary. See code below in PopulateSoundList to see how to get the sound file's filepath
         }
     }//GEN-LAST:event_replaceButtonActionPerformed
-
-    private void heroSoundListValueChanged(javax.swing.event.ListSelectionEvent evt)//GEN-FIRST:event_heroSoundListValueChanged
-    {//GEN-HEADEREND:event_heroSoundListValueChanged
-        if (!(evt.getValueIsAdjusting()))
-        {
-//            VPKEntry soundFileEntry = (VPKEntry) heroSoundList.getSelectedValue();
-//            setSoundText(soundFileEntry);
-        }
-    }//GEN-LAST:event_heroSoundListValueChanged
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_exportButtonActionPerformed
     {//GEN-HEADEREND:event_exportButtonActionPerformed
@@ -472,26 +451,58 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             heroDropdown.addItem(tempHero);
         }
 
-        populateSoundList((NamedHero) heroDropdown.getSelectedItem());
+        //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
+        populateSoundListAsTree((NamedHero)heroDropdown.getSelectedItem());
     }
 
-    private void populateSoundList(NamedHero selectedHero)
+    //TODO: Look into deprecating this method and its associated jList.
+//    private void populateSoundList(NamedHero selectedHero)
+//    {
+//        this.getHeroScriptFile(selectedHero.internalName);
+//        Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
+//        ScriptParser parser = new ScriptParser(scriptPath.toFile());
+//        TreeModel scriptTree = parser.getTreeModel();
+//        DefaultListModel scriptList = new DefaultListModel();
+//
+//        //Get all children of root node:
+//        TreeNode rootNode = (TreeNode) scriptTree.getRoot();
+//        int childCount = rootNode.getChildCount();
+//        for (int i = 0; i < childCount; i++)
+//        {
+//            scriptList.addElement(scriptTree.getChild(rootNode, i));
+//        }
+//
+//        heroSoundList.setModel(scriptList);
+//    }
+    
+    private void populateSoundListAsTree(NamedHero selectedHero)
     {
         this.getHeroScriptFile(selectedHero.internalName);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         ScriptParser parser = new ScriptParser(scriptPath.toFile());
         TreeModel scriptTree = parser.getTreeModel();
         DefaultListModel scriptList = new DefaultListModel();
-
-        //Get all children of root node:
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
-        for (int i = 0; i < childCount; i++)
+        
+        TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
+        ArrayList<String> wavePathsList = new ArrayList<String>();
+        for(int i = 0; i < childCount; i++)
         {
-            scriptList.addElement(scriptTree.getChild(rootNode, i));
+            
+             wavePathsList = this.getWavePathsAsList((TreeNode)scriptTree.getChild(rootNode, i));
+             String nodeValue = scriptTree.getChild(rootNode, i).toString();
+             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
+             
+             for(String s : wavePathsList)
+             {
+                 DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
+                 newNode.add(tempNode);
+             }
+             ((DefaultMutableTreeNode)soundListTreeModel.getRoot()).add(newNode);
         }
-
-        heroSoundList.setModel(scriptList);
+        
+        jTree1.setModel(soundListTreeModel);                 
     }
 
     //Just an example for now
@@ -523,7 +534,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private javax.swing.JTextField frequencyField;
     private javax.swing.JComboBox heroDropdown;
     private javax.swing.JLabel heroImageLabel;
-    private javax.swing.JList heroSoundList;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
@@ -535,7 +545,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
@@ -685,24 +694,31 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         return null;
     }
 
-    private File promptUserForNewFile(TreeNode selectedFile)
+    private File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
         chooser.setFileFilter(filter);
 
-        //TODO: Change this following block so that:
-        //      - The filename doesn't get changed
+        //TODO: Change this following block so that:                
         //      - The TreeNode's wave property is changed
         //      - The modified tree gets written to a new script file
         //      - The new script file gets written to disk and replaces the exisiting one
-        //      - The UI bits all update
+        //      - The UI bits all update                
         int chooserRetVal = chooser.showOpenDialog(chooser);
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
+            TreeNode selectedFile = getTreeNodeFromWavePath(wavePath);
+            
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            String wavePath = getWavePath(selectedFile);
-            Path destPath = Paths.get(installDir + "\\dota\\" + wavePath);
+            
+            //TODO: REVISIT this line (and whole block) and check it for sanity
+            ArrayList wavePathsList = getWavePathsAsList(selectedFile);
+            
+            //RECHECK THIS STATEMENT
+            Path destPath = Paths.get(installDir + "\\dota\\customsounds\\" +
+                    ((NamedHero)heroDropdown.getSelectedItem()).getInternalName()
+                    + "\\" + chosenFile.getFileName());
 
             try
             {
@@ -769,12 +785,15 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
     }
 
-    private String getWavePath(TreeNode selectedFile)
+    private ArrayList<String> getWavePathsAsList(TreeNode selectedFile)
     {
+        ArrayList<String> wavePathsList = new ArrayList<String>();
         Enumeration e = selectedFile.children();
         while(e.hasMoreElements())
         {
             Object currentElement = e.nextElement();
+            
+            //If a soundfile has multiple possible wavefiles
             if (currentElement.toString().contains("\"rndwave\""))
             {
                 Enumeration innerE = ((TreeNode)currentElement).children();
@@ -784,11 +803,35 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     if(currentInnerElement.toString().contains("\"wave\""))
                     {
                         //Maybe do some string massaging here before we just hand it back
-                        return ((TreeNode)currentInnerElement).toString();
+                        wavePathsList.add(((TreeNode)currentInnerElement).toString());
                     }
                 }
             }
+            //If it only has one
+            
+            else if(currentElement.toString().contains("\"wave\""))
+            {
+                wavePathsList.add(((TreeNode)currentElement).toString());
+            }
         }
+        return wavePathsList;
+    }
+
+    private TreeNode getTreeNodeFromWavePath(String wavePath)
+    {        
+        VPKEntry scriptFile = getHeroScriptFile(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
+        ScriptParser parser = new ScriptParser(new File(Paths.get(installDir + "\\dota\\" + scriptFile.getPath()).toString()));
+        TreeModel model = parser.getTreeModel();
+        
+        TreeNode root = (TreeNode)model.getRoot();
+        for(Enumeration e = ((DefaultMutableTreeNode)root).breadthFirstEnumeration(); e.hasMoreElements() && root != null;)
+        {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
+            if(node.toString().contains(wavePath))
+            {
+                return node;
+            }
+        }                       
         return null;
     }
 }
