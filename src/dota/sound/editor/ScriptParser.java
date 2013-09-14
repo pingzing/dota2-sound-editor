@@ -8,10 +8,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -28,6 +30,8 @@ public class ScriptParser
     private int previousLevel = 0;
     private DefaultMutableTreeNode currentNode = null;
     private DefaultMutableTreeNode currentParent = null;
+    private File modelFile = null;
+    private StringBuilder outputScriptString = null;
 
     ScriptParser(File script)
     {
@@ -62,6 +66,44 @@ public class ScriptParser
             System.out.println("Done generating tree.");
         }
     }
+
+    ScriptParser(TreeModel currentHeroTreeModel)
+    {
+        StringBuilder scriptString = parseModel(currentHeroTreeModel);
+        outputScriptString = scriptString;
+    }
+    
+    public void writeModelToFile(String scriptFilePath)
+    {
+        if(outputScriptString != null)
+        {
+            File outputFile = new File(scriptFilePath);
+            FileWriter fw = null;
+            
+            try
+            {
+                fw = new FileWriter(outputFile);
+                fw.write(outputScriptString.toString());
+                fw.close();
+            }
+            catch(IOException ex)
+            {                
+                ex.printStackTrace();
+            }
+            finally
+            {
+                try
+                {
+                    fw.close();                    
+                }
+                catch(IOException ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+                
+        }
+    }    
 
     public TreeModel getTreeModel()
     {
@@ -106,6 +148,38 @@ public class ScriptParser
             {
                 ex.printStackTrace();
             }
+        }
+    }
+
+    private StringBuilder parseModel(TreeModel currentHeroTreeModel)
+    {        
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode)currentHeroTreeModel.getRoot();
+        StringBuilder scriptString = new StringBuilder();        
+        recursiveBuildScript(scriptString, root);
+        
+        //Remove first bracket and newline
+        scriptString.deleteCharAt(0);
+        scriptString.deleteCharAt(0);
+        
+        //Remove final brack
+        scriptString.deleteCharAt(scriptString.lastIndexOf("}"));
+        return scriptString;
+    }
+
+    private void recursiveBuildScript(StringBuilder scriptString, DefaultMutableTreeNode node)
+    {
+        if(!node.getUserObject().toString().contentEquals("root"))
+        {
+                scriptString.append(node.getUserObject().toString()+"\n");
+        }
+        if(!node.isLeaf())
+        {
+            scriptString.append("{\n");
+            for(int i = 0; i < node.getChildCount(); i++)
+            {
+                 recursiveBuildScript(scriptString, (DefaultMutableTreeNode)node.getChildAt(i));
+            }
+            scriptString.append("}\n");
         }
     }
 }
