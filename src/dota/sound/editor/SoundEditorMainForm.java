@@ -333,7 +333,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
-            
+
             File soundFile = createSoundFileFromWaveString(waveString);
             String soundFilePath = soundFile.toURI().toString();
             Media media = new Media(soundFilePath);
@@ -403,7 +403,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
     }
 
-    //TODO: Look into deprecating this method and its associated jList.
+    //DEPRECATED. Left in as historical
 //    private void populateSoundList(NamedHero selectedHero)
 //    {
 //        this.getHeroScriptFile(selectedHero.internalName);
@@ -422,6 +422,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 //
 //        heroSoundList.setModel(scriptList);
 //    }
+    
     private void populateSoundListAsTree(NamedHero selectedHero)
     {
         this.getHeroScriptFile(selectedHero.internalName);
@@ -452,8 +453,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jTree1.setModel(soundListTreeModel);
     }
-
-    //Just an example for now
+   
     private void fillImageFrame(NamedHero selectedItem) throws IOException
     {
         try
@@ -750,11 +750,22 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         VPKArchive vpk = new VPKArchive();
         File entryFile = null;
 
-        int startIndex = nthOccurrence(waveString, '\"', 2);
-        int endIndex = nthOccurrence(waveString, '\"', 3);
-        
-        //TODO: Somewhere here, deal with lack of "wave" in front of wavestring
-        String waveSubstring = waveString.substring(startIndex, endIndex + 1);
+        String waveSubstring = "";
+        int startIndex = -1;
+        int endIndex = -1;
+        if (waveString.contains("\"wave\""))
+        {
+            startIndex = nthOccurrence(waveString, '\"', 2);
+            endIndex = nthOccurrence(waveString, '\"', 3);
+        }
+        //For weird special cases where the "wave" part of the string is missing, i.e. Treant's Overgrowth.Target spell
+        else
+        {
+            startIndex = nthOccurrence(waveString, '\"', 0);
+            endIndex = nthOccurrence(waveString, '\"', 1);
+        }
+
+        waveSubstring = waveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
         waveSubstring = waveSubstring.replace("\\", "/");

@@ -4,13 +4,15 @@
  */
 
 //Features to add:
-// - Change Replace to something less scary
-// - Preview sounds
-// - Change dropdown box names
-// - Make sound names more obvious
+// - Delete scratch sounds on program close
 // - Ability to revert sounds to default
+// - Change dropdown box names
+// - Fix missing portraits
+// - Write a readme
 // - Get sound length
-// - Figure out how to parse scripts with no "wave" in front of the wavepath
+// - Change Replace to something less scary
+// - Make more obvious that sound names need to be expanded
+
 package dota.sound.editor;
 
 import java.awt.event.WindowAdapter;
