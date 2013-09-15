@@ -21,6 +21,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import static java.nio.file.StandardCopyOption.*;
 import java.util.Enumeration;
+import javafx.embed.swing.JFXPanel;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -50,8 +51,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         installDir = _installDir;
         portraitFinder = new PortraitFinder(fileName);
         initComponents();
-        jMenuBar1.setVisible(false);        
+        jMenuBar1.setVisible(false);
         populateDropdownBox();
+        JFXPanel token = new JFXPanel();
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable()
@@ -264,7 +266,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             System.out.println(heroDropdown.getSelectedItem().toString());
             //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
-            populateSoundListAsTree((NamedHero)heroDropdown.getSelectedItem());
+            populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
             jTree1.setRootVisible(false);
             jTree1.setShowsRootHandles(true);
             try
@@ -279,10 +281,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     }//GEN-LAST:event_heroDropdownStateChanged
 
     private void replaceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replaceButtonActionPerformed
-        if (jTree1.getSelectionRows() != null && 
-                ((TreeNode)jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
+        if (jTree1.getSelectionRows() != null
+                && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            TreeNode selectedFile = ((TreeNode)jTree1.getSelectionPath().getLastPathComponent());                       
+            TreeNode selectedFile = ((TreeNode) jTree1.getSelectionPath().getLastPathComponent());
 
             //See if they have an autoexec.cfg
             String autoExecPath = checkForAutoExec();
@@ -295,10 +297,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             {
                 autoExecPath = createAutoExecCfg();
                 checkAndSetSndUpdate(autoExecPath);
-            }                        
+            }
 
             //Prompt user to pick a file to replace with
-            promptUserForNewFile(selectedFile.toString());                       
+            promptUserForNewFile(selectedFile.toString());
         }
     }//GEN-LAST:event_replaceButtonActionPerformed
 
@@ -326,13 +328,17 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playSoundButtonActionPerformed
     {//GEN-HEADEREND:event_playSoundButtonActionPerformed
-        if (jTree1.getSelectionRows() != null && 
-                ((TreeNode)jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
+        if (jTree1.getSelectionRows().length != 0
+                && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode)jTree1.getSelectionPath().getLastPathComponent());
+            DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
-            createSoundFileFromWaveString(waveString);
-            //Media media = new Media();
+            
+            File soundFile = createSoundFileFromWaveString(waveString);
+            String soundFilePath = soundFile.toURI().toString();
+            Media media = new Media(soundFilePath);
+            MediaPlayer player = new MediaPlayer(media);
+            player.play();
         }
     }//GEN-LAST:event_playSoundButtonActionPerformed
 
@@ -394,7 +400,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
 
         //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
-        populateSoundListAsTree((NamedHero)heroDropdown.getSelectedItem());
+        populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
     }
 
     //TODO: Look into deprecating this method and its associated jList.
@@ -416,7 +422,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 //
 //        heroSoundList.setModel(scriptList);
 //    }
-    
     private void populateSoundListAsTree(NamedHero selectedHero)
     {
         this.getHeroScriptFile(selectedHero.internalName);
@@ -427,25 +432,25 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         DefaultListModel scriptList = new DefaultListModel();
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
-        
+
         TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         ArrayList<String> wavePathsList = new ArrayList<String>();
-        for(int i = 0; i < childCount; i++)
+        for (int i = 0; i < childCount; i++)
         {
-            
-             wavePathsList = this.getWavePathsAsList((TreeNode)scriptTree.getChild(rootNode, i));
-             String nodeValue = scriptTree.getChild(rootNode, i).toString();
-             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
-             
-             for(String s : wavePathsList)
-             {
-                 DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
-                 newNode.add(tempNode);
-             }
-             ((DefaultMutableTreeNode)soundListTreeModel.getRoot()).add(newNode);
+
+            wavePathsList = this.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
+            String nodeValue = scriptTree.getChild(rootNode, i).toString();
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
+
+            for (String s : wavePathsList)
+            {
+                DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
+                newNode.add(tempNode);
+            }
+            ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
         }
-        
-        jTree1.setModel(soundListTreeModel);                 
+
+        jTree1.setModel(soundListTreeModel);
     }
 
     //Just an example for now
@@ -581,7 +586,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             fileExistsLocally = true;
         }
-        
+
         File file = new File(fileName);
         VPKArchive vpk = new VPKArchive();
         try
@@ -602,11 +607,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             if (entry.getName().contains("game_sounds_" + heroName))
             {
                 //If it already exists, break out and move on.
-                if(fileExistsLocally)
+                if (fileExistsLocally)
                 {
                     return entry;
                 }
-                
+
                 File entryFile = new File(destDir, entry.getPath());
 
                 File entryDir = entryFile.getParentFile();
@@ -641,46 +646,46 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         int chooserRetVal = chooser.showOpenDialog(chooser);
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
-            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode)getTreeNodeFromWavePath(wavePath);
-            
+            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
+
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            
+
             //TODO: REVISIT this line (and whole block) and check it for sanity
             ArrayList wavePathsList = getWavePathsAsList(selectedFile);
-                        
-            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\" +
-                                    ((NamedHero)heroDropdown.getSelectedItem()).getInternalName()
-                                     + "\\" + chosenFile.getFileName());
+
+            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
+                    + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
+                    + "\\" + chosenFile.getFileName());
 
             try
             {
                 //Copy in the new file
                 boolean success = new File(destPath.toString()).mkdirs();
                 Files.copy(chosenFile, destPath, REPLACE_EXISTING);
-                
+
                 //Replace the wavestring in the treenode
                 int startIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
                 int endIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
                 String waveString = selectedFile.getUserObject().toString();
-                String waveSubstring = waveString.substring(startIndex, endIndex+1);
+                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
                 String installDirForwardSlashes = installDir.replace('\\', '/');
-                waveString = waveString.replace(waveSubstring, "\")custom/" +
-                                    ((NamedHero)heroDropdown.getSelectedItem()).getInternalName()
-                                    + "/" + chosenFile.getFileName() + "\"");
+                waveString = waveString.replace(waveSubstring, "\")custom/"
+                        + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
+                        + "/" + chosenFile.getFileName() + "\"");
                 selectedFile.setUserObject(waveString);
-                
+
                 //Parse the modified TreeModel into a script file, and write the file to disk.
                 ScriptParser parser = new ScriptParser(this.currentHeroTreeModel);
-                
+
                 //This line can probably be replaced with globally-available data
-                VPKEntry scriptFile = getHeroScriptFile(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());               
-                
+                VPKEntry scriptFile = getHeroScriptFile(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
+
                 Path scriptPath = Paths.get((installDir + "\\dota\\" + scriptFile.getPath()));
-                parser.writeModelToFile(scriptPath.toString());  
-                
+                parser.writeModelToFile(scriptPath.toString());
+
                 //Update UI bits
-                populateSoundListAsTree((NamedHero)heroDropdown.getSelectedItem());
-                
+                populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
+
                 JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
             }
             catch (IOException ex)
@@ -689,85 +694,105 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         }
         return null;
-    }  
+    }
 
     private ArrayList<String> getWavePathsAsList(TreeNode selectedFile)
     {
         ArrayList<String> wavePathsList = new ArrayList<String>();
         Enumeration e = selectedFile.children();
-        while(e.hasMoreElements())
+        while (e.hasMoreElements())
         {
             Object currentElement = e.nextElement();
-            
+
             //If a soundfile has multiple possible wavefiles
             if (currentElement.toString().contains("\"rndwave\""))
             {
-                Enumeration innerE = ((TreeNode)currentElement).children();
-                while(innerE.hasMoreElements())
+                Enumeration innerE = ((TreeNode) currentElement).children();
+                while (innerE.hasMoreElements())
                 {
                     Object currentInnerElement = innerE.nextElement();
-                    if(currentInnerElement.toString().contains("\"wave\""))
+                    if (currentInnerElement.toString().contains("\"wave\"") || currentInnerElement.toString().contains(".wav"))
                     {
                         //Maybe do some string massaging here before we just hand it back
-                        wavePathsList.add(((TreeNode)currentInnerElement).toString());
+                        wavePathsList.add(((TreeNode) currentInnerElement).toString());
                     }
                 }
             }
             //If it only has one
-            
-            else if(currentElement.toString().contains("\"wave\""))
+            else if (currentElement.toString().contains("\"wave\""))
             {
-                wavePathsList.add(((TreeNode)currentElement).toString());
+                wavePathsList.add(((TreeNode) currentElement).toString());
             }
         }
         return wavePathsList;
     }
 
     private TreeNode getTreeNodeFromWavePath(String wavePath)
-    {        
+    {
         VPKEntry scriptFile = getHeroScriptFile(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
         TreeModel model = this.currentHeroTreeModel;
-        
-        TreeNode root = (TreeNode)model.getRoot();
-        for(Enumeration e = ((DefaultMutableTreeNode)root).breadthFirstEnumeration(); e.hasMoreElements() && root != null;)
+
+        TreeNode root = (TreeNode) model.getRoot();
+        for (Enumeration e = ((DefaultMutableTreeNode) root).breadthFirstEnumeration(); e.hasMoreElements() && root != null;)
         {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
-            if(node.toString().contains(wavePath))
+            if (node.toString().contains(wavePath))
             {
                 return node;
             }
-        }                       
+        }
         return null;
     }
 
-    private void createSoundFileFromWaveString(String waveString)
+    private File createSoundFileFromWaveString(String waveString)
     {
         File file = new File(fileName);
         VPKArchive vpk = new VPKArchive();
-        
-        
+        File entryFile = null;
+
         int startIndex = nthOccurrence(waveString, '\"', 2);
-        int endIndex = nthOccurrence(waveString, '\"', 3);                
-        String waveSubstring = waveString.substring(startIndex, endIndex+1);
+        int endIndex = nthOccurrence(waveString, '\"', 3);
+        
+        //TODO: Somewhere here, deal with lack of "wave" in front of wavestring
+        String waveSubstring = waveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
-        
-        try
+        waveSubstring = waveSubstring.replace("\\", "/");
+
+        if (!waveString.contains("custom"))
         {
-            vpk.load(file);
-        }
-        catch (Exception ex)
-        {
-            System.err.println("Can't open archive: " + ex.getMessage());            
-        }
-                
-        for (VPKEntry entry : vpk.getEntries())
-        {
-            if (entry.getPath().contains(waveSubstring))
+            try
             {
-                //write it out to disk, maybe to scratch.wav. Allow function that called this handle playing
-                break;
+                vpk.load(file);
             }
-        }        
+            catch (Exception ex)
+            {
+                System.err.println("Can't open archive: " + ex.getMessage());
+            }
+
+            for (VPKEntry entry : vpk.getEntries())
+            {
+                if (entry.getPath().contains(waveSubstring))
+                {
+                    entryFile = entry.getType().contains("wav") ? new File(Paths.get("scratch.wav").toString()) : new File(Paths.get("scratch.mp3").toString());
+
+                    try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
+                    {
+                        fc.write(entry.getData());
+                    }
+                    catch (IOException ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                    break;
+                }
+            }
+            return entryFile;
+        }
+        else    //If it's NOT stored in the VPK, it's on the local filesys
+        {
+            entryFile = new File(Paths.get(installDir + "\\dota\\sound\\" + waveSubstring).toString());
+            return entryFile;
+        }
     }
 }

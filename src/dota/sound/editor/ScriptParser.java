@@ -113,7 +113,7 @@ public class ScriptParser
     private void parseScript(String line)
     {
         System.out.println("Looking at: " + line);
-        if (line.isEmpty() || line.equals("") || line.startsWith("//"))
+        if (line.isEmpty() || line.equals("") || line.startsWith("//") || line.contentEquals("\t"))
         {
             return;
         }

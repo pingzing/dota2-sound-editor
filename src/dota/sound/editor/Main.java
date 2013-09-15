@@ -10,6 +10,7 @@
 // - Make sound names more obvious
 // - Ability to revert sounds to default
 // - Get sound length
+// - Figure out how to parse scripts with no "wave" in front of the wavepath
 package dota.sound.editor;
 
 import java.awt.event.WindowAdapter;

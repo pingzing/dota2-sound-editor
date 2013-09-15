@@ -1,9 +1,9 @@
-java.lang.StringIndexOutOfBoundsException: String index out of range: -39
-	at java.lang.String.substring(String.java:1911)
-	at dota.sound.editor.SoundEditorMainForm.promptUserForNewFile(SoundEditorMainForm.java:640)
-	at dota.sound.editor.SoundEditorMainForm.replaceButtonActionPerformed(SoundEditorMainForm.java:287)
-	at dota.sound.editor.SoundEditorMainForm.access$100(SoundEditorMainForm.java:34)
-	at dota.sound.editor.SoundEditorMainForm$3.actionPerformed(SoundEditorMainForm.java:125)
+java.lang.StringIndexOutOfBoundsException: String index out of range: -1
+	at java.lang.String.substring(String.java:1904)
+	at dota.sound.editor.SoundEditorMainForm.createSoundFileFromWaveString(SoundEditorMainForm.java:754)
+	at dota.sound.editor.SoundEditorMainForm.playSoundButtonActionPerformed(SoundEditorMainForm.java:336)
+	at dota.sound.editor.SoundEditorMainForm.access$300(SoundEditorMainForm.java:37)
+	at dota.sound.editor.SoundEditorMainForm$5.actionPerformed(SoundEditorMainForm.java:152)
 	at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2018)
 	at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2341)
 	at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:402)
