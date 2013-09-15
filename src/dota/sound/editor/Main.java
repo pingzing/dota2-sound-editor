@@ -2,6 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
+//Features to add:
+// - Change Replace to something less scary
+// - Preview sounds
+// - Change dropdown box names
+// - Make sound names more obvious
+// - Ability to revert sounds to default
+// - Get sound length
 package dota.sound.editor;
 
 import java.awt.event.WindowAdapter;

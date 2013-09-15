@@ -26,6 +26,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 /**
  *
@@ -79,7 +81,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         replaceButton = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
-        exportButton = new javax.swing.JButton();
+        advancedButton = new javax.swing.JButton();
+        playSoundButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -130,12 +133,21 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        exportButton.setText("Create Tree");
-        exportButton.addActionListener(new java.awt.event.ActionListener()
+        advancedButton.setLabel("Advanced View");
+        advancedButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                exportButtonActionPerformed(evt);
+                advancedButtonActionPerformed(evt);
+            }
+        });
+
+        playSoundButton.setText("Play Sound");
+        playSoundButton.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                playSoundButtonActionPerformed(evt);
             }
         });
 
@@ -191,28 +203,29 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(heroDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 246, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 165, Short.MAX_VALUE)
-                        .addComponent(exportButton)
+                        .addComponent(advancedButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 147, Short.MAX_VALUE)
+                        .addComponent(playSoundButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(replaceButton))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 176, Short.MAX_VALUE)
+                    .addGap(0, 216, Short.MAX_VALUE)
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 175, Short.MAX_VALUE)))
+                    .addGap(0, 216, Short.MAX_VALUE)))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(176, Short.MAX_VALUE)
+                    .addContainerGap(216, Short.MAX_VALUE)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(175, Short.MAX_VALUE)))
+                    .addContainerGap(216, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -227,8 +240,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(exportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(replaceButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(advancedButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(replaceButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(playSoundButton))
                 .addGap(22, 22, 22))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
@@ -284,14 +298,12 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }                        
 
             //Prompt user to pick a file to replace with
-            File newSoundFile = promptUserForNewFile(selectedFile.toString());           
-            //Check for file type sameness, *OPTIONAL* check for sound-length, stereo-ness and frequency matching
-            //Copy file into relevant folder, rename it as necessary. See code below in PopulateSoundList to see how to get the sound file's filepath
+            promptUserForNewFile(selectedFile.toString());                       
         }
     }//GEN-LAST:event_replaceButtonActionPerformed
 
-    private void exportButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_exportButtonActionPerformed
-    {//GEN-HEADEREND:event_exportButtonActionPerformed
+    private void advancedButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_advancedButtonActionPerformed
+    {//GEN-HEADEREND:event_advancedButtonActionPerformed
         //TODO:
         // Abstract this into its own function
         // Rename it to be the "Advanced" or "Details" button
@@ -300,7 +312,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         ScriptParser parser = new ScriptParser(new File(Paths.get(installDir + "\\dota\\" + scriptFile.getPath()).toString()));
         TreeModel model = parser.getTreeModel();
         jTree1.setModel(model);
-    }//GEN-LAST:event_exportButtonActionPerformed
+    }//GEN-LAST:event_advancedButtonActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem1ActionPerformed
@@ -311,6 +323,18 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playSoundButtonActionPerformed
+    {//GEN-HEADEREND:event_playSoundButtonActionPerformed
+        if (jTree1.getSelectionRows() != null && 
+                ((TreeNode)jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
+        {
+            DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode)jTree1.getSelectionPath().getLastPathComponent());
+            String waveString = selectedFile.getUserObject().toString();
+            createSoundFileFromWaveString(waveString);
+            //Media media = new Media();
+        }
+    }//GEN-LAST:event_playSoundButtonActionPerformed
 
     private void populateDropdownBox()
     {
@@ -448,7 +472,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         return pos;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton exportButton;
+    private javax.swing.JButton advancedButton;
     private javax.swing.JComboBox heroDropdown;
     private javax.swing.JLabel heroImageLabel;
     private javax.swing.JLabel jLabel1;
@@ -465,6 +489,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JTree jTree1;
+    private javax.swing.JButton playSoundButton;
     private javax.swing.JButton replaceButton;
     // End of variables declaration//GEN-END:variables
 
@@ -556,9 +581,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             fileExistsLocally = true;
         }
+        
         File file = new File(fileName);
         VPKArchive vpk = new VPKArchive();
-
         try
         {
             vpk.load(file);
@@ -713,5 +738,36 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         }                       
         return null;
+    }
+
+    private void createSoundFileFromWaveString(String waveString)
+    {
+        File file = new File(fileName);
+        VPKArchive vpk = new VPKArchive();
+        
+        
+        int startIndex = nthOccurrence(waveString, '\"', 2);
+        int endIndex = nthOccurrence(waveString, '\"', 3);                
+        String waveSubstring = waveString.substring(startIndex, endIndex+1);
+        waveSubstring = waveSubstring.replace(")", "");
+        waveSubstring = waveSubstring.replace("\"", "");
+        
+        try
+        {
+            vpk.load(file);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Can't open archive: " + ex.getMessage());            
+        }
+                
+        for (VPKEntry entry : vpk.getEntries())
+        {
+            if (entry.getPath().contains(waveSubstring))
+            {
+                //write it out to disk, maybe to scratch.wav. Allow function that called this handle playing
+                break;
+            }
+        }        
     }
 }
