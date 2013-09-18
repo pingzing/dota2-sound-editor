@@ -16,7 +16,9 @@ import org.apache.commons.io.FileUtils;
 
 /**
  *
- * @author Image 17
+ * @author
+ * Image
+ * 17
  */
 public class PortraitFinder
 {
@@ -42,23 +44,23 @@ public class PortraitFinder
         {
             System.err.println("Can't open archive: " + ex.getMessage());
             return;
-        }       
-        
+        }
+
         BufferedImage image = null;
         for (VPKEntry entry : vpk.getEntries())
         {
             //Put criteria to search for here
-            if (entry.getPath().contains("resource/flash3/images/heroes/") && entry.getType().equals("png") && 
-                    !(entry.getPath().contains("selection")))
+            if (entry.getPath().contains("resource/flash3/images/heroes/") && entry.getType().equals("png")
+                    && !(entry.getPath().contains("selection")))
             {
                 File imageFile = new File(entry.getPath());
-                               
+
                 try (FileChannel fc = FileUtils.openOutputStream(imageFile).getChannel())
                 {
                     fc.write(entry.getData());
-                    System.out.println("Writing image to File object.");   
+                    System.out.println("Writing image to File object.");
                     image = ImageIO.read(imageFile);
-                    String heroName = handleSpecialCaseHeroNames(entry.getName());
+                    String heroName = handleSpecialCaseHeroNames(entry.getName());                    
                     portraitMap.put(heroName, image);
                 }
                 catch (IOException ex)
@@ -68,18 +70,52 @@ public class PortraitFinder
             }
         }
     }
-    
+
     public BufferedImage getPortrait(String heroName)
     {
-        return portraitMap.get(heroName);
+        if (portraitMap.containsKey(heroName))
+        {
+            return portraitMap.get(heroName);
+        }
+        else
+        {
+            return portraitMap.get("default");
+        }
     }
 
     private String handleSpecialCaseHeroNames(String name)
     {
-        if(name.equals("centaur"))
+        //Make portrait hero names match internal hero names. Internal names don't have underscores
+        switch (name)
         {
-            name = "";
+            case "witch_doctor":
+                name = "witchdoctor";
+                break;
+            case "doom_bringer":
+                name = "doombringer";
+                break;
+            case "night_stalker":
+                name = "nightstalker";
+                break;
+            case "skeleton_king":
+                name = "skeletonking";
+                break;
+            case "shadow_shaman":
+                name = "shadowshaman";
+                break;
+            case "crystal_maiden":
+                name = "crystalmaiden";
+                break;
+            case "drow_ranger":
+                name = "drowranger";
+                break;
+            case "sand_king":
+                name = "sandking";
+                break;
+            case "storm_spirit":
+                name = "stormspirit";
+                break;
         }
         return name;
-    }      
+    }
 }

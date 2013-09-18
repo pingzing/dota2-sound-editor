@@ -6,8 +6,7 @@
 //Features to add:
 // - Delete scratch sounds on program close
 // - Ability to revert sounds to default
-// - Change dropdown box names
-// - Fix missing portraits
+// - *OPTIONAL* Make program not write out portraits to folder 
 // - Write a readme
 // - Get sound length
 // - Change Replace to something less scary
@@ -26,7 +25,6 @@ import javax.swing.UIManager;
  */
 public class Main
 {
-
     private static Object lock = new Object();
 
     public static void main(String args[]) throws Exception
