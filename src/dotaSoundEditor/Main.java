@@ -12,7 +12,7 @@
 // - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded
 
-package dota.sound.editor;
+package dotaSoundEditor;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

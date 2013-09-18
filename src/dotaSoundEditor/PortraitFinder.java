@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dota.sound.editor;
+package dotaSoundEditor;
 
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dota.sound.editor;
+package dotaSoundEditor;
 
 import java.io.File;
 import java.nio.file.*;
@@ -16,7 +16,7 @@ import javax.swing.JFileChooser;
 class UserPrefs
 {
 
-    Preferences prefs = Preferences.userNodeForPackage(dota.sound.editor.UserPrefs.class);
+    Preferences prefs = Preferences.userNodeForPackage(dotaSoundEditor.UserPrefs.class);
     final String DOTA_DIR_PREF_NAME = "dota_install_dir";
     final String MAIN_VPK_PREF_NAME = "main_vpk_dir";
     String installDir = "";

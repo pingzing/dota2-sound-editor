@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dota.sound.editor;
+package dotaSoundEditor;
 
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -98,7 +98,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dota 2 Sound Editor");
         setMinimumSize(new java.awt.Dimension(353, 495));
-        setPreferredSize(new java.awt.Dimension(353, 495));
 
         heroDropdown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         heroDropdown.setName("heroDropdownBox"); // NOI18N
