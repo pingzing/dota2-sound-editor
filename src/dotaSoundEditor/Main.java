@@ -4,13 +4,13 @@
  */
 
 //Features to add:
-// - Ability to revert sounds to default
 // - *OPTIONAL* Make program not write out portraits to folder 
 // - Implement taskbar at the top
 // - Write a readme
 // - Get sound length
 // - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded
+// - Fix ScriptParser's functions to not automatically fire when its constructoirs are called.
 
 package dotaSoundEditor;
 
