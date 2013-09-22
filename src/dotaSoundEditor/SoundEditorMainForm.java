@@ -453,9 +453,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             waveSubstring = waveSubstring.replace("\"", "");
             File soundFileToDelete = new File(Paths.get(installDir + "\\dota\\" + waveSubstring).toString());
             if (soundFileToDelete.isFile())
-            {
-                //TODO: DEBUG COMMENT, REMOVE COMMENT BELOW BEFORE SHIPPING
-                //soundFileToDelete.delete();
+            {                
+                soundFileToDelete.delete();
             }
             else
             {
