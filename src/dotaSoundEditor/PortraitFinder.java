@@ -13,8 +13,6 @@ import java.nio.channels.FileChannel;
 import java.util.TreeMap;
 import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
-
-// org/apache/commons/io/filefilter/IOFileFilter
 /**
  *
  * @author

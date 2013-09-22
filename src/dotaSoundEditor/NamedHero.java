@@ -8,7 +8,7 @@ import java.util.Objects;
 
 /**
  *
- * @author Image 17
+ * @author Neil McAlister
  */
 public class NamedHero implements Comparable<NamedHero>
 {

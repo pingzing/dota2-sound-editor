@@ -4,9 +4,9 @@
  */
 
 //Features to add:
-// - Delete scratch sounds on program close
 // - Ability to revert sounds to default
 // - *OPTIONAL* Make program not write out portraits to folder 
+// - Implement taskbar at the top
 // - Write a readme
 // - Get sound length
 // - Change Replace to something less scary

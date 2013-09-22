@@ -8,19 +8,20 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Enumeration;
+import java.io.StringReader;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 /**
  *
- * @author Image 17
+ * @author
+ * Neil
+ * McAlister
  */
 public class ScriptParser
 {
@@ -39,13 +40,31 @@ public class ScriptParser
         scriptTree = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         currentNode = (DefaultMutableTreeNode) scriptTree.getRoot();
         currentParent = currentNode;
+        generateModelFromFile(script);
+    }
 
+    ScriptParser(TreeModel currentHeroTreeModel)
+    {
+        StringBuilder scriptString = parseModel(currentHeroTreeModel);
+        outputScriptString = scriptString;
+    }
+
+    ScriptParser(String scriptString)
+    {        
+        scriptTree = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
+        currentNode = (DefaultMutableTreeNode) scriptTree.getRoot();
+        currentParent = currentNode;
+        generateModelFromString(scriptString);
+    }
+
+    private void generateModelFromFile(File script)
+    {
         InputStream fis;
         BufferedReader br;
 
         FileWriter fos;
         BufferedWriter bw;
-        String line;
+        String line = null;
 
         try
         {
@@ -66,44 +85,58 @@ public class ScriptParser
             System.out.println("Done generating tree.");
         }
     }
-
-    ScriptParser(TreeModel currentHeroTreeModel)
-    {
-        StringBuilder scriptString = parseModel(currentHeroTreeModel);
-        outputScriptString = scriptString;
-    }
     
+    private void generateModelFromString(String script)
+    {
+        BufferedReader buf = new BufferedReader(new StringReader(script));
+        String line = null;
+        try{
+        while((line = buf.readLine()) != null)
+        {
+            parseScript(line);
+        }
+        }
+        catch(IOException ex)
+        {
+            ex.printStackTrace();
+        }
+        finally
+        {
+            System.out.println("Done generating tree.");
+        }
+    }
+
     public void writeModelToFile(String scriptFilePath)
     {
-        if(outputScriptString != null)
+        if (outputScriptString != null)
         {
             File outputFile = new File(scriptFilePath);
             FileWriter fw = null;
-            
+
             try
             {
                 fw = new FileWriter(outputFile);
                 fw.write(outputScriptString.toString());
                 fw.close();
             }
-            catch(IOException ex)
-            {                
+            catch (IOException ex)
+            {
                 ex.printStackTrace();
             }
             finally
             {
                 try
                 {
-                    fw.close();                    
+                    fw.close();
                 }
-                catch(IOException ex)
+                catch (IOException ex)
                 {
                     ex.printStackTrace();
                 }
             }
-                
+
         }
-    }    
+    }
 
     public TreeModel getTreeModel()
     {
@@ -152,15 +185,15 @@ public class ScriptParser
     }
 
     private StringBuilder parseModel(TreeModel currentHeroTreeModel)
-    {        
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)currentHeroTreeModel.getRoot();
-        StringBuilder scriptString = new StringBuilder();        
+    {
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) currentHeroTreeModel.getRoot();
+        StringBuilder scriptString = new StringBuilder();
         recursiveBuildScript(scriptString, root);
-        
+
         //Remove first bracket and newline
         scriptString.deleteCharAt(0);
         scriptString.deleteCharAt(0);
-        
+
         //Remove final brack
         scriptString.deleteCharAt(scriptString.lastIndexOf("}"));
         return scriptString;
@@ -168,16 +201,16 @@ public class ScriptParser
 
     private void recursiveBuildScript(StringBuilder scriptString, DefaultMutableTreeNode node)
     {
-        if(!node.getUserObject().toString().contentEquals("root"))
+        if (!node.getUserObject().toString().contentEquals("root"))
         {
-                scriptString.append(node.getUserObject().toString()+"\n");
+            scriptString.append(node.getUserObject().toString() + "\n");
         }
-        if(!node.isLeaf())
+        if (!node.isLeaf())
         {
             scriptString.append("{\n");
-            for(int i = 0; i < node.getChildCount(); i++)
+            for (int i = 0; i < node.getChildCount(); i++)
             {
-                 recursiveBuildScript(scriptString, (DefaultMutableTreeNode)node.getChildAt(i));
+                recursiveBuildScript(scriptString, (DefaultMutableTreeNode) node.getChildAt(i));
             }
             scriptString.append("}\n");
         }
