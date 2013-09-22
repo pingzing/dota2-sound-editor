@@ -13,8 +13,8 @@ import java.util.Objects;
 public class NamedHero implements Comparable<NamedHero>
 {
 
-    String internalName;
-    String friendlyName;
+    private String internalName;
+    private String friendlyName;
 
     public NamedHero(String _internalName)
     {

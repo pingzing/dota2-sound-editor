@@ -11,39 +11,41 @@ import javax.swing.JFileChooser;
 
 /**
  *
- * @author Image 17
+ * @author
+ * Image
+ * 17
  */
 class UserPrefs
 {
 
     Preferences prefs = Preferences.userNodeForPackage(dotaSoundEditor.UserPrefs.class);
-    final String DOTA_DIR_PREF_NAME = "dota_install_dir";
-    final String MAIN_VPK_PREF_NAME = "main_vpk_dir";
-    String installDir = "";
-    String vpkDir = "";
-    boolean success = false;
+    private String dotaDirPrefName = "dota_install_dir";
+    private String mainVPKPrefName = "main_vpk_dir";
+    private String installDir = "";
+    private String vpkDir = "";
+    private boolean success = false;
 
     public UserPrefs()
-    {        
+    {
     }
 
     public String getInstallDir()
     {
-        boolean exists = prefs.get(DOTA_DIR_PREF_NAME, null) != null;
+        boolean exists = prefs.get(dotaDirPrefName, null) != null;
         if (exists)
         {
-            this.installDir = prefs.get(DOTA_DIR_PREF_NAME, null);            
-        }       
+            this.installDir = prefs.get(dotaDirPrefName, null);
+        }
         return installDir;
     }
 
     public String getVPKDir()
     {
-        boolean exists = prefs.get(MAIN_VPK_PREF_NAME, null) != null;
+        boolean exists = prefs.get(mainVPKPrefName, null) != null;
         if (exists)
         {
-            this.vpkDir = prefs.get(MAIN_VPK_PREF_NAME, null);
-        }        
+            this.vpkDir = prefs.get(mainVPKPrefName, null);
+        }
         return this.vpkDir;
     }
 
@@ -51,11 +53,11 @@ class UserPrefs
     {
         return this.success;
     }
-    
+
     public void setInstallKeys()
     {
-        prefs.put(DOTA_DIR_PREF_NAME, installDir);
-        prefs.put(MAIN_VPK_PREF_NAME, vpkDir);         
+        prefs.put(dotaDirPrefName, installDir);
+        prefs.put(mainVPKPrefName, vpkDir);
     }
 
     public void setInstallDir()
@@ -66,7 +68,7 @@ class UserPrefs
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
             System.out.println(chooser.getSelectedFile().getAbsolutePath() + " was chosen.");
-            this.installDir = chooser.getSelectedFile().getAbsolutePath();   
+            this.installDir = chooser.getSelectedFile().getAbsolutePath();
             //Validate that the user's choice is actually the dota directory
             Path totalFilePath = Paths.get(installDir + "//dota//");
             Path vpkPath = Paths.get(totalFilePath + "//pak01_dir.vpk//");
@@ -74,23 +76,31 @@ class UserPrefs
             File vpkFile = new File(vpkPath.toString());
             if (vpkFile.exists())
             {
-                this.vpkDir = vpkPath.toString();                
-                this.success = true;                
-            }            
-        }        
+                this.vpkDir = vpkPath.toString();
+                this.success = true;
+            }
+        }
     }
-    
+
     public void setInstallDir(String _installDir)
     {
         this.installDir = _installDir;
         //Validate
-        Path filePath = Paths.get(_installDir + "//dota//");
-        Path vpkPath = Paths.get(filePath + "//pak01_dir.vpk//");
-        File vpkFile = new File(vpkPath.toString());
-        if(vpkFile.exists())
+        try
         {
-            this.vpkDir = vpkPath.toString();
-            this.success = true;
+            Path filePath = Paths.get(_installDir + "//dota//");
+            Path vpkPath = Paths.get(filePath + "//pak01_dir.vpk//");
+            File vpkFile = new File(vpkPath.toString());
+            if (vpkFile.exists())
+            {
+                this.vpkDir = vpkPath.toString();
+                this.success = true;
+            }
+        }
+        catch (java.nio.file.InvalidPathException ex)
+        {
+            System.err.println("Unable to find Dota directory from given path: " + _installDir);
+            this.success = false;
         }
     }
 }

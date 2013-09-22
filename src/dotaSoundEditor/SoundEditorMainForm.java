@@ -6,7 +6,10 @@ package dotaSoundEditor;
 
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
+import java.awt.Window;
 import java.awt.event.ItemEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -47,7 +50,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
      * form
      * SoundEditorMainForm
      */
-    String fileName;
+    String vpkDir;
     String installDir;
     PortraitFinder portraitFinder;
     TreeModel currentHeroTreeModel;
@@ -56,17 +59,31 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     public SoundEditorMainForm(String _fileName, String _installDir)
     {
-        fileName = _fileName;
-        installDir = _installDir;
-        portraitFinder = new PortraitFinder(fileName);
         initComponents();
-        jMenuBar1.setVisible(false);
+        vpkDir = _fileName;
+        installDir = _installDir;
+        portraitFinder = new PortraitFinder(vpkDir);
+
+        //jMenuBar1.setVisible(false);
         populateDropdownBox();
 
         //Required to initialize the JavaFX libraries. Doesn't serve any other purpose.
         JFXPanel token = new JFXPanel();
-        
+
         deleteScratchFiles();
+
+        //See if they have an autoexec.cfg
+        String autoExecPath = checkForAutoExec();
+        if (autoExecPath != null)
+        {
+            //Make sure snd_overridecache is set
+            checkAndSetSndUpdate(autoExecPath);
+        }
+        else    //Otherwise, create autoexec.cfg and set snd_updatecache
+        {
+            autoExecPath = createAutoExecCfg();
+            checkAndSetSndUpdate(autoExecPath);
+        }
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable()
@@ -223,7 +240,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jMenu1.setText("File");
 
+        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
         jMenuItem1.setText("Close");
+        jMenuItem1.setToolTipText("");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -238,6 +257,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         jMenu2.setText("Settings");
 
         jMenuItem4.setText("Change install directory");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
         jMenu2.add(jMenuItem4);
 
         jMenuBar1.add(jMenu2);
@@ -353,53 +379,40 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         }
     }//GEN-LAST:event_heroDropdownStateChanged
-    
+
     private void replaceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replaceButtonActionPerformed
         if (jTree1.getSelectionRows() != null
                 && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
             TreeNode selectedFile = ((TreeNode) jTree1.getSelectionPath().getLastPathComponent());
 
-            //See if they have an autoexec.cfg
-            String autoExecPath = checkForAutoExec();
-            if (autoExecPath != null)
-            {
-                //Make sure snd_overridecache is set
-                checkAndSetSndUpdate(autoExecPath);
-            }
-            else    //Otherwise, create autoexec.cfg and set snd_updatecache
-            {
-                autoExecPath = createAutoExecCfg();
-                checkAndSetSndUpdate(autoExecPath);
-            }
-
             //Prompt user to pick a file to replace with
             promptUserForNewFile(selectedFile.toString());
         }
     }//GEN-LAST:event_replaceButtonActionPerformed
-    
+
     private void advancedButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_advancedButtonActionPerformed
     {//GEN-HEADEREND:event_advancedButtonActionPerformed
         //TODO:
-        // Abstract this into its own function
-        // Rename it to be the "Advanced" or "Details" button
+        // Abstract this into its own function        
         //This is going to turn into the "Advanced" view, later
         String scriptPath = this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
         ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
         TreeModel model = parser.getTreeModel();
         jTree1.setModel(model);
     }//GEN-LAST:event_advancedButtonActionPerformed
-    
+
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        Window w = this;
+        w.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(w, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_jMenuItem1ActionPerformed
-    
+
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jMenuItem2ActionPerformed
-    
+
     private void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playSoundButtonActionPerformed
     {//GEN-HEADEREND:event_playSoundButtonActionPerformed
         if (jTree1.getSelectionRows().length != 0
@@ -407,7 +420,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
-            
+
             File soundFile = createSoundFileFromWaveString(waveString);
             String soundFilePath = soundFile.toURI().toString();
             media = new Media(soundFilePath);
@@ -422,38 +435,39 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     {//GEN-HEADEREND:event_formWindowClosing
         deleteScratchFiles();
     }//GEN-LAST:event_formWindowClosing
-    
+
+    //TODO: Clean this hellion up
     private void revertButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertButtonActionPerformed
     {//GEN-HEADEREND:event_revertButtonActionPerformed
         //TODO: See if we can abstract away some of this + promptUserForNewFile()'s functionality
         if (jTree1.getSelectionRows() != null
                 && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
-            String selectedWaveString = ((DefaultMutableTreeNode) selectedFile).getUserObject().toString();
-            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedFile).getParent()).getUserObject().toString();
-            selectedFile = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
+            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
+            String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
+            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
+            selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
 
             //First go in and delete the sound in customSounds            
             int startIndex = -1;
             int endIndex = -1;
             if (selectedWaveString.contains("\"wave\""))
             {
-                startIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
-                endIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
+                startIndex = nthOccurrence(selectedNode.getUserObject().toString(), '\"', 2);
+                endIndex = nthOccurrence(selectedNode.getUserObject().toString(), '\"', 3);
             }
             else
             {
-                startIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
-                endIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
+                startIndex = nthOccurrence(selectedNode.getUserObject().toString(), '\"', 1);
+                endIndex = nthOccurrence(selectedNode.getUserObject().toString(), '\"', 2);
             }
-            
+
             String waveSubstring = selectedWaveString.substring(startIndex, endIndex + 1);
             waveSubstring = waveSubstring.replace(")", "");
             waveSubstring = waveSubstring.replace("\"", "");
             File soundFileToDelete = new File(Paths.get(installDir + "\\dota\\" + waveSubstring).toString());
             if (soundFileToDelete.isFile())
-            {                
+            {
                 soundFileToDelete.delete();
             }
             else
@@ -461,29 +475,23 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 System.err.println("Cannot find and delete custom sound file " + waveSubstring);
             }
 
-            //Somehow get relevant wavestring from the internal script file
-            //First, getWavePathListAsString() from currently-selected sound's parent.
-            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedFile.getParent());
-            int waveListIndex = wavePathList.indexOf(selectedWaveString);
-            
+            //Get the relevant wavestring from the internal scriptfile                    
             VPKArchive vpk = new VPKArchive();
-            
             try
             {
-                vpk.load(new File(this.fileName));
+                vpk.load(new File(this.vpkDir));
             }
             catch (IOException ex)
             {
                 ex.printStackTrace();
             }
-            //Strriiiing massaaaaaging
             String scriptDir = this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
             scriptDir = scriptDir.replace(Paths.get(installDir + "\\dota\\").toString(), "");
             scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
             scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
             scriptDir = scriptDir.substring(0, scriptDir.lastIndexOf("/") + 1); //Cut off file extension            
 
-            String scriptString = null;
+            String scriptFileString = null;
             byte[] bytes = null;
             for (VPKEntry entry : vpk.getEntriesForDir(scriptDir))
             {
@@ -500,25 +508,29 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     {
                         ex.printStackTrace();
                     }
-                    scriptString = new String(bytes, Charset.forName("UTF-8"));
+                    scriptFileString = new String(bytes, Charset.forName("UTF-8"));
                     break;
                 }
             }
-            
-            scriptString = scriptString.substring(scriptString.indexOf(selectedWaveParentString), scriptString.length());
-            ArrayList<String> internalWavePathsList = this.getWavePathListFromString(scriptString);
+            //First, getWavePathListAsString() from currently-selected sound's parent, and get the index of the relevant wavepath
+            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
+            int waveListIndex = wavePathList.indexOf(selectedWaveString);
+
+            //Cut off every part of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally get the wrong wavepaths
+            scriptFileString = scriptFileString.substring(scriptFileString.indexOf(selectedWaveParentString), scriptFileString.length());
+            ArrayList<String> internalWavePathsList = this.getWavePathListFromString(scriptFileString);
             String replacementString = internalWavePathsList.get(waveListIndex);
-            
-            selectedFile.setUserObject(replacementString);
+
+            selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentHeroTreeModel);
             parser.writeModelToFile(this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName()));
-            
+
             //Modify the UI treeNode in addition to the backing TreeNode
-            ((DefaultMutableTreeNode)jTree1.getLastSelectedPathComponent()).setUserObject(replacementString);                        
-            ((DefaultTreeModel)jTree1.getModel()).nodeChanged(((DefaultMutableTreeNode)jTree1.getLastSelectedPathComponent()));
+            ((DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent()).setUserObject(replacementString);
+            ((DefaultTreeModel) jTree1.getModel()).nodeChanged(((DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent()));
         }
     }//GEN-LAST:event_revertButtonActionPerformed
-    
+
     private void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertAllButtonActionPerformed
     {//GEN-HEADEREND:event_revertAllButtonActionPerformed
         //Delete existing script file
@@ -536,17 +548,37 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         //Repopulate soundtree
         populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
     }//GEN-LAST:event_revertAllButtonActionPerformed
-    
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
+    {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
+        //Change steam install loc   
+        final UserPrefs prefs = new UserPrefs();
+        SteamLocationForm steamForm = new SteamLocationForm(prefs, true);
+
+        steamForm.addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent arg0)
+            {
+                if (prefs.getSuccess())
+                {
+                    vpkDir = prefs.getVPKDir();
+                    installDir = prefs.getInstallDir();
+                }
+            }
+        });
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
     private void populateDropdownBox()
     {
         heroDropdown.removeAllItems();
         Set heroList = new CopyOnWriteArraySet();
         //Build list of heroes and populate dropwdown with it                
-        File file = new File(fileName);
+        File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
-        
+
         System.out.println(file);
-        
+
         try
         {
             vpk.load(file);
@@ -556,8 +588,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println("Can't open archive: " + ex.getMessage());
             return;
         }
-        
-        
+
+
         for (VPKEntry entry : vpk.getEntries())
         {
             if (entry.getPath().contains("scripts/game_sounds_heroes/"))
@@ -573,10 +605,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 heroList.add(entry.getName());
             }
         }
-
-        //@TODO: Come back to this to format it properly and replace hero names
-        //with correct names
-
         //Format and prettify hero list
         for (Object hero : heroList)
         {
@@ -624,7 +652,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         //Defer writing script file to disk until we're sure it doesn't exist
         if (!scriptFile.isFile())
         {
-            this.getHeroScriptFile(selectedHero.internalName);
+            this.getHeroScriptFile(selectedHero.getInternalName());
         }
         ScriptParser parser = new ScriptParser(scriptPath.toFile());
         TreeModel scriptTree = parser.getTreeModel();
@@ -632,16 +660,16 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         DefaultListModel scriptList = new DefaultListModel();
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
-        
+
         TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         ArrayList<String> wavePathsList = new ArrayList<String>();
         for (int i = 0; i < childCount; i++)
         {
-            
+
             wavePathsList = this.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
-            
+
             for (String s : wavePathsList)
             {
                 DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
@@ -649,23 +677,23 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
             ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
         }
-        
+
         jTree1.setModel(soundListTreeModel);
     }
-    
+
     private void fillImageFrame(NamedHero selectedItem) throws IOException
     {
         try
         {
-            heroImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.internalName)));
+            heroImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.getInternalName())));
         }
         catch (NullPointerException ex)
         {
-            System.err.println("Icon not found.");
+            System.err.println("Icon not found for hero: " + selectedItem.getFriendlyName());
             heroImageLabel.setIcon(new ImageIcon(""));
         }
     }
-    
+
     public static int nthOccurrence(String str, char c, int n)
     {
         int pos = str.indexOf(c, 0);
@@ -704,7 +732,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         Path autoExecPath = Paths.get(installDir + "//dota//cfg//autoexec.cfg");
         File autoExecFile = new File(autoExecPath.toString());
         File[] fileList = autoExecFile.getParentFile().listFiles();
-        
+
         for (File f : fileList)
         {
             if (f.getAbsolutePath().equalsIgnoreCase(autoExecFile.getAbsolutePath()))
@@ -720,16 +748,16 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     {
         InputStream fis;
         BufferedReader br;
-        
+
         FileWriter fos;
         BufferedWriter bw;
         String line;
-        
+
         try
         {
             fis = new FileInputStream(autoExecPath);
             br = new BufferedReader(new InputStreamReader(fis));
-            
+
             while ((line = br.readLine()) != null)
             {
                 if (line.contains("snd_updateaudiocache"))
@@ -748,10 +776,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         catch (Exception ex)
         {
             System.err.println(ex);
-            //TODO: bail out or inform the user what went wrong. This one's important, and they might be able to fix it manually.
+            JOptionPane.showMessageDialog(this, "Unable to update autoexec.cfg. You may have to do it manually.", "Autoexec Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private String createAutoExecCfg()
     {
         Path autoExecPath = Paths.get(installDir + "//dota//cfg//");
@@ -781,8 +809,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             fileExistsLocally = true;
         }
-        
-        File file = new File(fileName);
+
+        File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
         try
         {
@@ -793,7 +821,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println("Can't open archive: " + ex.getMessage());
             return null;
         }
-        
+
         Path destPath = Paths.get(installDir + "\\dota\\");
         File destDir = destPath.toFile();
 
@@ -807,15 +835,15 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 {
                     return entry;
                 }
-                
+
                 File entryFile = new File(destDir, entry.getPath());
-                
+
                 File entryDir = entryFile.getParentFile();
                 if (entryDir != null && !entryDir.exists())
                 {
                     entryDir.mkdirs();
                 }
-                
+
                 try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
                 {
                     fc.write(entry.getData());
@@ -829,13 +857,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return null;
     }
-    
+
     private File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
         chooser.setFileFilter(filter);
-        
+
         int chooserRetVal = chooser.showOpenDialog(chooser);
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
@@ -844,7 +872,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
                     + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
                     + "\\" + chosenFile.getFileName());
-            
+
             try
             {
                 //Copy in the new wav/mp3 file
@@ -865,8 +893,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     startIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
                     endIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
                 }
-                
-                
+
+
                 String waveSubstring = waveString.substring(startIndex, endIndex + 1);
                 waveString = waveString.replace(waveSubstring, "\")custom/"
                         + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
@@ -878,13 +906,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
                 //This line can probably be replaced with globally-available data
                 String scriptString = this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
-                
+
                 Path scriptPath = Paths.get((scriptString));
                 parser.writeModelToFile(scriptPath.toString());
 
                 //Update UI bits
                 populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
-                
+
                 JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
             }
             catch (IOException ex)
@@ -894,7 +922,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return null;
     }
-    
+
     private ArrayList<String> getWavePathsAsList(TreeNode selectedFile)
     {
         ArrayList<String> wavePathsList = new ArrayList<String>();
@@ -925,7 +953,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return wavePathsList;
     }
-    
+
     private ArrayList<String> getWavePathListFromString(String scriptString)
     {
         ArrayList<String> wavePathsList = new ArrayList<String>();
@@ -940,7 +968,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 {
                     break;
                 }
-                
+
                 if (line.contains("\"wave\"") || line.contains(".wav") || line.contains(".mp3"))
                 {
                     wavePathsList.add(line);
@@ -954,11 +982,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             return null;
         }
     }
-    
+
     private TreeNode getTreeNodeFromWavePath(String wavePath)
     {
         TreeModel model = this.currentHeroTreeModel;
-        
+
         TreeNode root = (TreeNode) model.getRoot();
         for (Enumeration e = ((DefaultMutableTreeNode) root).breadthFirstEnumeration(); e.hasMoreElements() && root != null;)
         {
@@ -970,13 +998,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return null;
     }
-    
+
     private File createSoundFileFromWaveString(String waveString)
     {
-        File file = new File(fileName);
+        File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
         File entryFile = null;
-        
+
         String waveSubstring = "";
         int startIndex = -1;
         int endIndex = -1;
@@ -991,12 +1019,12 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             startIndex = nthOccurrence(waveString, '\"', 0);
             endIndex = nthOccurrence(waveString, '\"', 1);
         }
-        
+
         waveSubstring = waveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
         waveSubstring = waveSubstring.replace("\\", "/");
-        
+
         if (!waveString.contains("custom"))
         {
             try
@@ -1007,7 +1035,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             {
                 System.err.println("Can't open archive: " + ex.getMessage());
             }
-            
+
             for (VPKEntry entry : vpk.getEntries())
             {
                 if (entry.getPath().contains(waveSubstring))
@@ -1015,7 +1043,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     entryFile = entry.getType().contains("wav")
                             ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
                             : new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3").toString());
-                    
+
                     try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
                     {
                         fc.write(entry.getData());
@@ -1035,7 +1063,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             return entryFile;
         }
     }
-    
+
     private void deleteScratchFiles()
     {
         Path scratchMp3Path = Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3");
@@ -1053,15 +1081,15 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.out.println("wav success: " + success);
         }
     }
-    
+
     private String getScriptPathByHeroName(String internalName)
     {
         String scriptPathString =
                 Paths.get(installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_"
                 + internalName + ".txt").toString();
-        
+
         File scriptFilePath = new File(scriptPathString);
-        
+
         if (scriptFilePath.isFile())
         {
             return scriptFilePath.getAbsolutePath();

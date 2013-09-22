@@ -5,12 +5,11 @@
 
 //Features to add:
 // - *OPTIONAL* Make program not write out portraits to folder 
-// - Implement taskbar at the top
 // - Write a readme
 // - Get sound length
 // - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded
-// - Fix ScriptParser's functions to not automatically fire when its constructoirs are called.
+// - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 
 package dotaSoundEditor;
 
@@ -35,7 +34,7 @@ public class Main
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
         if (prefs.getInstallDir().equals(""))
         {
-            final SteamLocationForm locForm = new SteamLocationForm(prefs);
+            final SteamLocationForm locForm = new SteamLocationForm(prefs, false);
             Thread t = new Thread()
             {
                 public void run()
