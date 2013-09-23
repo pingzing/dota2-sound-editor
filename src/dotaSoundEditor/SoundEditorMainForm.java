@@ -25,6 +25,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import static java.nio.file.StandardCopyOption.*;
 import java.util.Enumeration;
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -60,40 +61,37 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     public SoundEditorMainForm(String _fileName, String _installDir)
     {
+
+
         initComponents();
         vpkDir = _fileName;
         installDir = _installDir;
         portraitFinder = new PortraitFinder(vpkDir);
-
-        //jMenuBar1.setVisible(false);
         populateDropdownBox();
-
-        //Required to initialize the JavaFX libraries. Doesn't serve any other purpose.
-        JFXPanel token = new JFXPanel();
-
         deleteScratchFiles();
 
-        //See if they have an autoexec.cfg
-        String autoExecPath = checkForAutoExec();
-        if (autoExecPath != null)
+        try
         {
-            //Make sure snd_overridecache is set
-            checkAndSetSndUpdate(autoExecPath);
-        }
-        else    //Otherwise, create autoexec.cfg and set snd_updatecache
-        {
-            autoExecPath = createAutoExecCfg();
-            checkAndSetSndUpdate(autoExecPath);
-        }
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
+            //See if they have an autoexec.cfg
+            String autoExecPath = checkForAutoExec();
+            if (autoExecPath != null)
             {
-                setVisible(true);
+                //Make sure snd_overridecache is set
+                checkAndSetSndUpdate(autoExecPath);
             }
-        });
+            else    //Otherwise, create autoexec.cfg and set snd_updatecache
+            {
+                autoExecPath = createAutoExecCfg();
+                checkAndSetSndUpdate(autoExecPath);
+            }
+
+            setVisible(true);
+
+        }
+        catch (Exception ex)
+        {
+            System.err.println("File not found");
+        }
     }
 
     /**
@@ -420,16 +418,23 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         if (jTree1.getSelectionRows().length != 0
                 && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
-            String waveString = selectedFile.getUserObject().toString();
             try
             {
-                File soundFile = createSoundFileFromWaveString(waveString);
-                String soundFilePath = soundFile.toURI().toString();
+                Platform.runLater(new Runnable()
+                {
+                    DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
+                    String waveString = selectedFile.getUserObject().toString();
 
-                media = new Media(soundFilePath);
-                player = new MediaPlayer(media);
-                player.play();
+                    public void run()
+                    {
+                        File soundFile = createSoundFileFromWaveString(waveString);
+                        String soundFilePath = soundFile.toURI().toString();
+
+                        media = new Media(soundFilePath);
+                        player = new MediaPlayer(media);
+                        player.play();
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -449,7 +454,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private void revertButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertButtonActionPerformed
     {//GEN-HEADEREND:event_revertButtonActionPerformed
         //TODO: See if we can abstract away some of this + promptUserForNewFile()'s functionality
-        if (jTree1.getSelectionRows() != null
+        if (jTree1.getSelectionRows().length != 0
                 && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
         {
             DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
@@ -563,14 +568,14 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         //Change steam install loc   
         UserPrefs prefs = new UserPrefs();
         JDialog locationCheckDialog = new JDialog();
-            locationCheckDialog.setModal(true);
-            locationCheckDialog.setAlwaysOnTop(true);
-            locationCheckDialog.setTitle("Locate Dota 2");
-            locationCheckDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            SteamLocationPanel panel = new SteamLocationPanel(prefs, true, locationCheckDialog);
-            locationCheckDialog.add(panel);
-            locationCheckDialog.setSize(panel.getPreferredSize());
-            locationCheckDialog.setVisible(true);
+        locationCheckDialog.setModal(true);
+        locationCheckDialog.setAlwaysOnTop(true);
+        locationCheckDialog.setTitle("Locate Dota 2");
+        locationCheckDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        SteamLocationPanel panel = new SteamLocationPanel(prefs, true, locationCheckDialog);
+        locationCheckDialog.add(panel);
+        locationCheckDialog.setSize(panel.getPreferredSize());
+        locationCheckDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void populateDropdownBox()

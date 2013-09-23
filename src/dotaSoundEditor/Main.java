@@ -4,6 +4,7 @@
  */
 //Features to add:
 // - *OPTIONAL* Make program not write out portraits to folder 
+// - Change thread for sound playing into threadpool of 1
 // - Implement About dialog
 // - Write a readme
 // - Get sound length
@@ -13,6 +14,7 @@
 package dotaSoundEditor;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import javafx.embed.swing.JFXPanel;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 
@@ -23,16 +25,26 @@ import javax.swing.UIManager;
  * 17
  */
 public class Main
-{
-
-    private static Object lock = new Object();
-
+{   
     public static void main(String args[]) throws Exception
     {
+        
+        
         javax.swing.UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         UserPrefs prefs = new UserPrefs();
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
+        
+        Runnable r = new Runnable()
+        {
+            public void run()
+            {
+                 //Required to initialize the JavaFX libraries. Doesn't serve any other purpose.
+                        JFXPanel token = new JFXPanel();
+            }
+        };
+        new Thread(r).start();
+        
         if (prefs.getInstallDir().equals(""))
         {            
             JDialog locationCheckDialog = new JDialog();
