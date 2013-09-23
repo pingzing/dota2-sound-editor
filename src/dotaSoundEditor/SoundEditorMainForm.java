@@ -423,12 +423,19 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
+            try
+            {
+                File soundFile = createSoundFileFromWaveString(waveString);
+                String soundFilePath = soundFile.toURI().toString();
 
-            File soundFile = createSoundFileFromWaveString(waveString);
-            String soundFilePath = soundFile.toURI().toString();
-            media = new Media(soundFilePath);
-            player = new MediaPlayer(media);
-            player.play();
+                media = new Media(soundFilePath);
+                player = new MediaPlayer(media);
+                player.play();
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
         }
     }//GEN-LAST:event_playSoundButtonActionPerformed
 
@@ -1039,9 +1046,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 System.err.println("Can't open archive: " + ex.getMessage());
             }
 
+            //TODO: replace with vpk.getEntriesInDir()
             for (VPKEntry entry : vpk.getEntries())
             {
-                if (entry.getPath().contains(waveSubstring))
+                if (entry.getPath().toLowerCase().contains(waveSubstring.toLowerCase()))
                 {
                     entryFile = entry.getType().contains("wav")
                             ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
