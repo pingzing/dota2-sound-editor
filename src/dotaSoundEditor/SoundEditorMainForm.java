@@ -8,7 +8,6 @@ import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.Window;
 import java.awt.event.ItemEvent;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -562,21 +561,16 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
         //Change steam install loc   
-        final UserPrefs prefs = new UserPrefs();
-        SteamLocationForm steamForm = new SteamLocationForm(prefs, true);
-
-        steamForm.addWindowListener(new WindowAdapter()
-        {
-            @Override
-            public void windowClosing(WindowEvent arg0)
-            {
-                if (prefs.getSuccess())
-                {
-                    vpkDir = prefs.getVPKDir();
-                    installDir = prefs.getInstallDir();
-                }
-            }
-        });
+        UserPrefs prefs = new UserPrefs();
+        JDialog locationCheckDialog = new JDialog();
+            locationCheckDialog.setModal(true);
+            locationCheckDialog.setAlwaysOnTop(true);
+            locationCheckDialog.setTitle("Locate Dota 2");
+            locationCheckDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            SteamLocationPanel panel = new SteamLocationPanel(prefs, true, locationCheckDialog);
+            locationCheckDialog.add(panel);
+            locationCheckDialog.setSize(panel.getPreferredSize());
+            locationCheckDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void populateDropdownBox()

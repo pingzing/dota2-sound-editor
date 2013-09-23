@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 //Features to add:
 // - *OPTIONAL* Make program not write out portraits to folder 
 // - Implement About dialog
@@ -11,20 +10,21 @@
 // - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
-
 package dotaSoundEditor;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.lang.Thread.UncaughtExceptionHandler;
+import javax.swing.JDialog;
 import javax.swing.UIManager;
 
 /**
  *
- * @author Image 17
+ * @author
+ * Image
+ * 17
  */
 public class Main
 {
+
     private static Object lock = new Object();
 
     public static void main(String args[]) throws Exception
@@ -34,45 +34,16 @@ public class Main
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
         if (prefs.getInstallDir().equals(""))
-        {
-            final SteamLocationForm locForm = new SteamLocationForm(prefs, false);
-            Thread t = new Thread()
-            {
-                public void run()
-                {
-                    synchronized (lock)
-                    {
-
-                        while (locForm.isVisible())
-                        {
-                            try
-                            {
-                                lock.wait();
-                            }
-                            catch (InterruptedException e)
-                            {
-                                e.printStackTrace();
-                            }
-                        }
-                        System.out.println("Location form launched.");
-                    }
-                }
-            };
-            t.start();
-
-            locForm.addWindowListener(new WindowAdapter()
-            {
-                @Override
-                public void windowClosing(WindowEvent arg0)
-                {
-                    synchronized (lock)
-                    {
-                        locForm.setVisible(false);
-                        lock.notify();
-                    }
-                }
-            });
-            t.join();
+        {            
+            JDialog locationCheckDialog = new JDialog();
+            locationCheckDialog.setModal(true);
+            locationCheckDialog.setAlwaysOnTop(true);
+            locationCheckDialog.setTitle("Locate Dota 2");
+            locationCheckDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            SteamLocationPanel panel = new SteamLocationPanel(prefs, false, locationCheckDialog);
+            locationCheckDialog.add(panel);
+            locationCheckDialog.setSize(panel.getPreferredSize());
+            locationCheckDialog.setVisible(true);
         }
 
         String vpkDir = prefs.getVPKDir();
@@ -81,7 +52,6 @@ public class Main
         if (!(vpkDir.equals("")) && !(installDir.equals("")))
         {
             SoundEditorMainForm mainForm = new SoundEditorMainForm(vpkDir, installDir);
-        }
+        }        
     }
 }
-
