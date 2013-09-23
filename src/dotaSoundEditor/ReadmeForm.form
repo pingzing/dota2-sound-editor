@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="2"/>
+    <Property name="title" type="java.lang.String" value="Sound Editor Help"/>
+    <Property name="locationByPlatform" type="boolean" value="true"/>
+    <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[535, 450]"/>
+    </Property>
+    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[530, 450]"/>
+    </Property>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="0" pref="461" max="32767" attributes="0"/>
+                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jScrollPane2" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane2" pref="399" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JButton" name="jButton1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Close"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+      </Events>
+    </Component>
+    <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+      <Properties>
+        <Property name="horizontalScrollBarPolicy" type="int" value="31"/>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[530, 450]"/>
+        </Property>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JEditorPane" name="jEditorPane1">
+          <Properties>
+            <Property name="editable" type="boolean" value="false"/>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                <TitledBorder/>
+              </Border>
+            </Property>
+            <Property name="contentType" type="java.lang.String" value="text/html" noResource="true"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="&quot;&lt;html&gt;&quot;&#xd;&#xa;+ &quot;&lt;h1&gt;How to use:&lt;/h1&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;&lt;h2&gt;Setting up&lt;/h2&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;1. Open Steam and click on Library.&lt;br&gt;&quot;&#xd;&#xa;+ &quot;2. Right click on Dota 2, and select Properties.&lt;br&gt;&quot;&#xd;&#xa;+ &quot;3. Select \&quot;Set Launch Options\&quot;.&lt;br&gt;&quot;&#xd;&#xa;+ &quot;4. Add \&quot;-override_vpk\&quot; (without quotes) to the launch options.&lt;br&gt;&quot;&#xd;&#xa;+ &quot;5. Click Ok.&lt;br&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;&quot;&#xd;&#xa;+ &quot;&lt;h2&gt;Using Dota 2 Sound Editor&lt;/h2&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;The Dota 2 Sound editor allows you to modify what sounds are played when heroes in Dota 2 perform actions.&quot;&#xd;&#xa;+ &quot; To begin, select a hero from the dropdown box. Then, expand the list of sounds associated with a particular action. &quot;&#xd;&#xa;+ &quot;From there, you can view each sound that may occur when a hero performs that action. For each sound, you can:&lt;br&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;&quot;&#xd;&#xa;+ &quot;&lt;b&gt;Replace&lt;/b&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;This allows you to change what sound plays when the selected action is performed.&lt;br&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;&quot;&#xd;&#xa;+ &quot;&lt;b&gt;Revert&lt;/b&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;This restores the selected action to its default sound.&lt;br&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;&quot;&#xd;&#xa;+ &quot;&lt;b&gt;Revert All&lt;/b&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;This restores all actions for to current hero to their default sounds.&lt;br&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;&lt;b&gt;Advanced&lt;/b&gt;&lt;br&gt;&quot;&#xd;&#xa;+ &quot;This allows you to view the current hero&apos;s entire sound script as a tree. Currently, this feature is unfinished, and not supported.&lt;/html&quot;" type="code"/>
+            </Property>
+            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+              <Insets value="[6, 6, 6, 6]"/>
+            </Property>
+            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[530, 450]"/>
+            </Property>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+  </SubComponents>
+</Form>

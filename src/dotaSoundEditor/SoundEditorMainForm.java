@@ -34,6 +34,8 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 
 /**
  *
@@ -410,7 +412,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
-        // TODO add your handling code here:
+        JFrame readme = new ReadmeForm();
+        readme.setVisible(true);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playSoundButtonActionPerformed

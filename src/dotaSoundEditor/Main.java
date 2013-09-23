@@ -5,6 +5,7 @@
 
 //Features to add:
 // - *OPTIONAL* Make program not write out portraits to folder 
+// - Implement About dialog
 // - Write a readme
 // - Get sound length
 // - Change Replace to something less scary
