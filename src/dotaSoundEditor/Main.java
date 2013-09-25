@@ -14,7 +14,6 @@
 package dotaSoundEditor;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import javafx.embed.swing.JFXPanel;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 
@@ -34,16 +33,6 @@ public class Main
         UserPrefs prefs = new UserPrefs();
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
-        
-        Runnable r = new Runnable()
-        {
-            public void run()
-            {
-                 //Required to initialize the JavaFX libraries. Doesn't serve any other purpose.
-                        JFXPanel token = new JFXPanel();
-            }
-        };
-        new Thread(r).start();
         
         if (prefs.getInstallDir().equals(""))
         {            
