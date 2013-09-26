@@ -3,16 +3,17 @@
  * and open the template in the editor.
  */
 //Features to add:
-// - *OPTIONAL* Make program not write out portraits to folder 
-// - Change thread for sound playing into threadpool of 1
-// - Implement About dialog
+// - Add a warning dialogue for/diable the Advanced button
 // - Write a readme
 // - Get sound length
 // - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
+// - Investigate scanning common install paths for dota before asking the user
 package dotaSoundEditor;
 
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.lang.Thread.UncaughtExceptionHandler;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
@@ -26,10 +27,8 @@ import javax.swing.UIManager;
 public class Main
 {   
     public static void main(String args[]) throws Exception
-    {
-        
-        
-        javax.swing.UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+    {                
+        javax.swing.UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());                        
         UserPrefs prefs = new UserPrefs();
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);

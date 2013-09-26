@@ -14,6 +14,8 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.LineListener;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -32,6 +34,7 @@ public class SoundPlayer
     private File soundFile;
     private boolean isMp3 = false;
     private boolean waveIsComplete = true;    
+    private JFrame parentFrame = null;
 
     public SoundPlayer()
     {}
@@ -90,6 +93,8 @@ public class SoundPlayer
             {
                 ex.printStackTrace();
                 System.err.println("Failed to open sound file.");
+                JOptionPane.showMessageDialog(this.parentFrame, "Unable to play sound file.",
+                                                "Sound Error", JOptionPane.ERROR_MESSAGE);
             }
             new Thread()
             {
@@ -103,6 +108,8 @@ public class SoundPlayer
                     {
                         ex.printStackTrace();
                         System.err.println("Failed to play MP3 file.");
+                        JOptionPane.showMessageDialog(parentFrame, "Unable to play sound file.",
+                                                "Sound Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }.start();
@@ -135,5 +142,10 @@ public class SoundPlayer
                 System.err.println("Failed to play WAV file.");
             }
         }
+    }
+    
+    public void setParentFrame(JFrame newParent)
+    {
+        this.parentFrame = newParent;
     }
 }

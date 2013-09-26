@@ -52,11 +52,12 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     String vpkDir;
     String installDir;
     PortraitFinder portraitFinder;
-    TreeModel currentHeroTreeModel;    
+    TreeModel currentHeroTreeModel;
     SoundPlayer previousSound = new SoundPlayer();
 
     public SoundEditorMainForm(String _fileName, String _installDir)
-    {        
+    {
+        Utility.setFrameIcon(this);
         initComponents();
         vpkDir = _fileName;
         installDir = _installDir;
@@ -275,6 +276,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         jMenu3.add(jSeparator7);
 
         jMenuItem3.setText("About");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
         jMenu3.add(jMenuItem3);
 
         jMenuBar1.add(jMenu3);
@@ -403,7 +411,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
-        JFrame readme = new ReadmeForm();
+        JFrame readme = new ReadmePanel();
         readme.setVisible(true);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
@@ -411,12 +419,12 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     {//GEN-HEADEREND:event_playSoundButtonActionPerformed
         if (jTree1.getSelectionRows().length != 0
                 && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
-        { 
-            if(!previousSound.getSoundIsComplete())
+        {
+            if (!previousSound.getSoundIsComplete())
             {
-                previousSound.stopSound();                
+                previousSound.stopSound();
             }
-            
+
             try
             {
                 DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
@@ -429,8 +437,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             catch (Exception ex)
             {
                 ex.printStackTrace();
-            }            
-        }        
+            }
+        }
     }//GEN-LAST:event_playSoundButtonActionPerformed
 
     //Delete scratch.wav and scratch.mp3 if they exist. Not 100% reliable
@@ -453,7 +461,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
 
             //First go in and delete the sound in customSounds   
-            deleteSoundFileByWaveString(selectedWaveString);           
+            deleteSoundFileByWaveString(selectedWaveString);
 
             //Get the relevant wavestring from the internal scriptfile                    
             VPKArchive vpk = new VPKArchive();
@@ -498,18 +506,20 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
             //Cut off every part of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally get the wrong wavepaths            
             StringBuilder scriptFileStringShortened = new StringBuilder();
-            Scanner scan =  new Scanner(scriptFileString);
+            Scanner scan = new Scanner(scriptFileString);
             boolean found = false;
-            while(scan.hasNextLine())
+            while (scan.hasNextLine())
             {
                 String curLine = scan.nextLine();
-                if(curLine.equals(selectedWaveParentString))
+                if (curLine.equals(selectedWaveParentString))
+                {
                     found = true;
-                if(found == true)
+                }
+                if (found == true)
                 {
                     scriptFileStringShortened.append(curLine + System.lineSeparator());
-                }                
-            }            
+                }
+            }
             scriptFileString = scriptFileStringShortened.toString();
             ArrayList<String> internalWavePathsList = this.getWavePathListFromString(scriptFileString);
             String replacementString = internalWavePathsList.get(waveListIndex);
@@ -556,6 +566,19 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         locationCheckDialog.setSize(panel.getPreferredSize());
         locationCheckDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem3ActionPerformed
+    {//GEN-HEADEREND:event_jMenuItem3ActionPerformed
+        JDialog aboutDialog = new JDialog();
+        aboutDialog.setModal(true);
+        aboutDialog.setAlwaysOnTop(true);
+        aboutDialog.setTitle("About Dota 2 Sound Editor");
+        aboutDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        AboutPanel panel = new AboutPanel(aboutDialog);
+        aboutDialog.add(panel);
+        aboutDialog.setSize(panel.getPreferredSize());
+        aboutDialog.setVisible(true);
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void populateDropdownBox()
     {
@@ -784,7 +807,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         return autoExecFile.getAbsolutePath();
     }
 
-    //TODO: Rewrite this to not write to disk unless we're actually making changes.
     private VPKEntry getHeroScriptFile(String heroName)
     {
         //String massaging to get the hero name from the filepath. Remove underscores because underscore use in game files for hero names is inconsistent.        
@@ -857,7 +879,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            Path destPath = Paths.get(installDir + "\\dota\\sound\\customsounds\\"
+            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
                     + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
                     + "\\" + chosenFile.getFileName());
 
@@ -884,7 +906,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
 
                 String waveSubstring = waveString.substring(startIndex, endIndex + 1);
-                waveString = waveString.replace(waveSubstring, "\")customsounds/"
+                waveString = waveString.replace(waveSubstring, "\")custom/"
                         + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
                         + "/" + chosenFile.getFileName() + "\"");
                 selectedFile.setUserObject(waveString);
@@ -1013,7 +1035,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         waveSubstring = waveSubstring.replace("\"", "");
         waveSubstring = waveSubstring.replace("\\", "/");
 
-        if (!waveString.contains("customsounds"))
+        if (!waveString.contains("sound"))
         {
             try
             {
@@ -1091,30 +1113,30 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void deleteSoundFileByWaveString(String selectedWaveString)
     {
-         int startIndex = -1;
-            int endIndex = -1;
-            if (selectedWaveString.contains("\"wave\""))
-            {
-                startIndex = nthOccurrence(selectedWaveString, '\"', 2);
-                endIndex = nthOccurrence(selectedWaveString, '\"', 3);
-            }
-            else
-            {
-                startIndex = nthOccurrence(selectedWaveString, '\"', 1);
-                endIndex = nthOccurrence(selectedWaveString, '\"', 2);
-            }
+        int startIndex = -1;
+        int endIndex = -1;
+        if (selectedWaveString.contains("\"wave\""))
+        {
+            startIndex = nthOccurrence(selectedWaveString, '\"', 2);
+            endIndex = nthOccurrence(selectedWaveString, '\"', 3);
+        }
+        else
+        {
+            startIndex = nthOccurrence(selectedWaveString, '\"', 1);
+            endIndex = nthOccurrence(selectedWaveString, '\"', 2);
+        }
 
-            String waveSubstring = selectedWaveString.substring(startIndex, endIndex + 1);
-            waveSubstring = waveSubstring.replace(")", "");
-            waveSubstring = waveSubstring.replace("\"", "");
-            File soundFileToDelete = new File(Paths.get(installDir + "\\dota\\" + waveSubstring).toString());
-            if (soundFileToDelete.isFile())
-            {
-                soundFileToDelete.delete();
-            }
-            else
-            {
-                System.err.println("Cannot find and delete custom sound file " + waveSubstring);
-            }
+        String waveSubstring = selectedWaveString.substring(startIndex, endIndex + 1);
+        waveSubstring = waveSubstring.replace(")", "");
+        waveSubstring = waveSubstring.replace("\"", "");
+        File soundFileToDelete = new File(Paths.get(installDir + "\\dota\\sound\\" + waveSubstring).toString());
+        if (soundFileToDelete.isFile())
+        {
+            soundFileToDelete.delete();
+        }
+        else
+        {
+            System.err.println("Cannot find and delete custom sound file " + waveSubstring);
+        }
     }
 }

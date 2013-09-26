@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
  */
 public class SteamLocationPanel extends javax.swing.JPanel
 {
-    
+
     UserPrefs userPrefs;
     JDialog hostingDialog;
 
@@ -28,9 +28,11 @@ public class SteamLocationPanel extends javax.swing.JPanel
     public SteamLocationPanel(UserPrefs _userPrefs, boolean fromMainForm, JDialog hostingDialog)
     {
         this.userPrefs = _userPrefs;
-        this.hostingDialog = hostingDialog;
+        this.hostingDialog = hostingDialog;        
+        Utility.setFrameIcon(hostingDialog);
+
         initComponents();
-        if(!fromMainForm)
+        if (!fromMainForm)
         {
             cancelButton.setVisible(false);
         }
@@ -185,8 +187,8 @@ public class SteamLocationPanel extends javax.swing.JPanel
         else
         {
             JOptionPane.showMessageDialog(this,
-                "Dota 2 Install not found. Searched for pak01_dir.vpk, and could not find it.", "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Dota 2 Install not found. Searched for pak01_dir.vpk, and could not find it.", "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_browseButtonActionPerformed
 
@@ -214,8 +216,8 @@ public class SteamLocationPanel extends javax.swing.JPanel
             else
             {
                 JOptionPane.showMessageDialog(this,
-                    "Dota 2 Install not found. Searched for pak01_dir.vpk, and could not find it.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Dota 2 Install not found. Searched for pak01_dir.vpk, and could not find it.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_acceptButtonActionPerformed
@@ -224,7 +226,6 @@ public class SteamLocationPanel extends javax.swing.JPanel
     {//GEN-HEADEREND:event_cancelButtonActionPerformed
         this.hostingDialog.dispose();
     }//GEN-LAST:event_cancelButtonActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton acceptButton;
     private javax.swing.JButton browseButton;
