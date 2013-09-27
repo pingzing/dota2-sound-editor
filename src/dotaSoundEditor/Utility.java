@@ -20,7 +20,7 @@ public class Utility
     {
          try
         {
-            java.net.URL url = ClassLoader.getSystemResource("dotaSoundEditor/resources/default.png");
+            java.net.URL url = ClassLoader.getSystemResource("dotaSoundEditor/resources/editorIconTiny.png");
             Toolkit kit = Toolkit.getDefaultToolkit();
             Image img = kit.createImage(url);
             iconWindow.setIconImage(img);

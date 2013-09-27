@@ -401,6 +401,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
         TreeModel model = parser.getTreeModel();
         jTree1.setModel(model);
+        jTree1.setEditable(true);
     }//GEN-LAST:event_advancedButtonActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
@@ -658,6 +659,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 //    }
     private void populateSoundListAsTree(NamedHero selectedHero)
     {
+        jTree1.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
         //Defer writing script file to disk until we're sure it doesn't exist
