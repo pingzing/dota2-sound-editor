@@ -3,8 +3,6 @@
  * and open the template in the editor.
  */
 //Features to add:
-// - Add a warning dialogue for/diable the Advanced button
-// - Write a readme
 // - Get sound length
 // - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded

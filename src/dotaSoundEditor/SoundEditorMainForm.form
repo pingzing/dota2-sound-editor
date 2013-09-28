@@ -6,6 +6,7 @@
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenu1">
           <Properties>
+            <Property name="mnemonic" type="int" value="102"/>
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
           <SubComponents>
@@ -25,6 +26,7 @@
         </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu2">
           <Properties>
+            <Property name="mnemonic" type="int" value="115"/>
             <Property name="text" type="java.lang.String" value="Settings"/>
           </Properties>
           <SubComponents>
@@ -40,6 +42,7 @@
         </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu3">
           <Properties>
+            <Property name="mnemonic" type="int" value="104"/>
             <Property name="text" type="java.lang.String" value="Help"/>
           </Properties>
           <SubComponents>
@@ -106,8 +109,8 @@
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
-                      <Component id="advancedButton" min="-2" pref="93" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="32767" attributes="0"/>
+                      <Component id="advancedButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="12" max="32767" attributes="0"/>
                       <Component id="revertAllButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="revertButton" min="-2" max="-2" attributes="0"/>
@@ -210,12 +213,15 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTree" name="jTree1">
+        <Component class="javax.swing.JTree" name="soundTree">
           <Properties>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[72, 64]"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="18"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>
@@ -234,6 +240,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="replaceButton">
       <Properties>
+        <Property name="mnemonic" type="int" value="114"/>
         <Property name="text" type="java.lang.String" value="Replace"/>
       </Properties>
       <Events>
@@ -252,7 +259,8 @@
     </Component>
     <Component class="javax.swing.JButton" name="advancedButton">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Advanced"/>
+        <Property name="mnemonic" type="int" value="100"/>
+        <Property name="text" type="java.lang.String" value="Advanced &gt;&gt;"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="advancedButtonActionPerformed"/>
@@ -260,6 +268,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="playSoundButton">
       <Properties>
+        <Property name="mnemonic" type="int" value="97"/>
         <Property name="text" type="java.lang.String" value="Play Sound"/>
       </Properties>
       <Events>
@@ -268,6 +277,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="revertButton">
       <Properties>
+        <Property name="mnemonic" type="int" value="101"/>
         <Property name="text" type="java.lang.String" value="Revert"/>
         <Property name="toolTipText" type="java.lang.String" value="Revert selected sound to its default sound."/>
       </Properties>
@@ -277,6 +287,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="revertAllButton">
       <Properties>
+        <Property name="mnemonic" type="int" value="116"/>
         <Property name="text" type="java.lang.String" value="Revert All"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>

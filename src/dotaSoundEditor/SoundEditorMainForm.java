@@ -8,6 +8,9 @@ import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.Window;
 import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -33,6 +36,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -54,7 +58,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     PortraitFinder portraitFinder;
     TreeModel currentHeroTreeModel;
     SoundPlayer previousSound = new SoundPlayer();
-
+    
     public SoundEditorMainForm(String _fileName, String _installDir)
     {
         Utility.setFrameIcon(this);
@@ -64,7 +68,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         portraitFinder = new PortraitFinder(vpkDir);
         populateDropdownBox();
         deleteScratchFiles();
-
+        attachDoubleClickListenerToTree();
+        
         try
         {
             //See if they have an autoexec.cfg
@@ -79,9 +84,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 autoExecPath = createAutoExecCfg();
                 checkAndSetSndUpdate(autoExecPath);
             }
-
+            
             setVisible(true);
-
+            
         }
         catch (Exception ex)
         {
@@ -129,7 +134,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         heroDropdown = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
         heroImageLabel = new javax.swing.JLabel();
         replaceButton = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
@@ -174,13 +178,14 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jScrollPane1.setName("heroListFrame"); // NOI18N
 
-        jTree1.setMinimumSize(new java.awt.Dimension(72, 64));
-        jScrollPane1.setViewportView(jTree1);
+        soundTree.setMinimumSize(new java.awt.Dimension(72, 64));
+        jScrollPane1.setViewportView(soundTree);
 
         heroImageLabel.setMaximumSize(new java.awt.Dimension(128, 72));
         heroImageLabel.setMinimumSize(new java.awt.Dimension(128, 72));
         heroImageLabel.setPreferredSize(new java.awt.Dimension(128, 72));
 
+        replaceButton.setMnemonic('r');
         replaceButton.setText("Replace");
         replaceButton.addActionListener(new java.awt.event.ActionListener()
         {
@@ -194,7 +199,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        advancedButton.setText("Advanced");
+        advancedButton.setMnemonic('d');
+        advancedButton.setText("Advanced >>");
         advancedButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -203,6 +209,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
+        playSoundButton.setMnemonic('a');
         playSoundButton.setText("Play Sound");
         playSoundButton.addActionListener(new java.awt.event.ActionListener()
         {
@@ -212,6 +219,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
+        revertButton.setMnemonic('e');
         revertButton.setText("Revert");
         revertButton.setToolTipText("Revert selected sound to its default sound.");
         revertButton.addActionListener(new java.awt.event.ActionListener()
@@ -222,6 +230,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
+        revertAllButton.setMnemonic('t');
         revertAllButton.setText("Revert All");
         revertAllButton.setToolTipText("");
         revertAllButton.addActionListener(new java.awt.event.ActionListener()
@@ -232,6 +241,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
+        jMenu1.setMnemonic('f');
         jMenu1.setText("File");
 
         jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
@@ -248,6 +258,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jMenuBar1.add(jMenu1);
 
+        jMenu2.setMnemonic('s');
         jMenu2.setText("Settings");
 
         jMenuItem4.setText("Change install directory");
@@ -262,6 +273,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         jMenuBar1.add(jMenu2);
 
+        jMenu3.setMnemonic('h');
         jMenu3.setText("Help");
 
         jMenuItem2.setText("How to use");
@@ -302,8 +314,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                         .addComponent(heroDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(advancedButton, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, Short.MAX_VALUE)
+                        .addComponent(advancedButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                         .addComponent(revertAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(revertButton)
@@ -368,8 +380,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.out.println(heroDropdown.getSelectedItem().toString());
             //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
             populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
-            jTree1.setRootVisible(false);
-            jTree1.setShowsRootHandles(true);
+            soundTree.setRootVisible(false);
+            soundTree.setShowsRootHandles(true);
             try
             {
                 fillImageFrame((NamedHero) heroDropdown.getSelectedItem());
@@ -380,65 +392,62 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         }
     }//GEN-LAST:event_heroDropdownStateChanged
-
+    
     private void replaceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_replaceButtonActionPerformed
-        if (jTree1.getSelectionRows() != null
-                && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
+        if (soundTree.getSelectionRows() != null
+                && ((TreeNode) soundTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            TreeNode selectedFile = ((TreeNode) jTree1.getSelectionPath().getLastPathComponent());
+            TreeNode selectedFile = ((TreeNode) soundTree.getSelectionPath().getLastPathComponent());
 
             //Prompt user to pick a file to replace with
             promptUserForNewFile(selectedFile.toString());
         }
     }//GEN-LAST:event_replaceButtonActionPerformed
-
+    
     private void advancedButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_advancedButtonActionPerformed
     {//GEN-HEADEREND:event_advancedButtonActionPerformed
-        //TODO:
-        // Abstract this into its own function        
-        //This is going to turn into the "Advanced" view, later
-        String scriptPath = this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
-        ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
-        TreeModel model = parser.getTreeModel();
-        jTree1.setModel(model);
-        jTree1.setEditable(true);
+        if (advancedButton.getText().equals("Advanced >>"))
+        {
+            String scriptPath = this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
+            ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
+            TreeModel model = parser.getTreeModel();
+            soundTree.setModel(model);
+            soundTree.setEditable(true);
+            for(int i = 0; i < soundTree.getRowCount(); i++)
+            {
+                soundTree.expandRow(i);
+            }
+            //Change button and action to Basic-revert:
+            advancedButton.setText("Basic <<");
+            advancedButton.setMnemonic('a');
+        }        
+        else if(advancedButton.getText().equals("Basic <<"))
+        {
+            this.populateSoundListAsTree((NamedHero)heroDropdown.getSelectedItem());
+            advancedButton.setText("Advanced >>");
+            advancedButton.setMnemonic('a');
+            soundTree.setEditable(false);
+        }
     }//GEN-LAST:event_advancedButtonActionPerformed
-
+    
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem1ActionPerformed
         Window w = this;
         w.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(w, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_jMenuItem1ActionPerformed
-
+    
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
         JFrame readme = new ReadmePanel();
         readme.setVisible(true);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
-
+    
     private void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playSoundButtonActionPerformed
     {//GEN-HEADEREND:event_playSoundButtonActionPerformed
-        if (jTree1.getSelectionRows().length != 0
-                && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
+        if (soundTree.getSelectionRows().length != 0
+                && ((TreeNode) soundTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            if (!previousSound.getSoundIsComplete())
-            {
-                previousSound.stopSound();
-            }
-
-            try
-            {
-                DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
-                String waveString = selectedFile.getUserObject().toString();
-                File soundFile = createSoundFileFromWaveString(waveString);
-                SoundPlayer soundPlayer = new SoundPlayer(soundFile.getAbsolutePath());
-                soundPlayer.playSound();
-                previousSound = soundPlayer;
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
+            this.playSelectedTreeSound(soundTree.getSelectionPath());
         }
     }//GEN-LAST:event_playSoundButtonActionPerformed
 
@@ -453,10 +462,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private void revertButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertButtonActionPerformed
     {//GEN-HEADEREND:event_revertButtonActionPerformed
         //TODO: See if we can abstract away some of this + promptUserForNewFile()'s functionality
-        if (jTree1.getSelectionRows().length != 0
-                && ((TreeNode) jTree1.getSelectionPath().getLastPathComponent()).isLeaf())
+        if (soundTree.getSelectionRows().length != 0
+                && ((TreeNode) soundTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) jTree1.getSelectionPath().getLastPathComponent());
+            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) soundTree.getSelectionPath().getLastPathComponent());
             String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
             String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
             selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
@@ -524,17 +533,17 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             scriptFileString = scriptFileStringShortened.toString();
             ArrayList<String> internalWavePathsList = this.getWavePathListFromString(scriptFileString);
             String replacementString = internalWavePathsList.get(waveListIndex);
-
+            
             selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentHeroTreeModel);
             parser.writeModelToFile(this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName()));
 
             //Modify the UI treeNode in addition to the backing TreeNode
-            ((DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent()).setUserObject(replacementString);
-            ((DefaultTreeModel) jTree1.getModel()).nodeChanged(((DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent()));
+            ((DefaultMutableTreeNode) soundTree.getLastSelectedPathComponent()).setUserObject(replacementString);
+            ((DefaultTreeModel) soundTree.getModel()).nodeChanged(((DefaultMutableTreeNode) soundTree.getLastSelectedPathComponent()));
         }
     }//GEN-LAST:event_revertButtonActionPerformed
-
+    
     private void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertAllButtonActionPerformed
     {//GEN-HEADEREND:event_revertAllButtonActionPerformed
         //Delete existing script file
@@ -552,7 +561,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         //Repopulate soundtree
         populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
     }//GEN-LAST:event_revertAllButtonActionPerformed
-
+    
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
         //Change steam install loc   
@@ -567,7 +576,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         locationCheckDialog.setSize(panel.getPreferredSize());
         locationCheckDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
-
+    
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem3ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem3ActionPerformed
         JDialog aboutDialog = new JDialog();
@@ -580,7 +589,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         aboutDialog.setSize(panel.getPreferredSize());
         aboutDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
-
+    
     private void populateDropdownBox()
     {
         heroDropdown.removeAllItems();
@@ -588,9 +597,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         //Build list of heroes and populate dropwdown with it                
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
-
+        
         System.out.println(file);
-
+        
         try
         {
             vpk.load(file);
@@ -600,8 +609,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println("Can't open archive: " + ex.getMessage());
             return;
         }
-
-
+        
+        
         for (VPKEntry entry : vpk.getEntries())
         {
             if (entry.getPath().contains("scripts/game_sounds_heroes/"))
@@ -659,7 +668,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 //    }
     private void populateSoundListAsTree(NamedHero selectedHero)
     {
-        jTree1.setEditable(false);
+        soundTree.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
         //Defer writing script file to disk until we're sure it doesn't exist
@@ -673,16 +682,16 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         DefaultListModel scriptList = new DefaultListModel();
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
-
+        
         TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         ArrayList<String> wavePathsList = new ArrayList<String>();
         for (int i = 0; i < childCount; i++)
         {
-
+            
             wavePathsList = this.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
-
+            
             for (String s : wavePathsList)
             {
                 DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
@@ -690,10 +699,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
             ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
         }
-
-        jTree1.setModel(soundListTreeModel);
+        
+        soundTree.setModel(soundListTreeModel);
     }
-
+    
     private void fillImageFrame(NamedHero selectedItem) throws IOException
     {
         try
@@ -706,7 +715,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             heroImageLabel.setIcon(new ImageIcon(""));
         }
     }
-
+    
     public static int nthOccurrence(String str, char c, int n)
     {
         int pos = str.indexOf(c, 0);
@@ -733,11 +742,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator7;
-    private javax.swing.JTree jTree1;
     private javax.swing.JButton playSoundButton;
     private javax.swing.JButton replaceButton;
     private javax.swing.JButton revertAllButton;
     private javax.swing.JButton revertButton;
+    private final javax.swing.JTree soundTree = new javax.swing.JTree();
     // End of variables declaration//GEN-END:variables
 
     private String checkForAutoExec()
@@ -745,7 +754,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         Path autoExecPath = Paths.get(installDir + "//dota//cfg//autoexec.cfg");
         File autoExecFile = new File(autoExecPath.toString());
         File[] fileList = autoExecFile.getParentFile().listFiles();
-
+        
         for (File f : fileList)
         {
             if (f.getAbsolutePath().equalsIgnoreCase(autoExecFile.getAbsolutePath()))
@@ -761,16 +770,16 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     {
         InputStream fis;
         BufferedReader br;
-
+        
         FileWriter fos;
         BufferedWriter bw;
         String line;
-
+        
         try
         {
             fis = new FileInputStream(autoExecPath);
             br = new BufferedReader(new InputStreamReader(fis));
-
+            
             while ((line = br.readLine()) != null)
             {
                 if (line.contains("snd_updateaudiocache"))
@@ -792,7 +801,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             JOptionPane.showMessageDialog(this, "Unable to update autoexec.cfg. You may have to do it manually.", "Autoexec Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private String createAutoExecCfg()
     {
         Path autoExecPath = Paths.get(installDir + "//dota//cfg//");
@@ -808,7 +817,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return autoExecFile.getAbsolutePath();
     }
-
+    
     private VPKEntry getHeroScriptFile(String heroName)
     {
         //String massaging to get the hero name from the filepath. Remove underscores because underscore use in game files for hero names is inconsistent.        
@@ -821,7 +830,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             fileExistsLocally = true;
         }
-
+        
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
         try
@@ -833,7 +842,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println("Can't open archive: " + ex.getMessage());
             return null;
         }
-
+        
         Path destPath = Paths.get(installDir + "\\dota\\");
         File destDir = destPath.toFile();
 
@@ -847,15 +856,15 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 {
                     return entry;
                 }
-
+                
                 File entryFile = new File(destDir, entry.getPath());
-
+                
                 File entryDir = entryFile.getParentFile();
                 if (entryDir != null && !entryDir.exists())
                 {
                     entryDir.mkdirs();
                 }
-
+                
                 try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
                 {
                     fc.write(entry.getData());
@@ -869,13 +878,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return null;
     }
-
+    
     private File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
         chooser.setFileFilter(filter);
-
+        
         int chooserRetVal = chooser.showOpenDialog(chooser);
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
@@ -884,7 +893,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
                     + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
                     + "\\" + chosenFile.getFileName());
-
+            
             try
             {
                 //Copy in the new wav/mp3 file
@@ -905,8 +914,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     startIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
                     endIndex = nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
                 }
-
-
+                
+                
                 String waveSubstring = waveString.substring(startIndex, endIndex + 1);
                 waveString = waveString.replace(waveSubstring, "\")custom/"
                         + ((NamedHero) heroDropdown.getSelectedItem()).getInternalName()
@@ -918,13 +927,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
                 //This line can probably be replaced with globally-available data
                 String scriptString = this.getScriptPathByHeroName(((NamedHero) heroDropdown.getSelectedItem()).getInternalName());
-
+                
                 Path scriptPath = Paths.get((scriptString));
                 parser.writeModelToFile(scriptPath.toString());
 
                 //Update UI bits
                 populateSoundListAsTree((NamedHero) heroDropdown.getSelectedItem());
-
+                
                 JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
             }
             catch (IOException ex)
@@ -934,7 +943,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return null;
     }
-
+    
     private ArrayList<String> getWavePathsAsList(TreeNode selectedFile)
     {
         ArrayList<String> wavePathsList = new ArrayList<String>();
@@ -965,7 +974,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return wavePathsList;
     }
-
+    
     private ArrayList<String> getWavePathListFromString(String scriptString)
     {
         ArrayList<String> wavePathsList = new ArrayList<String>();
@@ -980,7 +989,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 {
                     break;
                 }
-
+                
                 if (line.contains("\"wave\"") || line.contains(".wav") || line.contains(".mp3"))
                 {
                     wavePathsList.add(line);
@@ -994,11 +1003,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             return null;
         }
     }
-
+    
     private TreeNode getTreeNodeFromWavePath(String wavePath)
     {
         TreeModel model = this.currentHeroTreeModel;
-
+        
         TreeNode root = (TreeNode) model.getRoot();
         for (Enumeration e = ((DefaultMutableTreeNode) root).breadthFirstEnumeration(); e.hasMoreElements() && root != null;)
         {
@@ -1010,13 +1019,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return null;
     }
-
+    
     private File createSoundFileFromWaveString(String waveString)
     {
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
         File entryFile = null;
-
+        
         String waveSubstring = "";
         int startIndex = -1;
         int endIndex = -1;
@@ -1031,12 +1040,12 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             startIndex = nthOccurrence(waveString, '\"', 0);
             endIndex = nthOccurrence(waveString, '\"', 1);
         }
-
+        
         waveSubstring = waveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
         waveSubstring = waveSubstring.replace("\\", "/");
-
+        
         if (!waveString.contains("sound"))
         {
             try
@@ -1056,7 +1065,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     entryFile = entry.getType().contains("wav")
                             ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
                             : new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3").toString());
-
+                    
                     try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
                     {
                         fc.write(entry.getData());
@@ -1076,7 +1085,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             return entryFile;
         }
     }
-
+    
     private void deleteScratchFiles()
     {
         Path scratchMp3Path = Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3");
@@ -1094,15 +1103,15 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.out.println("wav success: " + success);
         }
     }
-
+    
     private String getScriptPathByHeroName(String internalName)
     {
         String scriptPathString =
                 Paths.get(installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_"
                 + internalName + ".txt").toString();
-
+        
         File scriptFilePath = new File(scriptPathString);
-
+        
         if (scriptFilePath.isFile())
         {
             return scriptFilePath.getAbsolutePath();
@@ -1112,7 +1121,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             return null;
         }
     }
-
+    
     private void deleteSoundFileByWaveString(String selectedWaveString)
     {
         int startIndex = -1;
@@ -1127,7 +1136,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             startIndex = nthOccurrence(selectedWaveString, '\"', 1);
             endIndex = nthOccurrence(selectedWaveString, '\"', 2);
         }
-
+        
         String waveSubstring = selectedWaveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
@@ -1139,6 +1148,48 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         else
         {
             System.err.println("Cannot find and delete custom sound file " + waveSubstring);
+        }
+    }
+    
+    private void attachDoubleClickListenerToTree()
+    {
+        MouseListener ml = new MouseAdapter()
+        {
+            public void mousePressed(MouseEvent e)
+            {
+                int selRow = soundTree.getRowForLocation(e.getX(), e.getY());
+                TreePath selPath = soundTree.getPathForLocation(e.getX(), e.getY());
+                if (selRow != -1 && ((DefaultMutableTreeNode) selPath.getLastPathComponent()).isLeaf())
+                {
+                    if (e.getClickCount() == 2)
+                    {
+                        playSelectedTreeSound(selPath);
+                    }
+                }
+            }
+        };
+        soundTree.addMouseListener(ml);
+    }
+    
+    private void playSelectedTreeSound(TreePath selPath)
+    {
+        if (!previousSound.getSoundIsComplete())
+        {
+            previousSound.stopSound();
+        }
+        
+        try
+        {
+            DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
+            String waveString = selectedFile.getUserObject().toString();
+            File soundFile = createSoundFileFromWaveString(waveString);
+            SoundPlayer soundPlayer = new SoundPlayer(soundFile.getAbsolutePath());
+            soundPlayer.playSound();
+            previousSound = soundPlayer;
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
         }
     }
 }

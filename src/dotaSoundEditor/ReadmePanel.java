@@ -95,8 +95,10 @@ public class ReadmePanel extends javax.swing.JFrame
             + ""
             + "<b>Revert All</b><br>"
             + "This restores all actions for to current hero to their default sounds.<br><br>"
-            + "<b>Advanced</b><br>"
-            + "This allows you to view the current hero's entire sound script as a tree. Currently, this feature is unfinished, and not supported.</html");
+            + "<b>Advanced/Basic</b><br>"
+            + "The Advanced button allows you to view the current hero's entire sound script as a tree. Triple-click any node to allow manual editing.<br>"
+            + "While in Advanced mode, Replace, Revert and Play Sound will only work on nodes that contain a path to a sound file.<br>"
+            + "Clicking the <b>Basic</b> button will return the editor to Basic mode.</html>");
         jEditorPane1.setMargin(new java.awt.Insets(6, 6, 6, 6));
         jEditorPane1.setMaximumSize(new java.awt.Dimension(530, 450));
         jScrollPane2.setViewportView(jEditorPane1);
