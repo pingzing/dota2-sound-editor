@@ -1046,7 +1046,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         waveSubstring = waveSubstring.replace("\"", "");
         waveSubstring = waveSubstring.replace("\\", "/");
         
-        if (!waveString.contains("sound"))
+        if (!waveString.contains("custom"))
         {
             try
             {
