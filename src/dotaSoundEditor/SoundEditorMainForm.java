@@ -58,6 +58,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     PortraitFinder portraitFinder;
     TreeModel currentHeroTreeModel;
     SoundPlayer previousSound = new SoundPlayer();
+    SoundPlayer currentSound = new SoundPlayer();
     
     public SoundEditorMainForm(String _fileName, String _installDir)
     {
@@ -1176,6 +1177,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         if (!previousSound.getSoundIsComplete())
         {
             previousSound.stopSound();
+            previousSound = null;
         }
         
         try
@@ -1183,9 +1185,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
             File soundFile = createSoundFileFromWaveString(waveString);
-            SoundPlayer soundPlayer = new SoundPlayer(soundFile.getAbsolutePath());
-            soundPlayer.playSound();
-            previousSound = soundPlayer;
+            currentSound = new SoundPlayer(soundFile.getAbsolutePath());
+            currentSound.playSound();
+            previousSound = currentSound;
         }
         catch (Exception ex)
         {

@@ -29,16 +29,16 @@ public class SoundPlayer
     //Objects that make noise
     private Player mp3Player;
     private Clip clip;
-    
     //Objects and members that hold data
     private File soundFile;
     private boolean isMp3 = false;
-    private boolean waveIsComplete = true;    
+    private boolean waveIsComplete = true;
     private JFrame parentFrame = null;
 
     public SoundPlayer()
-    {}
-    
+    {
+    }
+
     public SoundPlayer(String filePath)
     {
         soundFile = new File(filePath);
@@ -50,15 +50,15 @@ public class SoundPlayer
         {
             isMp3 = true;
         }
-    }            
+    }
 
     public SoundPlayer(BufferedInputStream bis)
     {
     }
-    
+
     public void stopSound()
     {
-        if(isMp3)
+        if (isMp3)
         {
             mp3Player.close();
         }
@@ -66,11 +66,11 @@ public class SoundPlayer
         {
             clip.stop();
         }
-    }    
-    
+    }
+
     public boolean getSoundIsComplete()
     {
-        if(isMp3)
+        if (isMp3)
         {
             return mp3Player.isComplete();
         }
@@ -81,7 +81,7 @@ public class SoundPlayer
     }
 
     public void playSound()
-    {                
+    {
         if (isMp3)
         {
             try
@@ -94,7 +94,7 @@ public class SoundPlayer
                 ex.printStackTrace();
                 System.err.println("Failed to open sound file.");
                 JOptionPane.showMessageDialog(this.parentFrame, "Unable to play sound file.",
-                                                "Sound Error", JOptionPane.ERROR_MESSAGE);
+                        "Sound Error", JOptionPane.ERROR_MESSAGE);
             }
             new Thread()
             {
@@ -102,32 +102,32 @@ public class SoundPlayer
                 {
                     try
                     {
-                        mp3Player.play();                        
+                        mp3Player.play();
                     }
                     catch (Exception ex)
                     {
                         ex.printStackTrace();
                         System.err.println("Failed to play MP3 file.");
                         JOptionPane.showMessageDialog(parentFrame, "Unable to play sound file.",
-                                                "Sound Error", JOptionPane.ERROR_MESSAGE);
+                                "Sound Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }.start();
         }
-        
-        else if(!isMp3)
+        else if (!isMp3)
         {
             try
             {
                 clip = AudioSystem.getClip();
-                AudioInputStream ais = AudioSystem.getAudioInputStream(soundFile);                
+                AudioInputStream ais = AudioSystem.getAudioInputStream(soundFile);
                 LineListener listener = new LineListener()
                 {
                     public void update(LineEvent event)
-                    {                        
-                        if(event.getType() == Type.STOP)
+                    {
+                        if (event.getType() == Type.STOP)
                         {
                             waveIsComplete = true;
+                            clip.close();
                         }
                     }
                 };
@@ -136,14 +136,14 @@ public class SoundPlayer
                 clip.open(ais);
                 clip.start();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ex.printStackTrace();
                 System.err.println("Failed to play WAV file.");
             }
         }
     }
-    
+
     public void setParentFrame(JFrame newParent)
     {
         this.parentFrame = newParent;
