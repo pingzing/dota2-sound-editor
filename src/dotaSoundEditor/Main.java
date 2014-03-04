@@ -1,27 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 //Features to add:
+// - Go through and replace all references to heroSpellTree & heroDropdown with currentTree & currentDropdown.
+// - Note on extracting item names: Build a tree of the item scripts file. Use the regex: ".(.*)." on each root.
 // - Get sound length
-// - Change Replace to something less scary
 // - Make more obvious that sound names need to be expanded
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 // - Investigate scanning common install paths for dota before asking the user
+// - Rewrite image-extraction and loading code to avoid constant disk IO
 package dotaSoundEditor;
 
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.lang.Thread.UncaughtExceptionHandler;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 
-/**
- *
- * @author
- * Image
- * 17
- */
 public class Main
 {   
     public static void main(String args[]) throws Exception
@@ -31,6 +22,7 @@ public class Main
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
         
+        //Need to find dota 2 install dir
         if (prefs.getInstallDir().equals(""))
         {            
             JDialog locationCheckDialog = new JDialog();

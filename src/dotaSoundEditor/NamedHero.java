@@ -77,14 +77,14 @@ public class NamedHero implements Comparable<NamedHero>
             case "Rattletrap":          nameToClean = "Clockwerk";
                 break;
             case "Sandking":            nameToClean = "Sand King";
-                break;
+                break;           
             case "Nevermore":           nameToClean = "Shadow Fiend";
                 break;
             case "Shadowshaman":        nameToClean = "Shadow Shaman";
                 break;
             case "Shredder":            nameToClean = "Timbersaw";
                 break;
-            case "Skeletonking":        nameToClean = "Skeleton King";
+            case "Skeletonking":        nameToClean = "Wraith King";
                 break;
             case "Stormspirit":         nameToClean = "Storm Spirit";
                 break;

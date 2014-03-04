@@ -22,16 +22,20 @@ import org.apache.commons.io.FileUtils;
 public class PortraitFinder
 {
 
-    String fileName;
-    BufferedImage portrait;
-    TreeMap<String, BufferedImage> portraitMap = new TreeMap<>();
+    private String fileName;
+    private BufferedImage portrait;
+    private TreeMap<String, BufferedImage> portraitMap = new TreeMap<>();
 
     public PortraitFinder(String _fileName)
     {
-        fileName = _fileName;
+        fileName = _fileName;        
+    }
+    
+    public void buildHeroPortraits()
+    {
         File file = new File(fileName);
         VPKArchive vpk = new VPKArchive();
-
+       
         System.out.println("In extract.");
         System.out.println(file);
 
@@ -68,13 +72,55 @@ public class PortraitFinder
                 }
             }
         }
+    }        
+
+    public void buildItemPortraits()
+    {
+        File file = new File(fileName);
+        VPKArchive vpk = new VPKArchive();
+       
+        System.out.println("In extract.");
+        System.out.println(file);
+
+        try
+        {
+            vpk.load(file);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Can't open archive: " + ex.getMessage());
+            return;
+        }
+
+        BufferedImage image = null;
+        for (VPKEntry entry : vpk.getEntries())
+        {
+            //Put criteria to search for here
+            if (entry.getPath().contains("resource/flash3/images/items/") && entry.getType().equals("png"))     
+            {
+                File imageFile = new File(entry.getPath());
+
+                try (FileChannel fc = FileUtils.openOutputStream(imageFile).getChannel())
+                {
+                    fc.write(entry.getData());
+                    System.out.println("Writing image to File object.");
+                    image = ImageIO.read(imageFile);
+                    String item = handleSpecialCaseItemNames(entry.getName());                    
+                    portraitMap.put(item, image);
+                }
+                catch (IOException ex)
+                {
+                    System.err.println("Can't write " + entry.getPath() + ": " + ex.getMessage());
+                }
+            }
+        }        
     }
 
-    public BufferedImage getPortrait(String heroName)
+    public BufferedImage getPortrait(String portraitName)
     {
-        if (portraitMap.containsKey(heroName))
+        if (portraitMap.containsKey(portraitName))
         {
-            return portraitMap.get(heroName);
+            return portraitMap.get(portraitName);
         }
         else
         {
@@ -115,6 +161,11 @@ public class PortraitFinder
                 name = "stormspirit";
                 break;
         }
+        return name;
+    }
+
+    private String handleSpecialCaseItemNames(String name)
+    {
         return name;
     }
 }
