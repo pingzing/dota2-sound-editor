@@ -1246,8 +1246,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     }
 
     private void loadItemPanel()
-    {
-        currentTree = jTree1;
-        currentDropdown = jComboBox1;
+    {       
     }
 }
