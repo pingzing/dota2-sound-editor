@@ -15,7 +15,7 @@ import javax.swing.JFileChooser;
  * Image
  * 17
  */
-class UserPrefs
+public class UserPrefs
 {
 
     Preferences prefs = Preferences.userNodeForPackage(dotaSoundEditor.UserPrefs.class);

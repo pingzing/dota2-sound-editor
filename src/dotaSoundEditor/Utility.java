@@ -16,9 +16,17 @@ import java.awt.Window;
  */
 public class Utility
 {
+
+    public static PortraitFinder portraitFinder;
+
+    public static void initPortraitFinder(String vpkDir)
+    {
+        portraitFinder = new PortraitFinder(vpkDir);
+    }
+
     public static void setFrameIcon(Window iconWindow)
     {
-         try
+        try
         {
             java.net.URL url = ClassLoader.getSystemResource("dotaSoundEditor/resources/editorIconTiny.png");
             Toolkit kit = Toolkit.getDefaultToolkit();
@@ -30,5 +38,24 @@ public class Utility
             ex.printStackTrace();
         }
     }
-    
+
+    public static int nthOccurrence(String str, char c, int n)
+    {
+        int pos = str.indexOf(c, 0);
+        while (n-- > 0 && pos != -1)
+        {
+            pos = str.indexOf(c, pos + 1);
+        }
+        return pos;
+    }
+
+    public static String splitCamelCase(String s)
+    {
+        return s.replaceAll(
+                String.format("%s|%s|%s",
+                "(?<=[A-Z])(?=[A-Z][a-z])",
+                "(?<=[^A-Z])(?=[A-Z])",
+                "(?<=[A-Za-z])(?=[^A-Za-z])"),
+                " ");
+    }
 }

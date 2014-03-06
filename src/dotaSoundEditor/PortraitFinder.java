@@ -60,8 +60,7 @@ public class PortraitFinder
 
                 try (FileChannel fc = FileUtils.openOutputStream(imageFile).getChannel())
                 {
-                    fc.write(entry.getData());
-                    System.out.println("Writing image to File object.");
+                    fc.write(entry.getData());                    
                     image = ImageIO.read(imageFile);
                     String heroName = handleSpecialCaseHeroNames(entry.getName());                    
                     portraitMap.put(heroName, image);
@@ -102,11 +101,11 @@ public class PortraitFinder
 
                 try (FileChannel fc = FileUtils.openOutputStream(imageFile).getChannel())
                 {
-                    fc.write(entry.getData());
-                    System.out.println("Writing image to File object.");
+                    fc.write(entry.getData());                    
                     image = ImageIO.read(imageFile);
-                    String item = handleSpecialCaseItemNames(entry.getName());                    
+                    String item = entry.getName();
                     portraitMap.put(item, image);
+                    System.out.println(item);
                 }
                 catch (IOException ex)
                 {
@@ -161,11 +160,6 @@ public class PortraitFinder
                 name = "stormspirit";
                 break;
         }
-        return name;
-    }
-
-    private String handleSpecialCaseItemNames(String name)
-    {
         return name;
     }
 }

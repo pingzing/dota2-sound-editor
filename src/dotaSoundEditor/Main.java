@@ -9,6 +9,7 @@
 // - Rewrite image-extraction and loading code to avoid constant disk IO
 package dotaSoundEditor;
 
+import dotaSoundEditor.Controls.SoundEditorMainForm;
 import java.lang.Thread.UncaughtExceptionHandler;
 import javax.swing.JDialog;
 import javax.swing.UIManager;

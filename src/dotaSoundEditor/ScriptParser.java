@@ -32,9 +32,15 @@ public class ScriptParser
     private DefaultMutableTreeNode currentNode = null;
     private DefaultMutableTreeNode currentParent = null;
     private File modelFile = null;
-    private StringBuilder outputScriptString = null;
+    private StringBuilder outputScriptString = null;    
 
-    ScriptParser(File script)
+    public ScriptParser(TreeModel currentHeroTreeModel)
+    {
+        StringBuilder scriptString = parseModel(currentHeroTreeModel);
+        outputScriptString = scriptString;
+    }
+    
+    public ScriptParser(File script)
     {
         //Create the root node
         scriptTree = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
@@ -43,13 +49,7 @@ public class ScriptParser
         generateModelFromFile(script);
     }
 
-    ScriptParser(TreeModel currentHeroTreeModel)
-    {
-        StringBuilder scriptString = parseModel(currentHeroTreeModel);
-        outputScriptString = scriptString;
-    }
-
-    ScriptParser(String scriptString)
+    public ScriptParser(String scriptString)
     {        
         scriptTree = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         currentNode = (DefaultMutableTreeNode) scriptTree.getRoot();
