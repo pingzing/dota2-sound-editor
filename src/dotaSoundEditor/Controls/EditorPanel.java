@@ -97,14 +97,14 @@ public abstract class EditorPanel extends JPanel
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
-            File soundFile = createSoundFileFromWaveString(waveString);
+            File soundFile = createSoundFileFromWaveString(waveString);            
             currentSound = new SoundPlayer(soundFile.getAbsolutePath());
             currentSound.playSound();
             previousSound = currentSound;
         }
         catch (Exception ex)
         {
-            JOptionPane.showMessageDialog(null, "Could not find sound file.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "The selected node does not represent a valid sound file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -141,6 +141,12 @@ public abstract class EditorPanel extends JPanel
 
     private File createSoundFileFromWaveString(String waveString)
     {
+        if(!(waveString.contains(".wav") || (waveString.contains(".mp3"))))
+        {
+            return null;
+        }
+                    
+                
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
         File entryFile = null;

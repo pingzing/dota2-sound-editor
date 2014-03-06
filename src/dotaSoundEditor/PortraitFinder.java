@@ -34,10 +34,7 @@ public class PortraitFinder
     public void buildHeroPortraits()
     {
         File file = new File(fileName);
-        VPKArchive vpk = new VPKArchive();
-       
-        System.out.println("In extract.");
-        System.out.println(file);
+        VPKArchive vpk = new VPKArchive();                      
 
         try
         {
@@ -76,10 +73,7 @@ public class PortraitFinder
     public void buildItemPortraits()
     {
         File file = new File(fileName);
-        VPKArchive vpk = new VPKArchive();
-       
-        System.out.println("In extract.");
-        System.out.println(file);
+        VPKArchive vpk = new VPKArchive();                       
 
         try
         {
@@ -104,8 +98,7 @@ public class PortraitFinder
                     fc.write(entry.getData());                    
                     image = ImageIO.read(imageFile);
                     String item = entry.getName();
-                    portraitMap.put(item, image);
-                    System.out.println(item);
+                    portraitMap.put(item, image);                    
                 }
                 catch (IOException ex)
                 {
@@ -127,6 +120,7 @@ public class PortraitFinder
         }
     }
 
+    //TODO: Refactor this into NamedHero as an iconName instance variable.
     private String handleSpecialCaseHeroNames(String name)
     {
         //Make portrait hero names match internal hero names. Internal names don't have underscores

@@ -413,15 +413,29 @@ public class ItemPanel extends EditorPanel
     @Override
     void advancedButtonActionPerformed(ActionEvent evt, JButton advancedButton)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    //This panel doesn't use a dropdown box. No need to implement.
-    @Override
-    void populateDropdownBox()
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+        if (advancedButton.getText().equals("Advanced >>"))
+        {
+            String scriptPath = this.getItemScriptPath();
+            ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
+            TreeModel model = parser.getTreeModel();
+            currentTree.setModel(model);
+            currentTree.setEditable(true);
+            for (int i = 0; i < currentTree.getRowCount(); i++)
+            {
+                currentTree.expandRow(i);
+            }
+            //Change button and action to Basic-revert:
+            advancedButton.setText("Basic <<");
+            advancedButton.setMnemonic('a');
+        }
+        else if (advancedButton.getText().equals("Basic <<"))
+        {
+            this.populateSoundListAsTree(null);
+            advancedButton.setText("Advanced >>");
+            advancedButton.setMnemonic('a');
+            currentTree.setEditable(false);
+        }
+    }   
 
     private String getItemScriptPath()
     {
@@ -474,5 +488,12 @@ public class ItemPanel extends EditorPanel
         {
             System.err.println(ex.getMessage());
         }
+    }
+    
+    //This panel doesn't use a dropdown box. No need to implement.
+    @Override
+    void populateDropdownBox()
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

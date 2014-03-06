@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dotaSoundEditor;
 
 import java.io.BufferedWriter;
@@ -11,10 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
 
-/**
- *
- * @author Image 17
- */
 class Handler implements Thread.UncaughtExceptionHandler
 {
 
@@ -33,7 +25,8 @@ class Handler implements Thread.UncaughtExceptionHandler
         }
         catch (IOException ex)
         {
-            //well, now you're fucked.
+            //well, now you're fucked
+            ex.printStackTrace();
         }
         finally
         {
@@ -44,6 +37,7 @@ class Handler implements Thread.UncaughtExceptionHandler
             catch (Exception ex)
             {
                 //super fucked
+                ex.printStackTrace();
             }
         }
     }

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dotaSoundEditor.Controls;
 
 import dotaSoundEditor.AboutPanel;
@@ -19,21 +15,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-/**
- *
- * @author
- * Neil
- * McAlister
- */
 public class SoundEditorMainForm extends javax.swing.JFrame
 {
-
-    /**
-     * Creates
-     * new
-     * form
-     * SoundEditorMainForm
-     */
     private PortraitFinder portraitFinder;
     private String vpkDir;
     private String installDir;
@@ -68,8 +51,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         Utility.initPortraitFinder(vpkDir);
         portraitFinder = Utility.portraitFinder;
         portraitFinder.buildHeroPortraits();
-        portraitFinder.buildItemPortraits();
-        
+        portraitFinder.buildItemPortraits();        
 
         //Create tabs
         tabPane.add(new HeroPanel(vpkDir, installDir));
@@ -77,42 +59,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
         this.setVisible(true);
-
-
-    }
-
-    /**
-     * This
-     * method
-     * is
-     * called
-     * from
-     * within
-     * the
-     * constructor
-     * to
-     * initialize
-     * the
-     * form.
-     * WARNING:
-     * Do
-     * NOT
-     * modify
-     * this
-     * code.
-     * The
-     * content
-     * of
-     * this
-     * method
-     * is
-     * always
-     * regenerated
-     * by
-     * the
-     * Form
-     * Editor.
-     */
+    }  
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
@@ -475,26 +422,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println(ex);
         }
         return autoExecFile.getAbsolutePath();
-    }
-    //DEPRECATED. Left in as historical
-//    private void populateSoundList(NamedHero selectedHero)
-//    {
-//        this.getHeroScriptFile(selectedHero.internalName);
-//        Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
-//        ScriptParser parser = new ScriptParser(scriptPath.toFile());
-//        TreeModel scriptTree = parser.getTreeModel();
-//        DefaultListModel scriptList = new DefaultListModel();
-//
-//        //Get all children of root node:
-//        TreeNode rootNode = (TreeNode) scriptTree.getRoot();
-//        int childCount = rootNode.getChildCount();
-//        for (int i = 0; i < childCount; i++)
-//        {
-//            scriptList.addElement(scriptTree.getChild(rootNode, i));
-//        }
-//
-//        heroSoundList.setModel(scriptList);
-//    }
+    }   
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton advancedButton;
     private javax.swing.JMenu jMenu1;

@@ -1,12 +1,13 @@
 
 //Features to add:
-// - Go through and replace all references to heroSpellTree & heroDropdown with currentTree & currentDropdown.
-// - Note on extracting item names: Build a tree of the item scripts file. Use the regex: ".(.*)." on each root.
-// - Get sound length
-// - Make more obvious that sound names need to be expanded
+// - Get sound length, display along bottom of window
+// - Make "Play" button shift to "Stop" button when sound is playing
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 // - Investigate scanning common install paths for dota before asking the user
-// - Rewrite image-extraction and loading code to avoid constant disk IO
+// - Rewrite image-extraction and loading code to avoid disk IO every time we start the program
+// - Look into abstracting more methods into EditorPanel by adding a "scriptFilePath" instance member that each child implements
+// - Expand "Advanced" functionality to allow for adding of nodes. (Also add a right-click menu with Add, Edit, Delete)
+// - Localization?
 package dotaSoundEditor;
 
 import dotaSoundEditor.Controls.SoundEditorMainForm;

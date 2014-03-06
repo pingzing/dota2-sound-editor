@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dotaSoundEditor.Controls;
 
 import dotaSoundEditor.*;
@@ -9,24 +5,18 @@ import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -36,22 +26,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 import org.apache.commons.io.FileUtils;
 
-/**
- *
- * @author
- * Image
- * 17
- */
 public class HeroPanel extends EditorPanel
-{
-    //This will be the first panel that gets loaded, so make it take care of some housekeeping.
-    //TODO: Move this out into Main?
-
+{        
     PortraitFinder portraitFinder;
 
+    //Just used for designer compatibility. Should never be called from code.
     public HeroPanel()
     {
         initComponents();
@@ -66,13 +47,11 @@ public class HeroPanel extends EditorPanel
         initComponents();
         
         portraitFinder = Utility.portraitFinder;
+        currentDropdown = heroSpellsDropdown;
         currentTree = heroSpellTree;
         this.populateDropdownBox();
         this.attachDoubleClickListenerToTree();
-        this.setVisible(true);        
-        currentDropdown = heroSpellsDropdown;
-
-
+        this.setVisible(true);                
     }
     
     @SuppressWarnings("unchecked")
@@ -146,16 +125,16 @@ public class HeroPanel extends EditorPanel
 
     private void heroSpellsDropdownStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_heroSpellsDropdownStateChanged
     {//GEN-HEADEREND:event_heroSpellsDropdownStateChanged
+        //TODO: Find a way to inform the Advanced button that it needs to reset.
         if (evt.getStateChange() == ItemEvent.SELECTED)
         {
-            System.out.println(heroSpellsDropdown.getSelectedItem().toString());
-            //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
-            populateSoundListAsTree((NamedHero) heroSpellsDropdown.getSelectedItem());
+            System.out.println(currentDropdown.getSelectedItem().toString());            
+            populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
             try
             {
-                fillImageFrame((NamedHero) heroSpellsDropdown.getSelectedItem());
+                fillImageFrame((NamedHero) currentDropdown.getSelectedItem());
             }
             catch (IOException ex)
             {
@@ -174,7 +153,7 @@ public class HeroPanel extends EditorPanel
     @Override
     protected void populateDropdownBox()
     {
-        heroSpellsDropdown.removeAllItems();
+        currentDropdown.removeAllItems();
         Set heroList = new CopyOnWriteArraySet();
         //Build list of heroes and populate dropwdown with it                
         File file = new File(vpkDir);
@@ -196,15 +175,7 @@ public class HeroPanel extends EditorPanel
         for (VPKEntry entry : vpk.getEntries())
         {
             if (entry.getPath().contains("scripts/game_sounds_heroes/"))
-            {
-                if (vpk.isMultiChunk())
-                {
-                    //System.out.printf("%s:%s\n", entry.getFile().getName(), entry.getPath());
-                }
-                else
-                {
-                    //System.out.println(entry.getPath());
-                }
+            {                
                 heroList.add(entry.getName());
             }
         }
@@ -222,11 +193,10 @@ public class HeroPanel extends EditorPanel
         for (Object h : heroListArray)
         {
             NamedHero tempHero = (NamedHero) h;
-            heroSpellsDropdown.addItem(tempHero);
+            currentDropdown.addItem(tempHero);
         }
-
-        //populateSoundList((NamedHero) heroDropdown.getSelectedItem());
-        populateSoundListAsTree((NamedHero) heroSpellsDropdown.getSelectedItem());
+       
+        populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
     }
 
     @Override
@@ -244,6 +214,7 @@ public class HeroPanel extends EditorPanel
         currentTree.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
+        
         //Defer writing script file to disk until we're sure it doesn't exist
         if (!scriptFile.isFile())
         {
@@ -251,8 +222,7 @@ public class HeroPanel extends EditorPanel
         }
         ScriptParser parser = new ScriptParser(scriptPath.toFile());
         TreeModel scriptTree = parser.getTreeModel();
-        this.currentTreeModel = scriptTree;
-        DefaultListModel scriptList = new DefaultListModel();
+        this.currentTreeModel = scriptTree;        
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
 
@@ -260,7 +230,6 @@ public class HeroPanel extends EditorPanel
         ArrayList<String> wavePathsList = new ArrayList<>();
         for (int i = 0; i < childCount; i++)
         {
-
             wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
@@ -277,8 +246,7 @@ public class HeroPanel extends EditorPanel
     }
 
     private VPKEntry getAndWriteHeroScriptFile(String heroName)
-    {
-        //String massaging to get the hero name from the filepath. Remove underscores because underscore use in game files for hero names is inconsistent.        
+    {        
         heroName = heroName.toLowerCase();
 
         //Don't bother looking if we already have a stored copy locally.
@@ -337,6 +305,7 @@ public class HeroPanel extends EditorPanel
         return null;
     }
     
+    @Override
     protected void fillImageFrame(Object _selectedItem) throws IOException
     {
         NamedHero selectedItem;
@@ -372,7 +341,7 @@ public class HeroPanel extends EditorPanel
             DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
             Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
-                    + ((NamedHero) heroSpellsDropdown.getSelectedItem()).getInternalName()
+                    + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
                     + "\\" + chosenFile.getFileName());
 
             try
@@ -399,22 +368,18 @@ public class HeroPanel extends EditorPanel
 
                 String waveSubstring = waveString.substring(startIndex, endIndex + 1);
                 waveString = waveString.replace(waveSubstring, "\")custom/"
-                        + ((NamedHero) heroSpellsDropdown.getSelectedItem()).getInternalName()
+                        + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
                         + "/" + chosenFile.getFileName() + "\"");
                 selectedFile.setUserObject(waveString);
 
                 //Parse the modified TreeModel into a script file, and write the file to disk.
-                ScriptParser parser = new ScriptParser(this.currentTreeModel);
-
-                //This line can probably be replaced with globally-available data
-                String scriptString = this.getScriptPathByHeroName(((NamedHero) heroSpellsDropdown.getSelectedItem()).getInternalName());
-
+                ScriptParser parser = new ScriptParser(this.currentTreeModel);               
+                String scriptString = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
                 Path scriptPath = Paths.get((scriptString));
                 parser.writeModelToFile(scriptPath.toString());
 
                 //Update UI bits
-                populateSoundListAsTree((NamedHero) heroSpellsDropdown.getSelectedItem());
-
+                populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
                 JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
             }
             catch (IOException ex)
@@ -495,10 +460,9 @@ public class HeroPanel extends EditorPanel
                     scriptFileString = new String(bytes, Charset.forName("UTF-8"));
                     break;
                 }
-            }
-            //First, getWavePathListAsString() from currently-selected sound's parent, and get the index of the relevant wavepath
+            }            
             ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
-            int waveListIndex = wavePathList.indexOf(selectedWaveString);
+            int waveStringIndex = wavePathList.indexOf(selectedWaveString);
 
             //Cut off every part of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally get the wrong wavepaths            
             StringBuilder scriptFileStringShortened = new StringBuilder();
@@ -518,7 +482,7 @@ public class HeroPanel extends EditorPanel
             }
             scriptFileString = scriptFileStringShortened.toString();
             ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);
-            String replacementString = internalWavePathsList.get(waveListIndex);
+            String replacementString = internalWavePathsList.get(waveStringIndex);
 
             selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentTreeModel);
@@ -534,7 +498,7 @@ public class HeroPanel extends EditorPanel
     protected void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt)
     {
         //Delete existing script file
-        String scriptFilePath = getScriptPathByHeroName(((NamedHero) heroSpellsDropdown.getSelectedItem()).getInternalName());
+        String scriptFilePath = getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
         File scriptFileToDelete = new File(scriptFilePath);
         if (scriptFileToDelete.isFile())
         {
@@ -546,7 +510,7 @@ public class HeroPanel extends EditorPanel
         }
 
         //Repopulate soundtree
-        populateSoundListAsTree((NamedHero) heroSpellsDropdown.getSelectedItem());
+        populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
     }
 
     @Override
@@ -575,7 +539,7 @@ public class HeroPanel extends EditorPanel
     {
         if (advancedButton.getText().equals("Advanced >>"))
         {
-            String scriptPath = this.getScriptPathByHeroName(((NamedHero) heroSpellsDropdown.getSelectedItem()).getInternalName());
+            String scriptPath = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
             ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
             TreeModel model = parser.getTreeModel();
             currentTree.setModel(model);
@@ -590,7 +554,7 @@ public class HeroPanel extends EditorPanel
         }
         else if (advancedButton.getText().equals("Basic <<"))
         {
-            this.populateSoundListAsTree((NamedHero) heroSpellsDropdown.getSelectedItem());
+            this.populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
             advancedButton.setText("Advanced >>");
             advancedButton.setMnemonic('a');
             currentTree.setEditable(false);

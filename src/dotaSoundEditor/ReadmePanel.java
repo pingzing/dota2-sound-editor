@@ -1,48 +1,14 @@
 package dotaSoundEditor;
-import javax.swing.JFrame;
 
 public class ReadmePanel extends javax.swing.JFrame
 {                
     public ReadmePanel()
-    {        
-        Utility.setFrameIcon(this);        
+    {                        
         initComponents();
         this.setSize(530, 450);
         jEditorPane1.setCaretPosition(0);
+        Utility.setFrameIcon(this);
     }
-
-    /**
-     * This
-     * method
-     * is
-     * called
-     * from
-     * within
-     * the
-     * constructor
-     * to
-     * initialize
-     * the
-     * form.
-     * WARNING:
-     * Do
-     * NOT
-     * modify
-     * this
-     * code.
-     * The
-     * content
-     * of
-     * this
-     * method
-     * is
-     * always
-     * regenerated
-     * by
-     * the
-     * Form
-     * Editor.
-     */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
@@ -83,9 +49,10 @@ public class ReadmePanel extends javax.swing.JFrame
             + "5. Click Ok.<br><br>"
             + ""
             + "<h2>Using Dota 2 Sound Editor</h2><br>"
-            + "The Dota 2 Sound editor allows you to modify what sounds are played when heroes in Dota 2 perform actions."
-            + " To begin, select a hero from the dropdown box. Then, expand the list of sounds associated with a particular action. "
-            + "From there, you can view each sound that may occur when a hero performs that action. For each sound, you can:<br><br>"
+            + "The Dota 2 Sound editor allows you to modify what sounds are played when heroes or items in Dota 2 perform actions."
+            + " To begin, select a tab from the top of the window. Then, if applicable, select an entry from the dropdown box and "
+            + "expand the list of sounds associated with a particular action. "
+            + "From there, you can view each sound that may occur when a hero or item performs that action. For each sound, you can:<br><br>"
             + ""
             + "<b>Replace</b><br>"
             + "This allows you to change what sound plays when the selected action is performed.<br><br>"
@@ -94,7 +61,10 @@ public class ReadmePanel extends javax.swing.JFrame
             + "This restores the selected action to its default sound.<br><br>"
             + ""
             + "<b>Revert All</b><br>"
-            + "This restores all actions for to current hero to their default sounds.<br><br>"
+            + "<ul>"
+            + "<li><b>Heroes Spells:</b> This restores all actions for the current hero to their default sound.</li>"
+            + "<li><b>Items:</b> This restores all item actions to their default sound. </li>"
+            + "</ul><br>"
             + "<b>Advanced/Basic</b><br>"
             + "The Advanced button allows you to view the current hero's entire sound script as a tree. Triple-click any node to allow manual editing.<br>"
             + "While in Advanced mode, Replace, Revert and Play Sound will only work on nodes that contain a path to a sound file.<br>"
@@ -134,14 +104,7 @@ public class ReadmePanel extends javax.swing.JFrame
     {//GEN-HEADEREND:event_jButton1ActionPerformed
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
-
-    /**
-     * @param
-     * the
-     * command
-     * line
-     * arguments
-     */
+   
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JEditorPane jEditorPane1;

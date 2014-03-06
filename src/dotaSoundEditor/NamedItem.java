@@ -126,7 +126,7 @@ public class NamedItem
                 break;
             case "shiva's_guard":               localIconName = "shivas_guard";
                 break;
-            case "manta_styke":                 localIconName = "manta";
+            case "manta_style":                 localIconName = "manta";
                 break;
             case "shadow_blade":                localIconName = "invis_sword";
                 break;
@@ -139,9 +139,7 @@ public class NamedItem
             case "armlet_of_mordiggian":        localIconName = "armlet_active";
                 break;
             case "scythe_of_vyse":              localIconName = "sheepstick";
-                break;
-            default:                            localIconName = "";
-                break;
+                break;            
         }
         return localIconName;
     }
