@@ -37,7 +37,7 @@
                       </Group>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="64" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -47,7 +47,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="applicationIcon" max="32767" attributes="0"/>
+                      <Component id="applicationIcon" pref="55" max="32767" attributes="0"/>
                       <EmptySpace min="-2" pref="209" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
