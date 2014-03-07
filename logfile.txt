@@ -1,8 +1,0 @@
-Initializing.
-Starting portraitFinder
-PortraitFinder complete.
-Populating dropdown box
-Deleting scratch files.
-Checking for autoexec
-Done checking for autoexec
-Preparing to setVisible.
