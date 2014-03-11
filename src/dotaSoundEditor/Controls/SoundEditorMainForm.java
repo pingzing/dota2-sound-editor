@@ -282,7 +282,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
     {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
         //Change steam install loc   
-        UserPrefs prefs = new UserPrefs();
+        UserPrefs prefs = UserPrefs.LoadUserPrefs();
         JDialog locationCheckDialog = new JDialog();
         locationCheckDialog.setModal(true);
         locationCheckDialog.setAlwaysOnTop(true);

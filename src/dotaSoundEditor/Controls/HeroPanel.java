@@ -129,7 +129,7 @@ public class HeroPanel extends EditorPanel
         if (evt.getStateChange() == ItemEvent.SELECTED)
         {
             System.out.println(currentDropdown.getSelectedItem().toString());            
-            populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
+            populateSoundListAsTree();
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
             try
@@ -196,21 +196,14 @@ public class HeroPanel extends EditorPanel
             currentDropdown.addItem(tempHero);
         }
        
-        populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
+        populateSoundListAsTree();
     }
 
     @Override
-    protected void populateSoundListAsTree(Object _selectedDropdownItem)            
+    protected void populateSoundListAsTree()            
     {
-        NamedHero selectedHero;
-        if(_selectedDropdownItem instanceof NamedHero)
-        {
-            selectedHero = (NamedHero)_selectedDropdownItem;
-        }
-        else
-        {
-            return;
-        }
+        NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
+        
         currentTree.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
@@ -328,67 +321,67 @@ public class HeroPanel extends EditorPanel
         }
     }
 
-    @Override
-    protected File promptUserForNewFile(String wavePath)
-    {
-        JFileChooser chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
-        chooser.setFileFilter(filter);
-
-        int chooserRetVal = chooser.showOpenDialog(chooser);
-        if (chooserRetVal == JFileChooser.APPROVE_OPTION)
-        {
-            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
-            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
-                    + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
-                    + "\\" + chosenFile.getFileName());
-
-            try
-            {
-                //Copy in the new wav/mp3 file
-                boolean success = new File(destPath.toString()).mkdirs();
-                Files.copy(chosenFile, destPath, REPLACE_EXISTING);
-
-                //Replace the wavestring in the treenode
-                String waveString = selectedFile.getUserObject().toString();
-                int startIndex = -1;
-                int endIndex = -1;
-                if (waveString.contains("\"wave\""))
-                {
-                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
-                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
-                }
-                else
-                {
-                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
-                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
-                }
-
-
-                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
-                waveString = waveString.replace(waveSubstring, "\")custom/"
-                        + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
-                        + "/" + chosenFile.getFileName() + "\"");
-                selectedFile.setUserObject(waveString);
-
-                //Parse the modified TreeModel into a script file, and write the file to disk.
-                ScriptParser parser = new ScriptParser(this.currentTreeModel);               
-                String scriptString = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-                Path scriptPath = Paths.get((scriptString));
-                parser.writeModelToFile(scriptPath.toString());
-
-                //Update UI bits
-                populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
-                JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
-            }
-            catch (IOException ex)
-            {
-                System.err.println(ex);
-            }
-        }
-        return null;
-    }
+//    @Override
+//    protected File promptUserForNewFile(String wavePath)
+//    {
+//        JFileChooser chooser = new JFileChooser();
+//        FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
+//        chooser.setFileFilter(filter);
+//
+//        int chooserRetVal = chooser.showOpenDialog(chooser);
+//        if (chooserRetVal == JFileChooser.APPROVE_OPTION)
+//        {
+//            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
+//            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
+//            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
+//                    + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
+//                    + "\\" + chosenFile.getFileName());
+//
+//            try
+//            {
+//                //Copy in the new wav/mp3 file
+//                boolean success = new File(destPath.toString()).mkdirs();
+//                Files.copy(chosenFile, destPath, REPLACE_EXISTING);
+//
+//                //Replace the wavestring in the treenode
+//                String waveString = selectedFile.getUserObject().toString();
+//                int startIndex = -1;
+//                int endIndex = -1;
+//                if (waveString.contains("\"wave\""))
+//                {
+//                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
+//                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
+//                }
+//                else
+//                {
+//                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
+//                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
+//                }
+//
+//
+//                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
+//                waveString = waveString.replace(waveSubstring, "\")custom/"
+//                        + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
+//                        + "/" + chosenFile.getFileName() + "\"");
+//                selectedFile.setUserObject(waveString);
+//
+//                //Parse the modified TreeModel into a script file, and write the file to disk.
+//                ScriptParser parser = new ScriptParser(this.currentTreeModel);               
+//                String scriptString = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
+//                Path scriptPath = Paths.get((scriptString));
+//                parser.writeModelToFile(scriptPath.toString());
+//
+//                //Update UI bits
+//                populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
+//                JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
+//            }
+//            catch (IOException ex)
+//            {
+//                System.err.println(ex);
+//            }
+//        }
+//        return null;
+//    }
 
     private String getScriptPathByHeroName(String internalName)
     {
@@ -510,7 +503,7 @@ public class HeroPanel extends EditorPanel
         }
 
         //Repopulate soundtree
-        populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
+        populateSoundListAsTree();
     }
 
     @Override
@@ -554,10 +547,22 @@ public class HeroPanel extends EditorPanel
         }
         else if (advancedButton.getText().equals("Basic <<"))
         {
-            this.populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
+            this.populateSoundListAsTree();
             advancedButton.setText("Advanced >>");
             advancedButton.setMnemonic('a');
             currentTree.setEditable(false);
         }
+    }
+
+    @Override
+    String getPanelScriptString()
+    {
+        return this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
+    }
+
+    @Override
+    String getCustomSoundPathString()
+    {
+        return "custom\\" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + "\\";
     }
 }

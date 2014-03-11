@@ -15,14 +15,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
@@ -45,13 +51,10 @@ public abstract class EditorPanel extends JPanel
     protected JComboBox currentDropdown;
     protected String vpkDir;
     protected String installDir;    
+    
+    abstract void populateSoundListAsTree();
 
-    //TODO: Find a way to refactor the argument out of this--not every panel is going to have a dropdown list.
-    abstract void populateSoundListAsTree(Object selectedDropdownItem);
-
-    abstract void fillImageFrame(Object selectedItem) throws IOException;
-
-    abstract File promptUserForNewFile(String wavePath);    
+    abstract void fillImageFrame(Object selectedItem) throws IOException;   
     
     abstract void revertButtonActionPerformed(java.awt.event.ActionEvent evt);
     
@@ -64,6 +67,66 @@ public abstract class EditorPanel extends JPanel
     abstract void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton);
     
     abstract void populateDropdownBox();
+    
+    abstract String getPanelScriptString();    
+
+    abstract String getCustomSoundPathString();
+    
+    protected final File promptUserForNewFile(String wavePath)
+    {
+        JFileChooser chooser = new JFileChooser(new File(UserPrefs.getInstance().getWorkingDirectory()));
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
+        chooser.setFileFilter(filter);
+
+        int chooserRetVal = chooser.showOpenDialog(chooser);
+        if (chooserRetVal == JFileChooser.APPROVE_OPTION)
+        {
+            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
+            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());            
+            Path destPath = Paths.get(installDir + "\\dota\\sound\\" + getCustomSoundPathString() + chosenFile.getFileName());
+            UserPrefs.getInstance().setWorkingDirectory(chosenFile.getParent().toString());
+
+            try
+            {
+                boolean success = new File(destPath.toString()).mkdirs();
+                Files.copy(chosenFile, destPath, StandardCopyOption.REPLACE_EXISTING);
+
+                String waveString = selectedFile.getUserObject().toString();
+                int startIndex = -1;
+                int endIndex = -1;
+                if (waveString.contains("\"wave\""))
+                {
+                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
+                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
+                }
+                else    //Some wavestrings don't have the "wave" at the beginning for some reason
+                {
+                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
+                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
+                }
+
+                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
+                waveString = waveString.replace(waveSubstring, "\"" + getCustomSoundPathString() + chosenFile.getFileName() + "\"");
+                selectedFile.setUserObject(waveString);
+
+                //Write out modified tree to scriptfile.
+                ScriptParser parser = new ScriptParser(this.currentTreeModel);
+                String scriptString = getPanelScriptString();
+                Path scriptPath = Paths.get(scriptString);
+                parser.writeModelToFile(scriptPath.toString());
+
+                //Update UI
+                populateSoundListAsTree();
+                JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
+
+            }
+            catch (IOException ex)
+            {
+                System.err.println(ex);
+            }
+        }
+        return null;
+    }        
 
     protected void attachDoubleClickListenerToTree()
     {
@@ -284,5 +347,5 @@ public abstract class EditorPanel extends JPanel
             ex.printStackTrace();
             return null;
         }
-    }
+    }               
 }

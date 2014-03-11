@@ -20,7 +20,7 @@ public class Main
     public static void main(String args[]) throws Exception
     {                
         javax.swing.UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());                        
-        UserPrefs prefs = new UserPrefs();
+        UserPrefs prefs = UserPrefs.LoadUserPrefs();
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
         

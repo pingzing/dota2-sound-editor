@@ -17,16 +17,29 @@ import javax.swing.JFileChooser;
  */
 public class UserPrefs
 {
-
+    private static UserPrefs userPrefsInstance = null;
     Preferences prefs = Preferences.userNodeForPackage(dotaSoundEditor.UserPrefs.class);
     private String dotaDirPrefName = "dota_install_dir";
     private String mainVPKPrefName = "main_vpk_dir";
     private String installDir = "";
     private String vpkDir = "";
+    private String currentWorkingDirectory = null;
     private boolean success = false;
 
-    public UserPrefs()
+    private UserPrefs() {        }
+    
+    public static UserPrefs LoadUserPrefs()
     {
+        return getInstance();
+    }
+    
+    public static synchronized UserPrefs getInstance()
+    {
+        if(userPrefsInstance == null)
+        {
+            userPrefsInstance = new UserPrefs();
+        }
+        return userPrefsInstance;
     }
 
     public String getInstallDir()
@@ -103,4 +116,18 @@ public class UserPrefs
             this.success = false;
         }
     }
+    
+    public String getWorkingDirectory()
+    {
+        if(this.currentWorkingDirectory == null)
+        {
+            this.currentWorkingDirectory = System.getProperty("user.home");
+        }
+        return this.currentWorkingDirectory;
+    }
+    
+    public void setWorkingDirectory(String _workingDirectory)
+    {
+        this.currentWorkingDirectory = _workingDirectory;
+    }    
 }
