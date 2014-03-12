@@ -4,6 +4,9 @@
  */
 package dotaSoundEditor.Controls;
 
+import Helpers.SoundPlayer;
+import Helpers.ScriptParser;
+import Helpers.Utility;
 import dotaSoundEditor.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -237,6 +240,13 @@ public abstract class EditorPanel extends JPanel
 
         if (!waveString.contains("custom"))
         {
+            //Check the local filesys first, just in case. Way faster than opening up the vpk, extracting, etc etc
+            File localFile = new File(Paths.get(installDir + "\\sound\\" + waveSubstring).toString());
+            if(localFile.isFile())
+            {
+                return localFile;
+            }
+            
             try
             {
                 vpk.load(file);
@@ -250,7 +260,7 @@ public abstract class EditorPanel extends JPanel
             for (VPKEntry entry : vpk.getEntries())
             {
                 if (entry.getPath().toLowerCase().contains(waveSubstring.toLowerCase()))
-                {
+                {                    
                     entryFile = entry.getType().contains("wav")
                             ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
                             : new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3").toString());

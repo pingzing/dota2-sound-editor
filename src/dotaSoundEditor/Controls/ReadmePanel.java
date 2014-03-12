@@ -1,4 +1,6 @@
-package dotaSoundEditor;
+package dotaSoundEditor.Controls;
+
+import Helpers.Utility;
 
 public class ReadmePanel extends javax.swing.JFrame
 {                
@@ -21,7 +23,6 @@ public class ReadmePanel extends javax.swing.JFrame
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sound Editor Help");
         setLocationByPlatform(true);
-        setMaximumSize(new java.awt.Dimension(535, 450));
         setMinimumSize(new java.awt.Dimension(530, 450));
 
         jButton1.setText("Close");

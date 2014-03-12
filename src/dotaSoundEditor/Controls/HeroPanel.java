@@ -1,5 +1,8 @@
 package dotaSoundEditor.Controls;
 
+import Helpers.PortraitFinder;
+import Helpers.ScriptParser;
+import Helpers.Utility;
 import dotaSoundEditor.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -97,10 +100,10 @@ public class HeroPanel extends EditorPanel
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(heroSpellsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 409, Short.MAX_VALUE))
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(heroSpellsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
@@ -112,13 +115,13 @@ public class HeroPanel extends EditorPanel
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(heroSpellsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(heroSpellsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -320,68 +323,6 @@ public class HeroPanel extends EditorPanel
             heroImageLabel.setIcon(new ImageIcon(""));
         }
     }
-
-//    @Override
-//    protected File promptUserForNewFile(String wavePath)
-//    {
-//        JFileChooser chooser = new JFileChooser();
-//        FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
-//        chooser.setFileFilter(filter);
-//
-//        int chooserRetVal = chooser.showOpenDialog(chooser);
-//        if (chooserRetVal == JFileChooser.APPROVE_OPTION)
-//        {
-//            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
-//            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-//            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\"
-//                    + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
-//                    + "\\" + chosenFile.getFileName());
-//
-//            try
-//            {
-//                //Copy in the new wav/mp3 file
-//                boolean success = new File(destPath.toString()).mkdirs();
-//                Files.copy(chosenFile, destPath, REPLACE_EXISTING);
-//
-//                //Replace the wavestring in the treenode
-//                String waveString = selectedFile.getUserObject().toString();
-//                int startIndex = -1;
-//                int endIndex = -1;
-//                if (waveString.contains("\"wave\""))
-//                {
-//                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
-//                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
-//                }
-//                else
-//                {
-//                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
-//                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
-//                }
-//
-//
-//                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
-//                waveString = waveString.replace(waveSubstring, "\")custom/"
-//                        + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()
-//                        + "/" + chosenFile.getFileName() + "\"");
-//                selectedFile.setUserObject(waveString);
-//
-//                //Parse the modified TreeModel into a script file, and write the file to disk.
-//                ScriptParser parser = new ScriptParser(this.currentTreeModel);               
-//                String scriptString = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-//                Path scriptPath = Paths.get((scriptString));
-//                parser.writeModelToFile(scriptPath.toString());
-//
-//                //Update UI bits
-//                populateSoundListAsTree((NamedHero) currentDropdown.getSelectedItem());
-//                JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
-//            }
-//            catch (IOException ex)
-//            {
-//                System.err.println(ex);
-//            }
-//        }
-//        return null;
-//    }
 
     private String getScriptPathByHeroName(String internalName)
     {

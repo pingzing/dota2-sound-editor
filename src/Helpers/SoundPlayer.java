@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dotaSoundEditor;
+package Helpers;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -29,15 +29,14 @@ public class SoundPlayer
     //Objects that make noise
     private Player mp3Player;
     private Clip clip;
+    
     //Objects and members that hold data
     private File soundFile;
     private boolean isMp3 = false;
     private boolean waveIsComplete = true;
     private JFrame parentFrame = null;
-
-    public SoundPlayer()
-    {
-    }
+    
+    public SoundPlayer(){       }
 
     public SoundPlayer(String filePath)
     {
@@ -50,10 +49,6 @@ public class SoundPlayer
         {
             isMp3 = true;
         }
-    }
-
-    public SoundPlayer(BufferedInputStream bis)
-    {
     }
 
     public void stopSound()
@@ -87,7 +82,7 @@ public class SoundPlayer
             try
             {
                 FileInputStream fis = new FileInputStream(soundFile);
-                mp3Player = new Player(fis);
+                mp3Player = new Player(fis);                
             }
             catch (Exception ex)
             {

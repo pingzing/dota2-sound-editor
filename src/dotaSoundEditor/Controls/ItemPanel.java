@@ -4,6 +4,9 @@
  */
 package dotaSoundEditor.Controls;
 
+import Helpers.PortraitFinder;
+import Helpers.ScriptParser;
+import Helpers.Utility;
 import dotaSoundEditor.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;

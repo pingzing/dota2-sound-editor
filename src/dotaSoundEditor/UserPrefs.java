@@ -23,16 +23,12 @@ public class UserPrefs
     private String mainVPKPrefName = "main_vpk_dir";
     private String installDir = "";
     private String vpkDir = "";
-    private String currentWorkingDirectory = null;
+    private String currentWorkingDirectoryPrefName = "working_dir";
     private boolean success = false;
 
-    private UserPrefs() {        }
+    private UserPrefs() {        }    
     
-    public static UserPrefs LoadUserPrefs()
-    {
-        return getInstance();
-    }
-    
+    //Gogo Singleton pattern
     public static synchronized UserPrefs getInstance()
     {
         if(userPrefsInstance == null)
@@ -117,17 +113,20 @@ public class UserPrefs
         }
     }
     
+    //TODO: Refactor these two so we're not constantly pulling in and out of the registry. Should just hold value in memory and only grab from/store
+    //to on load and on exit.
     public String getWorkingDirectory()
     {
-        if(this.currentWorkingDirectory == null)
+        boolean exists = prefs.get(this.currentWorkingDirectoryPrefName, null) != null;
+        if(exists)
         {
-            this.currentWorkingDirectory = System.getProperty("user.home");
+            return prefs.get(this.currentWorkingDirectoryPrefName, null);
         }
-        return this.currentWorkingDirectory;
+        return "";
     }
     
     public void setWorkingDirectory(String _workingDirectory)
     {
-        this.currentWorkingDirectory = _workingDirectory;
+        prefs.put(this.currentWorkingDirectoryPrefName, _workingDirectory);
     }    
 }

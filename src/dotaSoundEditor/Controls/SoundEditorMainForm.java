@@ -1,11 +1,8 @@
 package dotaSoundEditor.Controls;
 
-import dotaSoundEditor.AboutPanel;
-import dotaSoundEditor.PortraitFinder;
-import dotaSoundEditor.ReadmePanel;
-import dotaSoundEditor.SteamLocationPanel;
+import Helpers.PortraitFinder;
 import dotaSoundEditor.UserPrefs;
-import dotaSoundEditor.Utility;
+import Helpers.Utility;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.io.*;
@@ -73,14 +70,14 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         playSoundButton = new javax.swing.JButton();
         replaceButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jMenuItem4 = new javax.swing.JMenuItem();
-        jMenu3 = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuFileButton = new javax.swing.JMenu();
+        JMenuClose = new javax.swing.JMenuItem();
+        jMenuSettingsButton = new javax.swing.JMenu();
+        JMenuInstallDir = new javax.swing.JMenuItem();
+        jMenuHelpButton = new javax.swing.JMenu();
+        jMenuHowTo = new javax.swing.JMenuItem();
         jSeparator7 = new javax.swing.JPopupMenu.Separator();
-        jMenuItem3 = new javax.swing.JMenuItem();
+        JMenuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dota 2 Sound Editor");
@@ -155,63 +152,63 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
-        jMenu1.setMnemonic('f');
-        jMenu1.setText("File");
+        jMenuFileButton.setMnemonic('f');
+        jMenuFileButton.setText("File");
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
-        jMenuItem1.setText("Close");
-        jMenuItem1.setToolTipText("");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener()
+        JMenuClose.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
+        JMenuClose.setText("Close");
+        JMenuClose.setToolTipText("");
+        JMenuClose.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                jMenuItem1ActionPerformed(evt);
+                JMenuCloseActionPerformed(evt);
             }
         });
-        jMenu1.add(jMenuItem1);
+        jMenuFileButton.add(JMenuClose);
 
-        jMenuBar1.add(jMenu1);
+        jMenuBar1.add(jMenuFileButton);
 
-        jMenu2.setMnemonic('s');
-        jMenu2.setText("Settings");
+        jMenuSettingsButton.setMnemonic('s');
+        jMenuSettingsButton.setText("Settings");
 
-        jMenuItem4.setText("Change install directory");
-        jMenuItem4.addActionListener(new java.awt.event.ActionListener()
+        JMenuInstallDir.setText("Change install directory");
+        JMenuInstallDir.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                jMenuItem4ActionPerformed(evt);
+                JMenuInstallDirActionPerformed(evt);
             }
         });
-        jMenu2.add(jMenuItem4);
+        jMenuSettingsButton.add(JMenuInstallDir);
 
-        jMenuBar1.add(jMenu2);
+        jMenuBar1.add(jMenuSettingsButton);
 
-        jMenu3.setMnemonic('h');
-        jMenu3.setText("Help");
+        jMenuHelpButton.setMnemonic('h');
+        jMenuHelpButton.setText("Help");
 
-        jMenuItem2.setText("How to use");
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener()
+        jMenuHowTo.setText("How to use");
+        jMenuHowTo.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                jMenuItem2ActionPerformed(evt);
+                jMenuHowToActionPerformed(evt);
             }
         });
-        jMenu3.add(jMenuItem2);
-        jMenu3.add(jSeparator7);
+        jMenuHelpButton.add(jMenuHowTo);
+        jMenuHelpButton.add(jSeparator7);
 
-        jMenuItem3.setText("About");
-        jMenuItem3.addActionListener(new java.awt.event.ActionListener()
+        JMenuAbout.setText("About");
+        JMenuAbout.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                jMenuItem3ActionPerformed(evt);
+                JMenuAboutActionPerformed(evt);
             }
         });
-        jMenu3.add(jMenuItem3);
+        jMenuHelpButton.add(JMenuAbout);
 
-        jMenuBar1.add(jMenu3);
+        jMenuBar1.add(jMenuHelpButton);
 
         setJMenuBar(jMenuBar1);
 
@@ -260,17 +257,17 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem1ActionPerformed
-    {//GEN-HEADEREND:event_jMenuItem1ActionPerformed
+    private void JMenuCloseActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_JMenuCloseActionPerformed
+    {//GEN-HEADEREND:event_JMenuCloseActionPerformed
         Window w = this;
         w.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(w, WindowEvent.WINDOW_CLOSING));
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_JMenuCloseActionPerformed
 
-    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem2ActionPerformed
-    {//GEN-HEADEREND:event_jMenuItem2ActionPerformed
+    private void jMenuHowToActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuHowToActionPerformed
+    {//GEN-HEADEREND:event_jMenuHowToActionPerformed
         JFrame readme = new ReadmePanel();
         readme.setVisible(true);
-    }//GEN-LAST:event_jMenuItem2ActionPerformed
+    }//GEN-LAST:event_jMenuHowToActionPerformed
 
     //Delete scratch.wav and scratch.mp3 if they exist. Not 100% reliable
     //Should probably do this on load too, just to be nice
@@ -279,10 +276,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         deleteScratchFiles();
     }//GEN-LAST:event_formWindowClosing
 
-    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem4ActionPerformed
-    {//GEN-HEADEREND:event_jMenuItem4ActionPerformed
+    private void JMenuInstallDirActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_JMenuInstallDirActionPerformed
+    {//GEN-HEADEREND:event_JMenuInstallDirActionPerformed
         //Change steam install loc   
-        UserPrefs prefs = UserPrefs.LoadUserPrefs();
+        UserPrefs prefs = UserPrefs.getInstance();
         JDialog locationCheckDialog = new JDialog();
         locationCheckDialog.setModal(true);
         locationCheckDialog.setAlwaysOnTop(true);
@@ -292,10 +289,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         locationCheckDialog.add(panel);
         locationCheckDialog.setSize(panel.getPreferredSize());
         locationCheckDialog.setVisible(true);
-    }//GEN-LAST:event_jMenuItem4ActionPerformed
+    }//GEN-LAST:event_JMenuInstallDirActionPerformed
 
-    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_jMenuItem3ActionPerformed
-    {//GEN-HEADEREND:event_jMenuItem3ActionPerformed
+    private void JMenuAboutActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_JMenuAboutActionPerformed
+    {//GEN-HEADEREND:event_JMenuAboutActionPerformed
         JDialog aboutDialog = new JDialog();
         aboutDialog.setModal(true);
         aboutDialog.setAlwaysOnTop(true);
@@ -305,7 +302,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         aboutDialog.add(panel);
         aboutDialog.setSize(panel.getPreferredSize());
         aboutDialog.setVisible(true);
-    }//GEN-LAST:event_jMenuItem3ActionPerformed
+    }//GEN-LAST:event_JMenuAboutActionPerformed
 
     private void revertButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertButtonActionPerformed
     {//GEN-HEADEREND:event_revertButtonActionPerformed
@@ -424,15 +421,15 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         return autoExecFile.getAbsolutePath();
     }   
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem JMenuAbout;
+    private javax.swing.JMenuItem JMenuClose;
+    private javax.swing.JMenuItem JMenuInstallDir;
     private javax.swing.JButton advancedButton;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenu jMenuFileButton;
+    private javax.swing.JMenu jMenuHelpButton;
+    private javax.swing.JMenuItem jMenuHowTo;
+    private javax.swing.JMenu jMenuSettingsButton;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JButton playSoundButton;

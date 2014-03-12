@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package dotaSoundEditor;
+package Helpers;
 
 import java.awt.Image;
 import java.awt.Toolkit;
