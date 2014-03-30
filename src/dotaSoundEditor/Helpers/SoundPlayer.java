@@ -1,10 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package Helpers;
+package dotaSoundEditor.Helpers;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import javazoom.jl.player.Player;
@@ -82,7 +77,8 @@ public class SoundPlayer
             try
             {
                 FileInputStream fis = new FileInputStream(soundFile);
-                mp3Player = new Player(fis);                
+                mp3Player = new Player(fis);   
+                fis.close();
             }
             catch (Exception ex)
             {
@@ -130,6 +126,7 @@ public class SoundPlayer
                 waveIsComplete = false;
                 clip.open(ais);
                 clip.start();
+                ais.close();
             }
             catch (Exception ex)
             {

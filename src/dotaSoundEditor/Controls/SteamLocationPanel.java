@@ -1,6 +1,6 @@
 package dotaSoundEditor.Controls;
 
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.UserPrefs;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;

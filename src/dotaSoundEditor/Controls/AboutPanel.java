@@ -1,18 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dotaSoundEditor.Controls;
 
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.Utility;
 import javax.swing.JDialog;
 
-/**
- *
- * @author
- * Image
- * 17
- */
 public class AboutPanel extends javax.swing.JPanel
 {
 

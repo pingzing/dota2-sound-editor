@@ -2,10 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package Helpers;
+package dotaSoundEditor.Helpers;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -62,8 +61,6 @@ public class ScriptParser
         InputStream fis;
         BufferedReader br;
 
-        FileWriter fos;
-        BufferedWriter bw;
         String line = null;
 
         try
@@ -74,7 +71,9 @@ public class ScriptParser
             while ((line = br.readLine()) != null)
             {
                 parseScript(line);
-            }
+            }            
+            br.close();
+            fis.close();
         }
         catch (IOException ex)
         {

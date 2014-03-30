@@ -1,19 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package Helpers;
+package dotaSoundEditor.Helpers;
 
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Window;
 
-/**
- *
- * @author
- * Image
- * 17
- */
 public class Utility
 {
 

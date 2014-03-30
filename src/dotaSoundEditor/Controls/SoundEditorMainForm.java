@@ -1,8 +1,8 @@
 package dotaSoundEditor.Controls;
 
-import Helpers.PortraitFinder;
+import dotaSoundEditor.Helpers.PortraitFinder;
 import dotaSoundEditor.UserPrefs;
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.Utility;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.io.*;
@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 public class SoundEditorMainForm extends javax.swing.JFrame
 {
+
     private PortraitFinder portraitFinder;
     private String vpkDir;
     private String installDir;
@@ -48,7 +49,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         Utility.initPortraitFinder(vpkDir);
         portraitFinder = Utility.portraitFinder;
         portraitFinder.buildHeroPortraits();
-        portraitFinder.buildItemPortraits();        
+        portraitFinder.buildItemPortraits();
 
         //Create tabs
         tabPane.add(new HeroPanel(vpkDir, installDir));
@@ -56,7 +57,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
         this.setVisible(true);
-    }  
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
@@ -331,7 +333,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void tabPaneStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_tabPaneStateChanged
     {//GEN-HEADEREND:event_tabPaneStateChanged
-	currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
+        currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
     }//GEN-LAST:event_tabPaneStateChanged
 
     private void deleteScratchFiles()
@@ -396,13 +398,16 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             fos = new FileWriter(autoExecPath, true);
             bw = new BufferedWriter(fos);
             bw.write(System.lineSeparator() + "snd_updateaudiocache");
-            bw.close();
+            bw.close();    
+            fos.close();
+            br.close();
+            fis.close();
         }
         catch (Exception ex)
         {
             System.err.println(ex);
             JOptionPane.showMessageDialog(this, "Unable to update autoexec.cfg. You may have to do it manually.", "Autoexec Error", JOptionPane.ERROR_MESSAGE);
-        }
+        }        
     }
 
     private String createAutoExecCfg()
@@ -419,7 +424,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println(ex);
         }
         return autoExecFile.getAbsolutePath();
-    }   
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem JMenuAbout;
     private javax.swing.JMenuItem JMenuClose;

@@ -1,8 +1,8 @@
 package dotaSoundEditor.Controls;
 
-import Helpers.PortraitFinder;
-import Helpers.ScriptParser;
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.PortraitFinder;
+import dotaSoundEditor.Helpers.ScriptParser;
+import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -14,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.*;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -22,9 +21,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -435,8 +431,19 @@ public class HeroPanel extends EditorPanel
         String scriptFilePath = getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
         File scriptFileToDelete = new File(scriptFilePath);
         if (scriptFileToDelete.isFile())
-        {
-            scriptFileToDelete.delete();
+        {                  
+            try
+            {
+                java.nio.file.Files.delete(Paths.get(scriptFilePath));            
+            }
+            catch(NoSuchFileException|DirectoryNotEmptyException|SecurityException ex)
+            {                
+                ex.printStackTrace();
+            }
+            catch(IOException ex)
+            {
+                System.err.println("IOException in delete.");                
+            }
         }
         else
         {

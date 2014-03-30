@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package Helpers;
+package dotaSoundEditor.Helpers;
 
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -22,8 +18,7 @@ import org.apache.commons.io.FileUtils;
 public class PortraitFinder
 {
 
-    private String fileName;
-    private BufferedImage portrait;
+    private String fileName;   
     private TreeMap<String, BufferedImage> portraitMap = new TreeMap<>();
 
     public PortraitFinder(String _fileName)

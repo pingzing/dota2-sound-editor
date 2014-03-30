@@ -1,6 +1,6 @@
 package dotaSoundEditor;
 
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.Utility;
 
 public class NamedItem
 {

@@ -4,9 +4,9 @@
  */
 package dotaSoundEditor.Controls;
 
-import Helpers.PortraitFinder;
-import Helpers.ScriptParser;
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.PortraitFinder;
+import dotaSoundEditor.Helpers.ScriptParser;
+import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -22,11 +22,8 @@ import java.util.Scanner;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -42,7 +39,6 @@ import org.apache.commons.io.FileUtils;
  */
 public class ItemPanel extends EditorPanel
 {
-
     PortraitFinder portraitFinder;
 
     public ItemPanel()
@@ -59,7 +55,7 @@ public class ItemPanel extends EditorPanel
         currentTree = itemTree;
         portraitFinder = Utility.portraitFinder;       
         this.populateSoundListAsTree();
-        initTreeSelection();
+        initTreeSelectionListener();
     }
 
     @SuppressWarnings("unchecked")
@@ -91,12 +87,12 @@ public class ItemPanel extends EditorPanel
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(itemLabel)
                         .addGap(0, 439, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(itemImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(itemImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -120,11 +116,7 @@ public class ItemPanel extends EditorPanel
     private VPKEntry getAndWriteItemScriptFile()
     {
         File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString());
-        boolean fileExistsLocally = false;
-        if (existsChecker.exists())
-        {
-            fileExistsLocally = true;
-        }
+        boolean fileExistsLocally = existsChecker.exists() ? true : false;
 
         File vpkFile = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
@@ -140,6 +132,7 @@ public class ItemPanel extends EditorPanel
 
         File destDir = Paths.get(installDir + "\\dota\\").toFile();
 
+        //TODO: change to vpk.getentry()
         for (VPKEntry entry : vpk.getEntries())
         {
             if (entry.getName().contains("game_sounds_items"))
@@ -228,65 +221,7 @@ public class ItemPanel extends EditorPanel
             System.err.println("Icon not found for item: " + selectedItem.getFriendlyName());
             itemImageLabel.setIcon(new ImageIcon(""));
         }
-    }
-
-    //Trying to move this up into the parent class 
-//    @Override
-//    File promptUserForNewFile(String wavePath)
-//    {
-//        JFileChooser chooser = new JFileChooser();
-//        FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
-//        chooser.setFileFilter(filter);
-//
-//        int chooserRetVal = chooser.showOpenDialog(chooser);
-//        if (chooserRetVal == JFileChooser.APPROVE_OPTION)
-//        {
-//            DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
-//            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-//            Path destPath = Paths.get(installDir + "\\dota\\sound\\custom\\items\\" + chosenFile.getFileName());
-//
-//
-//            try
-//            {
-//                boolean success = new File(destPath.toString()).mkdirs();
-//                Files.copy(chosenFile, destPath, StandardCopyOption.REPLACE_EXISTING);
-//
-//                String waveString = selectedFile.getUserObject().toString();
-//                int startIndex = -1;
-//                int endIndex = -1;
-//                if (waveString.contains("\"wave\""))
-//                {
-//                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 2);
-//                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 3);
-//                }
-//                else    //Some wavestrings don't have the "wave" at the beginning for some reason
-//                {
-//                    startIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 0);
-//                    endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
-//                }
-//
-//                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
-//                waveString = waveString.replace(waveSubstring, "\"custom/items/" + chosenFile.getFileName() + "\"");
-//                selectedFile.setUserObject(waveString);
-//
-//                //Write out modified tree to scriptfile.
-//                ScriptParser parser = new ScriptParser(this.currentTreeModel);
-//                String scriptString = this.getItemScriptPath();
-//                Path scriptPath = Paths.get(scriptString);
-//                parser.writeModelToFile(scriptPath.toString());
-//
-//                //Update UI
-//                populateSoundListAsTree(null);
-//                JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
-//
-//            }
-//            catch (IOException ex)
-//            {
-//                System.err.println(ex);
-//            }
-//        }
-//        return null;
-//    }
+    } 
 
     @Override
     void revertButtonActionPerformed(ActionEvent evt)
@@ -410,7 +345,6 @@ public class ItemPanel extends EditorPanel
         {
             TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
             promptUserForNewFile(selectedFile.toString());
-
         }
     }
 
@@ -456,7 +390,7 @@ public class ItemPanel extends EditorPanel
         }
     }
 
-    private void initTreeSelection()
+    private void initTreeSelectionListener()
     {
         currentTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         currentTree.addTreeSelectionListener(new TreeSelectionListener()

@@ -4,9 +4,9 @@
  */
 package dotaSoundEditor.Controls;
 
-import Helpers.SoundPlayer;
-import Helpers.ScriptParser;
-import Helpers.Utility;
+import dotaSoundEditor.Helpers.SoundPlayer;
+import dotaSoundEditor.Helpers.ScriptParser;
+import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
