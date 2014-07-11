@@ -28,7 +28,8 @@ import javax.swing.tree.TreeNode;
 import org.apache.commons.io.FileUtils;
 
 public class HeroPanel extends EditorPanel
-{        
+{
+
     PortraitFinder portraitFinder;
 
     //Just used for designer compatibility. Should never be called from code.
@@ -44,15 +45,15 @@ public class HeroPanel extends EditorPanel
         installDir = _installDir;
         this.setName("Hero Spells");
         initComponents();
-        
+
         portraitFinder = Utility.portraitFinder;
         currentDropdown = heroSpellsDropdown;
         currentTree = heroSpellTree;
         this.populateDropdownBox();
         this.attachDoubleClickListenerToTree();
-        this.setVisible(true);                
+        this.setVisible(true);
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
@@ -127,7 +128,7 @@ public class HeroPanel extends EditorPanel
         //TODO: Find a way to inform the Advanced button that it needs to reset.
         if (evt.getStateChange() == ItemEvent.SELECTED)
         {
-            System.out.println(currentDropdown.getSelectedItem().toString());            
+            System.out.println(currentDropdown.getSelectedItem().toString());
             populateSoundListAsTree();
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
@@ -149,6 +150,7 @@ public class HeroPanel extends EditorPanel
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 
+    //TODO: Use the much better-written MusicPanel populateDropdownBox to refactor this mess
     @Override
     protected void populateDropdownBox()
     {
@@ -170,11 +172,10 @@ public class HeroPanel extends EditorPanel
             return;
         }
 
-
         for (VPKEntry entry : vpk.getEntries())
         {
             if (entry.getPath().contains("scripts/game_sounds_heroes/"))
-            {                
+            {
                 heroList.add(entry.getName());
             }
         }
@@ -194,19 +195,19 @@ public class HeroPanel extends EditorPanel
             NamedHero tempHero = (NamedHero) h;
             currentDropdown.addItem(tempHero);
         }
-       
+
         populateSoundListAsTree();
     }
 
     @Override
-    protected void populateSoundListAsTree()            
+    protected void populateSoundListAsTree()
     {
         NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
-        
+
         currentTree.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
-        
+
         //Defer writing script file to disk until we're sure it doesn't exist
         if (!scriptFile.isFile())
         {
@@ -214,7 +215,7 @@ public class HeroPanel extends EditorPanel
         }
         ScriptParser parser = new ScriptParser(scriptPath.toFile());
         TreeModel scriptTree = parser.getTreeModel();
-        this.currentTreeModel = scriptTree;        
+        this.currentTreeModel = scriptTree;
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
 
@@ -238,7 +239,7 @@ public class HeroPanel extends EditorPanel
     }
 
     private VPKEntry getAndWriteHeroScriptFile(String heroName)
-    {        
+    {
         heroName = heroName.toLowerCase();
 
         //Don't bother looking if we already have a stored copy locally.
@@ -296,14 +297,14 @@ public class HeroPanel extends EditorPanel
         }
         return null;
     }
-    
+
     @Override
     protected void fillImageFrame(Object _selectedItem) throws IOException
     {
         NamedHero selectedItem;
-        if(_selectedItem instanceof NamedHero)
+        if (_selectedItem instanceof NamedHero)
         {
-            selectedItem = (NamedHero)_selectedItem;
+            selectedItem = (NamedHero) _selectedItem;
         }
         else
         {
@@ -390,7 +391,7 @@ public class HeroPanel extends EditorPanel
                     scriptFileString = new String(bytes, Charset.forName("UTF-8"));
                     break;
                 }
-            }            
+            }
             ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
             int waveStringIndex = wavePathList.indexOf(selectedWaveString);
 
@@ -431,18 +432,18 @@ public class HeroPanel extends EditorPanel
         String scriptFilePath = getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
         File scriptFileToDelete = new File(scriptFilePath);
         if (scriptFileToDelete.isFile())
-        {                  
+        {
             try
             {
-                java.nio.file.Files.delete(Paths.get(scriptFilePath));            
+                java.nio.file.Files.delete(Paths.get(scriptFilePath));
             }
-            catch(NoSuchFileException|DirectoryNotEmptyException|SecurityException ex)
-            {                
+            catch (NoSuchFileException | DirectoryNotEmptyException | SecurityException ex)
+            {
                 ex.printStackTrace();
             }
-            catch(IOException ex)
+            catch (IOException ex)
             {
-                System.err.println("IOException in delete.");                
+                System.err.println("IOException in delete.");
             }
         }
         else
@@ -470,7 +471,7 @@ public class HeroPanel extends EditorPanel
         if (currentTree.getSelectionRows() != null
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());           
+            TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
             promptUserForNewFile(selectedFile.toString());
         }
     }

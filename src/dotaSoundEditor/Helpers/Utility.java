@@ -7,8 +7,8 @@ import java.awt.Window;
 public class Utility
 {
 
+    //TODO: Investigate placement of this, why is it in here?
     public static PortraitFinder portraitFinder;
-
     public static void initPortraitFinder(String vpkDir)
     {
         portraitFinder = new PortraitFinder(vpkDir);
@@ -47,5 +47,24 @@ public class Utility
                 "(?<=[^A-Z])(?=[A-Z])",
                 "(?<=[A-Za-z])(?=[^A-Za-z])"),
                 " ");
+    }
+    
+    public static String capitalizeString(String string)
+    {
+        char[] chars = string.toLowerCase().toCharArray();
+        boolean found = false;
+        for (int i = 0; i < chars.length; i++)
+        {
+            if (!found && Character.isLetter(chars[i]))
+            {
+                chars[i] = Character.toUpperCase(chars[i]);
+                found = true;
+            }
+            else if (Character.isWhitespace(chars[i]) || chars[i] == '.' || chars[i] == '\'')
+            { // You can add other chars here
+                found = false;
+            }
+        }
+        return String.valueOf(chars);
     }
 }

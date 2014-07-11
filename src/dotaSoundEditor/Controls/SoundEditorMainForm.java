@@ -41,9 +41,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             System.err.println("File not found");
         }
-
-        Utility.setFrameIcon(this);
+        
         initComponents();
+        Utility.setFrameIcon(this);
         vpkDir = _fileName;
         installDir = _installDir;
         Utility.initPortraitFinder(vpkDir);
@@ -54,6 +54,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         //Create tabs
         tabPane.add(new HeroPanel(vpkDir, installDir));
         tabPane.add(new ItemPanel(vpkDir, installDir));
+        tabPane.add(new MusicPanel(vpkDir, installDir));
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
         this.setVisible(true);

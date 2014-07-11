@@ -77,8 +77,7 @@ public class SoundPlayer
             try
             {
                 FileInputStream fis = new FileInputStream(soundFile);
-                mp3Player = new Player(fis);   
-                fis.close();
+                mp3Player = new Player(fis);                   
             }
             catch (Exception ex)
             {
@@ -125,8 +124,7 @@ public class SoundPlayer
                 clip.addLineListener(listener);
                 waveIsComplete = false;
                 clip.open(ais);
-                clip.start();
-                ais.close();
+                clip.start();                
             }
             catch (Exception ex)
             {

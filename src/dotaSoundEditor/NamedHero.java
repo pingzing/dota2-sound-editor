@@ -4,6 +4,7 @@
  */
 package dotaSoundEditor;
 
+import dotaSoundEditor.Helpers.Utility;
 import java.util.Objects;
 
 /**
@@ -41,7 +42,7 @@ public class NamedHero implements Comparable<NamedHero>
     private String cleanUpName(String nameToClean)
     {
         nameToClean = nameToClean.replaceAll("_", " ");
-        nameToClean = capitalizeString(nameToClean);
+        nameToClean = Utility.capitalizeString(nameToClean);
         nameToClean = handleSpecialCases(nameToClean);
         return nameToClean;
     }
@@ -100,26 +101,7 @@ public class NamedHero implements Comparable<NamedHero>
                 break;                
         }
         return nameToClean;
-    }
-
-    private static String capitalizeString(String string)
-    {
-        char[] chars = string.toLowerCase().toCharArray();
-        boolean found = false;
-        for (int i = 0; i < chars.length; i++)
-        {
-            if (!found && Character.isLetter(chars[i]))
-            {
-                chars[i] = Character.toUpperCase(chars[i]);
-                found = true;
-            }
-            else if (Character.isWhitespace(chars[i]) || chars[i] == '.' || chars[i] == '\'')
-            { // You can add other chars here
-                found = false;
-            }
-        }
-        return String.valueOf(chars);
-    }
+    }    
 
     //Overrides what the dropdown box displays. Screw renderers! =D
     @Override

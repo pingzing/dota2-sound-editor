@@ -1,15 +1,18 @@
 
 //Features to add:
+// - Make sounds from different panels cancel each other out before a new one starts playing
+// - Make "Play" button shift to "Stop" button when sound is playing
+// - Handle Advanced mode changes actually applying to tree
 // - Hero VO
 // - Music
 // - Announcers??? maybe not...
 // - Get sound length, display along bottom of window
-// - Find way play sound files from memory instead of writing to local filesys, then playing
-// - Make "Play" button shift to "Stop" button when sound is playing
+// - Find way to play sound files from memory instead of writing to local filesys, then playing. So slow!
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 // - Investigate scanning common install paths for dota before asking the user
 // - Rewrite image-extraction and loading code to avoid disk IO every time we start the program. Check flash3's modified-date in vpk. if diff, update!
 // - Look into abstracting more methods into EditorPanel by adding a "scriptFilePath" instance member that each child implements
+//   - This one may not be possible with the MusicPanel. It's scripts are scattered all over the place. A list of scriptFilePaths, maybe?
 // - Expand "Advanced" functionality to allow for adding of nodes. (Also add a right-click menu with Add, Edit, Delete)
 // - Javadoc. Need to document things!
 // - Localization?
@@ -19,6 +22,8 @@ import dotaSoundEditor.Controls.SteamLocationPanel;
 import dotaSoundEditor.Controls.SoundEditorMainForm;
 import java.lang.Thread.UncaughtExceptionHandler;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class Main
@@ -49,7 +54,28 @@ public class Main
 
         if (!(vpkDir.equals("")) && !(installDir.equals("")))
         {
-            SoundEditorMainForm mainForm = new SoundEditorMainForm(vpkDir, installDir);
+            try
+            {
+                SoundEditorMainForm mainForm = new SoundEditorMainForm(vpkDir, installDir);
+            }
+            //This should cut down on at least 90% of support emails...
+            //TODO: Look into whether this belongs in Handler.java
+            catch(java.lang.NoClassDefFoundError nce)
+            {
+                JFrame errorFrame = new JFrame();                      
+                if(nce.getMessage().contains("info/ata4/vpk/VPKArchive"))
+                {
+                    JOptionPane.showMessageDialog(errorFrame, "<html><body>Couldn't find a required file. Did you extract the \"lib\" folder as well?"
+                            + "<br>Missing file: " + nce.getMessage()+"</body></html>");                      
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(errorFrame, "<html><body>A required file could not be found."
+                            + "<br>Missing file: "+ nce.getMessage() +"</body><html>");
+                }              
+                errorFrame.dispose();
+                System.exit(0);
+            }            
         }        
     }
 }

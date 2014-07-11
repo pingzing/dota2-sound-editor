@@ -145,7 +145,7 @@ public class ScriptParser
     private void parseScript(String line)
     {
         //System.out.println("Looking at: " + line);
-        if (line.isEmpty() || line.equals("") || line.startsWith("//") || line.contentEquals("\t"))
+        if (line.isEmpty() || line.equals("") || line.startsWith("//") || line.contentEquals("\t") || line.trim().length() <= 0) 
         {
             return;
         }
@@ -193,7 +193,7 @@ public class ScriptParser
         scriptString.deleteCharAt(0);
         scriptString.deleteCharAt(0);
 
-        //Remove final brack
+        //Remove final bracket
         scriptString.deleteCharAt(scriptString.lastIndexOf("}"));
         return scriptString;
     }

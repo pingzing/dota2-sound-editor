@@ -210,8 +210,7 @@ public abstract class EditorPanel extends JPanel
         {
             return null;
         }
-                    
-                
+                                    
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
         File entryFile = null;
@@ -236,10 +235,10 @@ public abstract class EditorPanel extends JPanel
         waveSubstring = waveSubstring.replace("\"", "");
         waveSubstring = waveSubstring.replace("\\", "/");
         waveSubstring = waveSubstring.replace("#", "");
+        waveSubstring = waveSubstring.replace("*", "");
 
         if (!waveString.contains("custom"))
-        {
-            //Check the local filesys first, just in case. Way faster than opening up the vpk, extracting, etc etc
+        {            
             File localFile = new File(Paths.get(installDir + "\\sound\\" + waveSubstring).toString());
             if(localFile.isFile())
             {

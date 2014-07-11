@@ -37,7 +37,7 @@ import org.apache.commons.io.FileUtils;
  * Image
  * 17
  */
-public class ItemPanel extends EditorPanel
+public final class ItemPanel extends EditorPanel
 {
     PortraitFinder portraitFinder;
 
@@ -167,11 +167,11 @@ public class ItemPanel extends EditorPanel
     void populateSoundListAsTree()
     {
         currentTree.setEditable(false);
-        File scriptFile = new File(getItemScriptPath());
+        File scriptFile = new File(getPanelScriptString());
         if (!scriptFile.isFile())
         {
             this.getAndWriteItemScriptFile();
-            scriptFile = new File(getItemScriptPath());
+            scriptFile = new File(getPanelScriptString());
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
@@ -249,7 +249,7 @@ public class ItemPanel extends EditorPanel
             {
                 ex.printStackTrace();
             }
-            String scriptDir = this.getItemScriptPath();
+            String scriptDir = this.getPanelScriptString();
             scriptDir = scriptDir.replace(Paths.get(installDir + "\\dota\\").toString(), "");
             scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
             scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
@@ -302,7 +302,7 @@ public class ItemPanel extends EditorPanel
 
             selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentTreeModel);
-            parser.writeModelToFile(this.getItemScriptPath());
+            parser.writeModelToFile(this.getPanelScriptString());
 
             //Modify the UI treeNode in addition to the backing TreeNode
             ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
@@ -323,7 +323,7 @@ public class ItemPanel extends EditorPanel
     @Override
     void revertAllButtonActionPerformed(ActionEvent evt)
     {
-        String scriptFilePath = getItemScriptPath();
+        String scriptFilePath = getPanelScriptString();
         File scriptFileToDelete = new File(scriptFilePath);
 
         if (scriptFileToDelete.isFile())
@@ -348,12 +348,13 @@ public class ItemPanel extends EditorPanel
         }
     }
 
+    //TODO: Move this method into the parent.
     @Override
     void advancedButtonActionPerformed(ActionEvent evt, JButton advancedButton)
     {
         if (advancedButton.getText().equals("Advanced >>"))
         {
-            String scriptPath = this.getItemScriptPath();
+            String scriptPath = this.getPanelScriptString();
             ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
             TreeModel model = parser.getTreeModel();
             currentTree.setModel(model);
@@ -373,22 +374,7 @@ public class ItemPanel extends EditorPanel
             advancedButton.setMnemonic('a');
             currentTree.setEditable(false);
         }
-    }   
-
-    private String getItemScriptPath()
-    {
-        String scriptPathString = Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString();
-        File scriptFilePath = new File(scriptPathString);
-
-        if (scriptFilePath.isFile())
-        {
-            return scriptFilePath.getAbsolutePath();
-        }
-        else
-        {
-            return "";
-        }
-    }
+    }      
 
     private void initTreeSelectionListener()
     {
@@ -430,15 +416,22 @@ public class ItemPanel extends EditorPanel
     
     //This panel doesn't use a dropdown box. No need to implement.
     @Override
-    void populateDropdownBox()
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    void populateDropdownBox() {    }
 
     @Override
     String getPanelScriptString()
     {
-        return this.getItemScriptPath();
+        String scriptPathString = Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString();
+        File scriptFilePath = new File(scriptPathString);
+
+        if (scriptFilePath.isFile())
+        {
+            return scriptFilePath.getAbsolutePath();
+        }
+        else
+        {
+            return "";
+        }
     }
 
     @Override

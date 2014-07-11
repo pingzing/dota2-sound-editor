@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 
 class Handler implements Thread.UncaughtExceptionHandler
@@ -20,8 +21,13 @@ class Handler implements Thread.UncaughtExceptionHandler
         try
         {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("error.txt"), "utf-8"));
-            writer.write(e.getMessage());
-            e.printStackTrace(new PrintStream("stackTrace.txt"));
+            writer.write("Error: " + e.getMessage());
+            writer.write("\n----------------------");
+            writer.write("\n");            
+            writer.close();    
+            PrintWriter pwriter = new PrintWriter("error.txt");
+            e.printStackTrace(pwriter);
+            pwriter.close();
         }
         catch (IOException ex)
         {
