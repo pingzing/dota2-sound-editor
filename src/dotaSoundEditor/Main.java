@@ -1,12 +1,12 @@
 
 //Features to add:
-// - Make sounds from different panels cancel each other out before a new one starts playing
 // - Make "Play" button shift to "Stop" button when sound is playing
 // - Handle Advanced mode changes actually applying to tree
 // - Hero VO
 // - Music
 // - Announcers??? maybe not...
-// - Get sound length, display along bottom of window
+// - Get sound length, display along bottom of 
+// - Improve cache invalidation to preserve users' changes
 // - Find way to play sound files from memory instead of writing to local filesys, then playing. So slow!
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 // - Investigate scanning common install paths for dota before asking the user
@@ -28,10 +28,10 @@ import javax.swing.UIManager;
 
 public class Main
 {   
+    private static UserPrefs prefs = UserPrefs.getInstance();
     public static void main(String args[]) throws Exception
     {                
-        javax.swing.UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());                        
-        UserPrefs prefs = UserPrefs.getInstance();
+        javax.swing.UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());                                
         Handler handler = new Handler();
         Thread.setDefaultUncaughtExceptionHandler((UncaughtExceptionHandler) handler);
         

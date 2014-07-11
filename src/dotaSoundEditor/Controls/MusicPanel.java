@@ -93,13 +93,13 @@ public final class MusicPanel extends EditorPanel
     void populateSoundListAsTree()
     {
         currentTree.setEditable(false);
-        File scriptFile = new File(getPanelScriptString());
+        File scriptFile = new File(getCurrentScriptString());
         if (!scriptFile.isFile())
         {
             String currentMusicPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
             VPKEntry scriptEntry = getMusicScriptFile(currentMusicPath);
             writeMusicScriptFile(scriptEntry);
-            scriptFile = new File(getPanelScriptString());
+            scriptFile = new File(getCurrentScriptString());
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
@@ -145,14 +145,18 @@ public final class MusicPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
+            boolean regenSound = this.playSelectedTreeSound(currentTree.getSelectionPath());
+            if(regenSound)
+            {
+                this.revertAllButtonActionPerformed(null);
+            }
         }
     }
 
     @Override
     void revertAllButtonActionPerformed(ActionEvent evt)
     {
-        String scriptFilePath = getPanelScriptString();
+        String scriptFilePath = getCurrentScriptString();
         File scriptFileToDelete = new File(scriptFilePath);
 
         if (scriptFileToDelete.isFile())
@@ -183,7 +187,7 @@ public final class MusicPanel extends EditorPanel
     {
         if (advancedButton.getText().equals("Advanced >>"))
         {
-            String scriptPath = getPanelScriptString();
+            String scriptPath = getCurrentScriptString();
             ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
             TreeModel model = parser.getTreeModel();
             currentTree.setModel(model);
@@ -254,7 +258,7 @@ public final class MusicPanel extends EditorPanel
     //where all the script files are in different folders, and can't be located with a single
     //script string.
     @Override
-    String getPanelScriptString()
+    String getCurrentScriptString()
     {
         String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
         String scriptPathString = Paths.get(installDir, "dota", internalPath).toString();

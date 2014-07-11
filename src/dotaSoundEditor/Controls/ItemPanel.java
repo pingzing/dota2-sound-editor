@@ -167,11 +167,11 @@ public final class ItemPanel extends EditorPanel
     void populateSoundListAsTree()
     {
         currentTree.setEditable(false);
-        File scriptFile = new File(getPanelScriptString());
+        File scriptFile = new File(getCurrentScriptString());
         if (!scriptFile.isFile())
         {
             this.getAndWriteItemScriptFile();
-            scriptFile = new File(getPanelScriptString());
+            scriptFile = new File(getCurrentScriptString());
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
@@ -249,7 +249,7 @@ public final class ItemPanel extends EditorPanel
             {
                 ex.printStackTrace();
             }
-            String scriptDir = this.getPanelScriptString();
+            String scriptDir = this.getCurrentScriptString();
             scriptDir = scriptDir.replace(Paths.get(installDir + "\\dota\\").toString(), "");
             scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
             scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
@@ -302,7 +302,7 @@ public final class ItemPanel extends EditorPanel
 
             selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentTreeModel);
-            parser.writeModelToFile(this.getPanelScriptString());
+            parser.writeModelToFile(this.getCurrentScriptString());
 
             //Modify the UI treeNode in addition to the backing TreeNode
             ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
@@ -316,14 +316,18 @@ public final class ItemPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
+            boolean regenSound = this.playSelectedTreeSound(currentTree.getSelectionPath());
+            if(regenSound)
+            {
+                this.revertAllButtonActionPerformed(null);
+            }
         }
     }
 
     @Override
     void revertAllButtonActionPerformed(ActionEvent evt)
     {
-        String scriptFilePath = getPanelScriptString();
+        String scriptFilePath = getCurrentScriptString();
         File scriptFileToDelete = new File(scriptFilePath);
 
         if (scriptFileToDelete.isFile())
@@ -354,7 +358,7 @@ public final class ItemPanel extends EditorPanel
     {
         if (advancedButton.getText().equals("Advanced >>"))
         {
-            String scriptPath = this.getPanelScriptString();
+            String scriptPath = this.getCurrentScriptString();
             ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
             TreeModel model = parser.getTreeModel();
             currentTree.setModel(model);
@@ -419,7 +423,7 @@ public final class ItemPanel extends EditorPanel
     void populateDropdownBox() {    }
 
     @Override
-    String getPanelScriptString()
+    String getCurrentScriptString()
     {
         String scriptPathString = Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString();
         File scriptFilePath = new File(scriptPathString);

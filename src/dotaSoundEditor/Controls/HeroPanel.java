@@ -461,7 +461,11 @@ public class HeroPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
+            boolean regenSound = this.playSelectedTreeSound(currentTree.getSelectionPath());
+            if(regenSound)
+            {
+                this.revertAllButtonActionPerformed(null);
+            }
         }
     }
 
@@ -504,7 +508,7 @@ public class HeroPanel extends EditorPanel
     }
 
     @Override
-    String getPanelScriptString()
+    String getCurrentScriptString()
     {
         return this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
     }

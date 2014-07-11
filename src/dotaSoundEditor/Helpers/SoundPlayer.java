@@ -1,5 +1,7 @@
 package dotaSoundEditor.Helpers;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileInputStream;
 import javazoom.jl.player.Player;
@@ -12,28 +14,43 @@ import javax.sound.sampled.LineListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author
- * Image
- * 17
- */
-public class SoundPlayer
+public final class SoundPlayer
 {
-
+    //Singleton stuff
+    private static SoundPlayer soundPlayerInstance = null;
     //Objects that make noise
     private Player mp3Player;
     private Clip clip;
-    
     //Objects and members that hold data
     private File soundFile;
     private boolean isMp3 = false;
-    private boolean waveIsComplete = true;
+    private boolean soundIsPlaying = false;
     private JFrame parentFrame = null;
-    
-    public SoundPlayer(){       }
+    //Event foundation
+    private PropertyChangeSupport support = new PropertyChangeSupport(this);
 
-    public SoundPlayer(String filePath)
+    private SoundPlayer(){    }
+
+    public static synchronized SoundPlayer getInstance()
+    {
+        if (soundPlayerInstance == null);
+        {
+            soundPlayerInstance = new SoundPlayer();
+        }
+        return soundPlayerInstance;
+    }
+    
+    public void addPropertyChangeListener(PropertyChangeListener pcl)
+    {
+        support.addPropertyChangeListener(pcl);
+    }
+    
+    public void removePropertyChangeListener(PropertyChangeListener pcl)
+    {
+        support.removePropertyChangeListener(pcl);
+    }
+
+    public void loadSound(String filePath)
     {
         soundFile = new File(filePath);
         if (filePath.contains(".wav"))
@@ -46,38 +63,36 @@ public class SoundPlayer
         }
     }
 
-    public void stopSound()
+    private void stopSound()
     {
-        if (isMp3)
+        if(mp3Player != null && !mp3Player.isComplete())
         {
             mp3Player.close();
+            soundIsPlaying = false;
+            support.firePropertyChange("soundIsPlaying", true, false);
         }
-        else
+        if(clip != null && soundIsPlaying)
         {
             clip.stop();
+            soundIsPlaying = false;
+            support.firePropertyChange("soundIsPlaying", true, false);
         }
     }
 
-    public boolean getSoundIsComplete()
+    public boolean isSoundPlaying()
     {
-        if (isMp3)
-        {
-            return mp3Player.isComplete();
-        }
-        else
-        {
-            return waveIsComplete;
-        }
+       return soundIsPlaying;
     }
 
     public void playSound()
-    {
+    {        
+        stopSound();
         if (isMp3)
         {
             try
             {
                 FileInputStream fis = new FileInputStream(soundFile);
-                mp3Player = new Player(fis);                   
+                mp3Player = new Player(fis);
             }
             catch (Exception ex)
             {
@@ -93,6 +108,8 @@ public class SoundPlayer
                     try
                     {
                         mp3Player.play();
+                        soundIsPlaying = true;
+                        support.firePropertyChange("soundIsPlaying", false, true);
                     }
                     catch (Exception ex)
                     {
@@ -116,15 +133,17 @@ public class SoundPlayer
                     {
                         if (event.getType() == Type.STOP)
                         {
-                            waveIsComplete = true;
+                            soundIsPlaying = false;
+                            support.firePropertyChange("soundIsPlaying", true, false);
                             clip.close();
                         }
                     }
                 };
                 clip.addLineListener(listener);
-                waveIsComplete = false;
+                soundIsPlaying = true;
+                support.firePropertyChange("soundIsPlaying", false, true);
                 clip.open(ais);
-                clip.start();                
+                clip.start();
             }
             catch (Exception ex)
             {

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dotaSoundEditor;
 
 import java.io.File;
@@ -9,13 +5,7 @@ import java.nio.file.*;
 import java.util.prefs.*;
 import javax.swing.JFileChooser;
 
-/**
- *
- * @author
- * Image
- * 17
- */
-public class UserPrefs
+public final class UserPrefs
 {
     private static UserPrefs userPrefsInstance = null;
     Preferences prefs = Preferences.userNodeForPackage(dotaSoundEditor.UserPrefs.class);

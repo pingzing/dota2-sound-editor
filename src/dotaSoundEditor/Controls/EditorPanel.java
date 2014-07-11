@@ -47,33 +47,32 @@ public abstract class EditorPanel extends JPanel
 {
 
     protected TreeModel currentTreeModel;
-    protected SoundPlayer previousSound = new SoundPlayer();
-    protected SoundPlayer currentSound = new SoundPlayer();
+    protected static SoundPlayer currentSound = SoundPlayer.getInstance();
     protected JTree currentTree;
     protected JComboBox currentDropdown;
     protected String vpkDir;
-    protected String installDir;    
-    
+    protected String installDir;
+
     abstract void populateSoundListAsTree();
 
-    abstract void fillImageFrame(Object selectedItem) throws IOException;   
-    
+    abstract void fillImageFrame(Object selectedItem) throws IOException;
+
     abstract void revertButtonActionPerformed(java.awt.event.ActionEvent evt);
-    
+
     abstract void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt);
-    
+
     abstract void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt);
-    
+
     abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);
-    
+
     abstract void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton);
-    
+
     abstract void populateDropdownBox();
-    
-    abstract String getPanelScriptString();    
+
+    abstract String getCurrentScriptString();
 
     abstract String getCustomSoundPathString();
-    
+
     protected final File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser(new File(UserPrefs.getInstance().getWorkingDirectory()));
@@ -84,7 +83,7 @@ public abstract class EditorPanel extends JPanel
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
             DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
-            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());            
+            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
             Path destPath = Paths.get(installDir + "\\dota\\sound\\" + getCustomSoundPathString() + chosenFile.getFileName());
             UserPrefs.getInstance().setWorkingDirectory(chosenFile.getParent().toString());
 
@@ -113,7 +112,7 @@ public abstract class EditorPanel extends JPanel
 
                 //Write out modified tree to scriptfile.
                 ScriptParser parser = new ScriptParser(this.currentTreeModel);
-                String scriptString = getPanelScriptString();
+                String scriptString = getCurrentScriptString();
                 Path scriptPath = Paths.get(scriptString);
                 parser.writeModelToFile(scriptPath.toString());
 
@@ -128,7 +127,7 @@ public abstract class EditorPanel extends JPanel
             }
         }
         return null;
-    }        
+    }
 
     protected void attachDoubleClickListenerToTree()
     {
@@ -149,27 +148,29 @@ public abstract class EditorPanel extends JPanel
         };
         currentTree.addMouseListener(ml);
     }
-    
-    protected void playSelectedTreeSound(TreePath selPath)
-    {
-        if (!previousSound.getSoundIsComplete())
-        {
-            previousSound.stopSound();
-            previousSound = null;
-        }
 
+    protected boolean playSelectedTreeSound(TreePath selPath)
+    {
+        boolean regenScript = true;
         try
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
-            File soundFile = createSoundFileFromWaveString(waveString);            
-            currentSound = new SoundPlayer(soundFile.getAbsolutePath());
+            File soundFile = createSoundFileFromWaveString(waveString);
+            if(soundFile == null)
+            {
+                return regenScript;
+            }
+            currentSound.loadSound(soundFile.getAbsolutePath());
             currentSound.playSound();
-            previousSound = currentSound;
+            regenScript = false;
+            return regenScript;
         }
         catch (Exception ex)
         {
             JOptionPane.showMessageDialog(null, "The selected node does not represent a valid sound file.", "Error", JOptionPane.ERROR_MESSAGE);
+            regenScript = false;
+            return regenScript;
         }
     }
 
@@ -206,14 +207,14 @@ public abstract class EditorPanel extends JPanel
 
     private File createSoundFileFromWaveString(String waveString)
     {
-        if(!(waveString.contains(".wav") || (waveString.contains(".mp3"))))
+        if (!(waveString.contains(".wav") || (waveString.contains(".mp3"))))
         {
             return null;
         }
-                                    
+
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
-        File entryFile = null;
+        File entryFile = new File("");
 
         String waveSubstring = "";
         int startIndex = -1;
@@ -238,13 +239,13 @@ public abstract class EditorPanel extends JPanel
         waveSubstring = waveSubstring.replace("*", "");
 
         if (!waveString.contains("custom"))
-        {            
+        {
             File localFile = new File(Paths.get(installDir + "\\sound\\" + waveSubstring).toString());
-            if(localFile.isFile())
+            if (localFile.isFile())
             {
                 return localFile;
             }
-            
+
             try
             {
                 vpk.load(file);
@@ -253,31 +254,39 @@ public abstract class EditorPanel extends JPanel
             {
                 System.err.println("Can't open archive: " + ex.getMessage());
             }
-
-            //TODO: replace with vpk.getEntriesInDir()
-            for (VPKEntry entry : vpk.getEntries())
+            waveSubstring = "sound/" + waveSubstring;
+            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());
+            if (entry == null)
             {
-                if (entry.getPath().toLowerCase().contains(waveSubstring.toLowerCase()))
-                {                    
-                    entryFile = entry.getType().contains("wav")
-                            ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
-                            : new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3").toString());
-
-                    try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
-                    {
-                        fc.write(entry.getData());
-                    }
-                    catch (IOException ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                    break;
+                int result = JOptionPane.showConfirmDialog(this, "A default game sound cannot be found. "
+                        + "This usually happens when Valve "
+                        + "\nchanges the internal location of script files. It's likely that many "
+                        + "\nentries for this script file are now out of date. "
+                        + "\n\nWould you like to regenerate the script file? This "
+                        + "will erase any changes you've made.", "Script File Out of Date", JOptionPane.YES_NO_OPTION);
+                if(result == JOptionPane.YES_OPTION)
+                {
+                    return null;
                 }
             }
+
+            entryFile = entry.getType().contains("wav")
+                    ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
+                    : new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3").toString());
+
+            try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
+            {
+                fc.write(entry.getData());
+            }
+            catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
+
             return entryFile;
         }
         else    //If it's NOT stored in the VPK, it's on the local filesys
-        {
+        {                        
             entryFile = new File(Paths.get(installDir + "\\dota\\sound\\" + waveSubstring).toString());
             return entryFile;
         }
@@ -355,5 +364,5 @@ public abstract class EditorPanel extends JPanel
             ex.printStackTrace();
             return null;
         }
-    }               
+    }
 }
