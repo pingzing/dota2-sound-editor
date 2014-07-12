@@ -68,7 +68,9 @@ public class NamedMusic implements Comparable<NamedMusic>
             case "Game Sounds Music Spectator": nameToClean = "Spectator";
                 break;
             case "Game Sounds Music Tutorial":  nameToClean = "Tutorial";
-                break;                                
+                break;        
+            case "Game Sounds Stingers":        nameToClean = "Stingers";
+                break;
         }
         return nameToClean;
     }

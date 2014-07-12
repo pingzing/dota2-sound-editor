@@ -214,6 +214,7 @@ public final class MusicPanel extends EditorPanel
         ArrayList<String> vpkSearchPaths = new ArrayList<>();
         ArrayList<NamedMusic> namedMusicList = new ArrayList<>();
         vpkSearchPaths.add("sound/music/valve_dota_001/music/");
+        vpkSearchPaths.add("sound/music/valve_dota_001/stingers/");
         vpkSearchPaths.add("scripts/");
         File file = new File(vpkDir);
         VPKArchive vpk = new VPKArchive();
@@ -236,7 +237,8 @@ public final class MusicPanel extends EditorPanel
                 if (entry.getPath().contains("game_sounds_music.txt")
                         || entry.getPath().contains("game_sounds_music_int.txt")
                         || entry.getPath().contains("game_sounds_music_spectator.txt")
-                        || entry.getPath().contains("game_sounds_music_tutorial.txt"))
+                        || entry.getPath().contains("game_sounds_music_tutorial.txt")
+                        || entry.getPath().contains("game_sounds_stingers.txt"))
                 {
                     String internalName = entry.getName();
                     //format internal name a little bit, remove prefixes
