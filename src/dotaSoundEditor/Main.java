@@ -1,6 +1,4 @@
-
 //Features to add:
-// - Make "Play" button shift to "Stop" button when sound is playing
 // - Handle Advanced mode changes actually applying to tree
 // - Hero VO
 // - Music
@@ -13,6 +11,7 @@
 // - Rewrite image-extraction and loading code to avoid disk IO every time we start the program. Check flash3's modified-date in vpk. if diff, update!
 // - Look into abstracting more methods into EditorPanel by adding a "scriptFilePath" instance member that each child implements
 //   - This one may not be possible with the MusicPanel. It's scripts are scattered all over the place. A list of scriptFilePaths, maybe?
+// - Generally refactor the panels. There's a lot of improvement that can happen in the vpk-handling sections.
 // - Expand "Advanced" functionality to allow for adding of nodes. (Also add a right-click menu with Add, Edit, Delete)
 // - Javadoc. Need to document things!
 // - Localization?

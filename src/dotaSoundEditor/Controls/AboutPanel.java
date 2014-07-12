@@ -7,7 +7,7 @@ public class AboutPanel extends javax.swing.JPanel
 {
 
     private JDialog hostingDialog = null;
-    private final String VERSION = "v1.1";
+    private final String VERSION = "v1.2 beta 1";
     public AboutPanel(JDialog _hostingDialog)
     {        
         this.hostingDialog = _hostingDialog;
@@ -16,38 +16,6 @@ public class AboutPanel extends javax.swing.JPanel
         versionLabel.setText(VERSION);
     }
 
-    /**
-     * This
-     * method
-     * is
-     * called
-     * from
-     * within
-     * the
-     * constructor
-     * to
-     * initialize
-     * the
-     * form.
-     * WARNING:
-     * Do
-     * NOT
-     * modify
-     * this
-     * code.
-     * The
-     * content
-     * of
-     * this
-     * method
-     * is
-     * always
-     * regenerated
-     * by
-     * the
-     * Form
-     * Editor.
-     */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()

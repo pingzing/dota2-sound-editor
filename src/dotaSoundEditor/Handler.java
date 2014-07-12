@@ -7,13 +7,19 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 class Handler implements Thread.UncaughtExceptionHandler
 {
-
     @Override
     public void uncaughtException(Thread t, Throwable e)
     {
+        JFrame frame = new JFrame();
+        JOptionPane.showMessageDialog(frame, "An unexpected error has occurred. "
+                + "An error log has been generated in the current directory."
+                + "\nDetails: " + e.toString(), "Unexpected Error", 
+                JOptionPane.ERROR_MESSAGE);
         Writer writer = null;
         System.err.println(e.getMessage());
         e.printStackTrace(System.err);
@@ -45,6 +51,7 @@ class Handler implements Thread.UncaughtExceptionHandler
                 //super fucked
                 ex.printStackTrace();
             }
+            frame.dispose();
         }
     }
 }

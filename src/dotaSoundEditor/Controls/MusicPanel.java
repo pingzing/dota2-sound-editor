@@ -137,7 +137,7 @@ public final class MusicPanel extends EditorPanel
     @Override
     void revertButtonActionPerformed(ActionEvent evt)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("This hasn't been implemented yet. Sorry!"); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
