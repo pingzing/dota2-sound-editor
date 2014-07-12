@@ -40,6 +40,7 @@ public final class MusicPanel extends EditorPanel
         currentTree = musicTree;
         this.populateDropdownBox();
         this.populateSoundListAsTree();
+        attachDoubleClickListenerToTree();
     }
 
     private VPKEntry getMusicScriptFile(String fileName)

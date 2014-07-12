@@ -47,32 +47,23 @@ public abstract class EditorPanel extends JPanel
 {
 
     protected TreeModel currentTreeModel;
-    protected static SoundPlayer currentSound = SoundPlayer.getInstance();
+    protected SoundPlayer currentSound = SoundPlayer.getInstance();
     protected JTree currentTree;
     protected JComboBox currentDropdown;
     protected String vpkDir;
     protected String installDir;
 
     abstract void populateSoundListAsTree();
-
     abstract void fillImageFrame(Object selectedItem) throws IOException;
-
     abstract void revertButtonActionPerformed(java.awt.event.ActionEvent evt);
-
     abstract void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt);
-
     abstract void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt);
-
     abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);
-
     abstract void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton);
-
     abstract void populateDropdownBox();
-
     abstract String getCurrentScriptString();
-
-    abstract String getCustomSoundPathString();
-
+    abstract String getCustomSoundPathString();                    
+    
     protected final File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser(new File(UserPrefs.getInstance().getWorkingDirectory()));
@@ -364,5 +355,5 @@ public abstract class EditorPanel extends JPanel
             ex.printStackTrace();
             return null;
         }
-    }
+    }    
 }

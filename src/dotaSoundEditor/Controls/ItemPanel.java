@@ -394,6 +394,7 @@ public final class ItemPanel extends EditorPanel
         attachDoubleClickListenerToTree();
     }
 
+    //Need this for ItemPanel because it's only a single script file, and thus each node requires a different portrait
     private void currentTreeSelectionChanged(TreeSelectionEvent evt)
     {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent();

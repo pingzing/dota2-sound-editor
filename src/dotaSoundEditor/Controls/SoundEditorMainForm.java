@@ -1,10 +1,14 @@
 package dotaSoundEditor.Controls;
 
 import dotaSoundEditor.Helpers.PortraitFinder;
+import dotaSoundEditor.Helpers.SoundPlayer;
 import dotaSoundEditor.UserPrefs;
 import dotaSoundEditor.Helpers.Utility;
 import java.awt.Window;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.nio.file.*;
 import javax.swing.JDialog;
@@ -19,6 +23,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private String vpkDir;
     private String installDir;
     private JPanel currentTabPanel;
+    private static SoundPlayer soundPlayer = SoundPlayer.getInstance();
+    private SoundPlayingListener soundPlayingListener = new SoundPlayingListener();
 
     public SoundEditorMainForm(String _fileName, String _installDir)
     {
@@ -41,8 +47,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             System.err.println("File not found");
         }
-        
+
         initComponents();
+        soundPlayer.addPropertyChangeListener(soundPlayingListener);
         Utility.setFrameIcon(this);
         vpkDir = _fileName;
         installDir = _installDir;
@@ -70,7 +77,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         revertAllButton = new javax.swing.JButton();
         advancedButton = new javax.swing.JButton();
         revertButton = new javax.swing.JButton();
-        playSoundButton = new javax.swing.JButton();
+        playStopButton = new javax.swing.JButton();
         replaceButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFileButton = new javax.swing.JMenu();
@@ -135,13 +142,13 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
-        playSoundButton.setMnemonic('a');
-        playSoundButton.setText("Play Sound");
-        playSoundButton.addActionListener(new java.awt.event.ActionListener()
+        playStopButton.setMnemonic('a');
+        playStopButton.setText("Play Sound");
+        playStopButton.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                playSoundButtonActionPerformed(evt);
+                playStopButtonActionPerformed(evt);
             }
         });
 
@@ -228,7 +235,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(revertButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(playSoundButton)
+                .addComponent(playStopButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(replaceButton)
                 .addContainerGap())
@@ -248,7 +255,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     .addComponent(revertButton)
                     .addComponent(advancedButton)
                     .addComponent(replaceButton)
-                    .addComponent(playSoundButton))
+                    .addComponent(playStopButton))
                 .addContainerGap())
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
@@ -312,10 +319,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         ((EditorPanel) currentTabPanel).revertButtonActionPerformed(evt);
     }//GEN-LAST:event_revertButtonActionPerformed
 
-    private void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playSoundButtonActionPerformed
-    {//GEN-HEADEREND:event_playSoundButtonActionPerformed
+    private void playStopButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_playStopButtonActionPerformed
+    {//GEN-HEADEREND:event_playStopButtonActionPerformed
         ((EditorPanel) currentTabPanel).playSoundButtonActionPerformed(evt);
-    }//GEN-LAST:event_playSoundButtonActionPerformed
+    }//GEN-LAST:event_playStopButtonActionPerformed
 
     private void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_revertAllButtonActionPerformed
     {//GEN-HEADEREND:event_revertAllButtonActionPerformed
@@ -399,7 +406,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             fos = new FileWriter(autoExecPath, true);
             bw = new BufferedWriter(fos);
             bw.write(System.lineSeparator() + "snd_updateaudiocache");
-            bw.close();    
+            bw.close();
             fos.close();
             br.close();
             fis.close();
@@ -408,7 +415,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             System.err.println(ex);
             JOptionPane.showMessageDialog(this, "Unable to update autoexec.cfg. You may have to do it manually.", "Autoexec Error", JOptionPane.ERROR_MESSAGE);
-        }        
+        }
     }
 
     private String createAutoExecCfg()
@@ -426,6 +433,57 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
         return autoExecFile.getAbsolutePath();
     }
+
+    class SoundPlayingListener implements PropertyChangeListener
+    {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt)
+        {
+            String propertyName = evt.getPropertyName();
+            if (propertyName.equals("soundIsPlaying"))
+            {
+                Object source = evt.getSource();
+                //Sound started playing. Change Play button to Stop butotn.
+                if ((boolean)evt.getNewValue() == true)
+                {
+                    playStopButton.setMnemonic('o');
+                    playStopButton.setText("Stop Sound");
+                    removeActionListeners();                    
+                    playStopButton.addActionListener(new java.awt.event.ActionListener()
+                    {
+                        @Override
+                        public void actionPerformed(java.awt.event.ActionEvent evt)
+                        {
+                            soundPlayer.stopSound();
+                        }
+                    });
+                }
+                //Sound just stopped. Change it back to play button.
+                if ((boolean)evt.getNewValue() == false)
+                {
+                    playStopButton.setMnemonic('a');
+                    playStopButton.setText("Play Sound");
+                    removeActionListeners();
+                    playStopButton.addActionListener(new java.awt.event.ActionListener()
+                    {
+                        @Override
+                        public void actionPerformed(java.awt.event.ActionEvent evt)
+                        {
+                            ((EditorPanel) currentTabPanel).playSoundButtonActionPerformed(evt);
+                        }
+                    });
+                }
+            }
+        }
+
+        private void removeActionListeners()
+        {
+            for(ActionListener listener : playStopButton.getActionListeners())
+            {
+                playStopButton.removeActionListener(listener);
+            }
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem JMenuAbout;
     private javax.swing.JMenuItem JMenuClose;
@@ -438,7 +496,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private javax.swing.JMenu jMenuSettingsButton;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator7;
-    private javax.swing.JButton playSoundButton;
+    private javax.swing.JButton playStopButton;
     private javax.swing.JButton replaceButton;
     private javax.swing.JButton revertAllButton;
     private javax.swing.JButton revertButton;

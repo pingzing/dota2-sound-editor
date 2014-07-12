@@ -108,7 +108,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="revertButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="playSoundButton" min="-2" max="-2" attributes="0"/>
+              <Component id="playStopButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="replaceButton" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -132,7 +132,7 @@
                   <Component id="revertButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="advancedButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="replaceButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="playSoundButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="playStopButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -188,13 +188,13 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="revertButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="playSoundButton">
+    <Component class="javax.swing.JButton" name="playStopButton">
       <Properties>
         <Property name="mnemonic" type="int" value="97"/>
         <Property name="text" type="java.lang.String" value="Play Sound"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="playSoundButtonActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="playStopButtonActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="replaceButton">

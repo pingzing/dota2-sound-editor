@@ -33,7 +33,7 @@ public final class SoundPlayer
 
     public static synchronized SoundPlayer getInstance()
     {
-        if (soundPlayerInstance == null);
+        if (soundPlayerInstance == null)
         {
             soundPlayerInstance = new SoundPlayer();
         }
@@ -63,7 +63,7 @@ public final class SoundPlayer
         }
     }
 
-    private void stopSound()
+    public void stopSound()
     {
         if(mp3Player != null && !mp3Player.isComplete())
         {
@@ -71,7 +71,7 @@ public final class SoundPlayer
             soundIsPlaying = false;
             support.firePropertyChange("soundIsPlaying", true, false);
         }
-        if(clip != null && soundIsPlaying)
+        if(clip != null)
         {
             clip.stop();
             soundIsPlaying = false;
@@ -107,9 +107,10 @@ public final class SoundPlayer
                 {
                     try
                     {
-                        mp3Player.play();
                         soundIsPlaying = true;
                         support.firePropertyChange("soundIsPlaying", false, true);
+                        mp3Player.play();
+                        
                     }
                     catch (Exception ex)
                     {
