@@ -184,8 +184,12 @@ public final class ItemPanel extends EditorPanel
         ArrayList<String> wavePathsList = new ArrayList<>();
         for (int i = 0; i < childCount; i++)
         {
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
+            if(nodeValue.trim().startsWith("//"))
+            {
+                continue;
+            }
+            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));            
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
 
             for (String s : wavePathsList)
@@ -227,7 +231,6 @@ public final class ItemPanel extends EditorPanel
     void revertButtonActionPerformed(ActionEvent evt)
     {
         //TODO: See if we can abstract away some of this + promptUserForNewFile()'s functionality        
-
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {

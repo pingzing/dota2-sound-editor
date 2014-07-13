@@ -25,12 +25,12 @@ public class NamedItem
     {
         return this.friendlyName;
     }
-    
+
     public String getIconName()
     {
         return this.iconName;
     }
-    
+
     public void setIconName(String _iconName)
     {
         this.iconName = _iconName;
@@ -42,23 +42,37 @@ public class NamedItem
         friendlyName = cleanUpName(internalName);
     }
 
-    private String cleanUpName(String nameToClean)
+    private String cleanUpName(String _nameToClean)
     {
+        String nameToClean = _nameToClean;
         //For some reason, Hand of Midas' script name is completely different than every other item's. Go figure.
-        //It follows the pattern DOTA_Item.Hand_Of_Midas, whereas everything else is DOTA_Item.<Name>.<Sound trigger>
+        //It follows the pattern DOTA_Item.Hand_Of_Midas, whereas everything else is DOTA_Item.<Name>.<Sound trigger>        
         if (nameToClean.contains("Midas"))
         {
             nameToClean = "Hand of Midas";
         }
+        //Would you look at that, so is the Basher's. Sigh.
+        else if (nameToClean.contains("SkullBasher"))
+        {
+            nameToClean = "Skull Basher";
+        }
         else
         {
-            nameToClean = nameToClean.replaceAll("_", "");            
-            int beginIndex = Utility.nthOccurrence(nameToClean, '.', 0);
-            int endIndex = Utility.nthOccurrence(nameToClean, '.', 1);
-            nameToClean = nameToClean.substring(beginIndex + 1, endIndex);
-            nameToClean = Utility.splitCamelCase(nameToClean);
-            nameToClean = nameToClean.replace("Of", "of");
-            nameToClean = handleSpecialCases(nameToClean);
+            try
+            {
+                nameToClean = nameToClean.replaceAll("_", "");
+                int beginIndex = Utility.nthOccurrence(nameToClean, '.', 0);
+                int endIndex = Utility.nthOccurrence(nameToClean, '.', 1);
+                nameToClean = nameToClean.substring(beginIndex + 1, endIndex);
+                nameToClean = Utility.splitCamelCase(nameToClean);
+                nameToClean = nameToClean.replace("Of", "of");
+                nameToClean = handleSpecialCases(nameToClean);
+            }
+            catch(IndexOutOfBoundsException ex)
+            {
+                ex.printStackTrace();
+                return _nameToClean;
+            }
         }
         return nameToClean;
     }
@@ -67,34 +81,48 @@ public class NamedItem
     {
         switch (nameToClean)
         {
-            case "Armlet":              nameToClean = "Armlet of Mordiggian";
+            case "Armlet":
+                nameToClean = "Armlet of Mordiggian";
                 break;
-            case "Pipe":                nameToClean = "Pipe of Insight";
+            case "Pipe":
+                nameToClean = "Pipe of Insight";
                 break;
-            case "Orchid":              nameToClean = "Orchid Malevolence";
+            case "Orchid":
+                nameToClean = "Orchid Malevolence";
                 break;
-            case "Cyclone":             nameToClean = "Eul's Scepter of Divinity";
+            case "Cyclone":
+                nameToClean = "Eul's Scepter of Divinity";
                 break;
-            case "Refresher":           nameToClean = "Refresher Orb";
+            case "Refresher":
+                nameToClean = "Refresher Orb";
                 break;
-            case "Shivas Guard":        nameToClean = "Shiva's Guard";
+            case "Shivas Guard":
+                nameToClean = "Shiva's Guard";
                 break;
-            case "Hot D":               nameToClean = "Helm of the Dominator";
+            case "Hot D":
+                nameToClean = "Helm of the Dominator";
                 break;
-            case "Manta":               nameToClean = "Manta Style";
+            case "Manta":
+                nameToClean = "Manta Style";
                 break;
-            case "Invisibility Sword":  nameToClean = "Shadow Blade";
+            case "Invisibility Sword":
+                nameToClean = "Shadow Blade";
                 break;
-            case "Linkens Sphere":      nameToClean = "Linken's Sphere";
+            case "Linkens Sphere":
+                nameToClean = "Linken's Sphere";
                 break;
-            case "Veilof Discord":      nameToClean = "Veil of Discord";
+            case "Veilof Discord":
+                nameToClean = "Veil of Discord";
                 break;
-            case "Heavens Halberd":     nameToClean = "Heaven's Halberd";
+            case "Heavens Halberd":
+                nameToClean = "Heaven's Halberd";
                 break;
-            case "Do E":                nameToClean = "Drum of Endurance";
+            case "Do E":
+                nameToClean = "Drum of Endurance";
                 break;
-            case "Sheepstick":          nameToClean = "Scythe of Vyse";
-                break;                                            
+            case "Sheepstick":
+                nameToClean = "Scythe of Vyse";
+                break;
         }
         return nameToClean;
     }
@@ -104,44 +132,68 @@ public class NamedItem
         String localIconName = "";
         localIconName = this.friendlyName.toLowerCase();
         localIconName = localIconName.replaceAll(" ", "_");
-        switch(localIconName)
+        switch (localIconName)
         {
-            case "clarity_potion":              localIconName = "clarity";
+            case "clarity_potion":
+                localIconName = "clarity";
                 break;
-            case "healing_salve":               localIconName = "flask";
+            case "healing_salve":
+                localIconName = "flask";
                 break;
-            case "dust_of_appearance":          localIconName = "dust";
+            case "dust_of_appearance":
+                localIconName = "dust";
                 break;
-            case "sentry_ward":                 localIconName = "ward_sentry";
+            case "sentry_ward":
+                localIconName = "ward_sentry";
                 break;
-            case "observer_ward":               localIconName = "ward_observer";
+            case "observer_ward":
+                localIconName = "ward_observer";
                 break;
-            case "blink_dagger":                localIconName = "blink";
+            case "blink_dagger":
+                localIconName = "blink";
                 break;
-            case "pipe_of_insight":             localIconName = "pipe";
+            case "pipe_of_insight":
+                localIconName = "pipe";
                 break;
-            case "orchid_malevolence":          localIconName = "orchid";
+            case "orchid_malevolence":
+                localIconName = "orchid";
                 break;
-            case "eul's_scepter_of_divinity":   localIconName = "cyclone";
+            case "eul's_scepter_of_divinity":
+                localIconName = "cyclone";
                 break;
-            case "refresher_orb":               localIconName = "refresher";
+            case "refresher_orb":
+                localIconName = "refresher";
                 break;
-            case "shiva's_guard":               localIconName = "shivas_guard";
+            case "shiva's_guard":
+                localIconName = "shivas_guard";
                 break;
-            case "manta_style":                 localIconName = "manta";
+            case "manta_style":
+                localIconName = "manta";
                 break;
-            case "shadow_blade":                localIconName = "invis_sword";
+            case "shadow_blade":
+                localIconName = "invis_sword";
                 break;
-            case "linken's_sphere":             localIconName = "sphere";
+            case "linken's_sphere":
+                localIconName = "sphere";
                 break;
-            case "heaven's_halberd":            localIconName = "heavens_halberd";
+            case "heaven's_halberd":
+                localIconName = "heavens_halberd";
                 break;
-            case "drum_of_endurance":           localIconName = "ancient_janggo";
+            case "drum_of_endurance":
+                localIconName = "ancient_janggo";
                 break;
-            case "armlet_of_mordiggian":        localIconName = "armlet_active";
+            case "armlet_of_mordiggian":
+                localIconName = "armlet_active";
                 break;
-            case "scythe_of_vyse":              localIconName = "sheepstick";
-                break;            
+            case "scythe_of_vyse":
+                localIconName = "sheepstick";
+                break;
+            case "skull_basher":
+                localIconName = "basher";
+                break;
+            case "daedelus":
+                localIconName = "greater_crit";
+                break;
         }
         return localIconName;
     }

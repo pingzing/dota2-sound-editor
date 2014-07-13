@@ -1,9 +1,19 @@
 //Features to add:
+//Roadmap to next release:
+    // - One-time cache invalidation, or at least notification that users should update Items panel.
+    // - Implement Revert button for Music
+    // - Add troubleshooting section to Readme
+    // - It should cover:
+    //  - Cache invalidation and script regeneration
+    //  - Troubleshooting steps: lib folder, check dota/sounds/custom, check original script file, check dota's console
+
+// - Some sort of cache invalidation that checks to see if anything has been added. Currently it's pretty weak
+// - Make multi-pressing play impossible
 // - Handle Advanced mode changes actually applying to tree
 // - Hero VO
-// - Music
-// - Announcers??? maybe not...
-// - Get sound length, display along bottom of 
+// - UI sounds
+// - Announcers??? maybe not...investigate legal ramifications
+// - Get sound length, display along bottom of window
 // - Improve cache invalidation to preserve users' changes
 // - Find way to play sound files from memory instead of writing to local filesys, then playing. So slow!
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.

@@ -34,38 +34,7 @@ public class SteamLocationPanel extends javax.swing.JPanel
         }
     }
 
-    /**
-     * This
-     * method
-     * is
-     * called
-     * from
-     * within
-     * the
-     * constructor
-     * to
-     * initialize
-     * the
-     * form.
-     * WARNING:
-     * Do
-     * NOT
-     * modify
-     * this
-     * code.
-     * The
-     * content
-     * of
-     * this
-     * method
-     * is
-     * always
-     * regenerated
-     * by
-     * the
-     * Form
-     * Editor.
-     */
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents()
@@ -135,9 +104,9 @@ public class SteamLocationPanel extends javax.swing.JPanel
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(pathField)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(acceptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(acceptButton, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(browseButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -172,7 +141,7 @@ public class SteamLocationPanel extends javax.swing.JPanel
     {//GEN-HEADEREND:event_browseButtonActionPerformed
 
         userPrefs.setInstallDir();
-        if (userPrefs.getSuccess())
+        if (userPrefs.getInstallDirSuccess())
         {
             pathField.setText(userPrefs.getInstallDir());
         }
@@ -188,7 +157,7 @@ public class SteamLocationPanel extends javax.swing.JPanel
     {//GEN-HEADEREND:event_acceptButtonActionPerformed
 
         //If the install path was already validated & successful, move on
-        if (userPrefs.getSuccess() && !pathField.getText().isEmpty())
+        if (userPrefs.getInstallDirSuccess() && !pathField.getText().isEmpty())
         {
             userPrefs.setInstallKeys();
             this.hostingDialog.dispose();
@@ -199,7 +168,7 @@ public class SteamLocationPanel extends javax.swing.JPanel
         else
         {
             userPrefs.setInstallDir(pathField.getText());
-            if (userPrefs.getSuccess())
+            if (userPrefs.getInstallDirSuccess())
             {
                 userPrefs.setInstallKeys();
                 this.hostingDialog.dispose();

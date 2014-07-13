@@ -54,21 +54,32 @@ public abstract class EditorPanel extends JPanel
     protected String installDir;
 
     abstract void populateSoundListAsTree();
+
     abstract void fillImageFrame(Object selectedItem) throws IOException;
+
     abstract void revertButtonActionPerformed(java.awt.event.ActionEvent evt);
+
     abstract void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt);
+
     abstract void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt);
+
     abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);
+
     abstract void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton);
+
     abstract void populateDropdownBox();
+
     abstract String getCurrentScriptString();
-    abstract String getCustomSoundPathString();                    
-    
+
+    abstract String getCustomSoundPathString();
+
     protected final File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser(new File(UserPrefs.getInstance().getWorkingDirectory()));
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
+        chooser.setAcceptAllFileFilterUsed((false));
         chooser.setFileFilter(filter);
+        chooser.setMultiSelectionEnabled(false);
 
         int chooserRetVal = chooser.showOpenDialog(chooser);
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
@@ -148,7 +159,7 @@ public abstract class EditorPanel extends JPanel
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
             File soundFile = createSoundFileFromWaveString(waveString);
-            if(soundFile == null)
+            if (soundFile == null)
             {
                 return regenScript;
             }
@@ -167,7 +178,7 @@ public abstract class EditorPanel extends JPanel
 
     protected ArrayList<String> getWavePathsAsList(TreeNode selectedFile)
     {
-        ArrayList<String> wavePathsList = new ArrayList<String>();
+        ArrayList<String> wavePathsList = new ArrayList<>();
         Enumeration e = selectedFile.children();
         while (e.hasMoreElements())
         {
@@ -180,7 +191,10 @@ public abstract class EditorPanel extends JPanel
                 while (innerE.hasMoreElements())
                 {
                     Object currentInnerElement = innerE.nextElement();
-                    if (currentInnerElement.toString().contains("\"wave\"") || currentInnerElement.toString().contains(".wav") || currentInnerElement.toString().contains(".mp3"))
+                    if (currentInnerElement.toString().contains("\"wave\"")
+                            || currentInnerElement.toString().contains(".wav")
+                            || currentInnerElement.toString().contains(".mp3")
+                            && !currentInnerElement.toString().trim().startsWith("//"))
                     {
                         //Maybe do some string massaging here before we just hand it back
                         wavePathsList.add(((TreeNode) currentInnerElement).toString());
@@ -190,7 +204,10 @@ public abstract class EditorPanel extends JPanel
             //If it only has one
             else if (currentElement.toString().contains("\"wave\""))
             {
-                wavePathsList.add(((TreeNode) currentElement).toString());
+                if (!currentElement.toString().trim().startsWith("//"))
+                {
+                    wavePathsList.add(((TreeNode) currentElement).toString());
+                }
             }
         }
         return wavePathsList;
@@ -255,7 +272,7 @@ public abstract class EditorPanel extends JPanel
                         + "\nentries for this script file are now out of date. "
                         + "\n\nWould you like to regenerate the script file? This "
                         + "will erase any changes you've made.", "Script File Out of Date", JOptionPane.YES_NO_OPTION);
-                if(result == JOptionPane.YES_OPTION)
+                if (result == JOptionPane.YES_OPTION)
                 {
                     return null;
                 }
@@ -277,7 +294,7 @@ public abstract class EditorPanel extends JPanel
             return entryFile;
         }
         else    //If it's NOT stored in the VPK, it's on the local filesys
-        {                        
+        {
             entryFile = new File(Paths.get(installDir + "\\dota\\sound\\" + waveSubstring).toString());
             return entryFile;
         }
@@ -355,5 +372,5 @@ public abstract class EditorPanel extends JPanel
             ex.printStackTrace();
             return null;
         }
-    }    
+    }
 }

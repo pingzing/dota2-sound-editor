@@ -14,7 +14,7 @@ public final class UserPrefs
     private String installDir = "";
     private String vpkDir = "";
     private String currentWorkingDirectoryPrefName = "working_dir";
-    private boolean success = false;
+    private boolean changeInstallDirSuccess = false;
 
     private UserPrefs() {        }    
     
@@ -48,9 +48,9 @@ public final class UserPrefs
         return this.vpkDir;
     }
 
-    public boolean getSuccess()
+    public boolean getInstallDirSuccess()
     {
-        return this.success;
+        return this.changeInstallDirSuccess;
     }
 
     public void setInstallKeys()
@@ -66,6 +66,7 @@ public final class UserPrefs
         int chooserRetVal = chooser.showOpenDialog(chooser);
         if (chooserRetVal == JFileChooser.APPROVE_OPTION)
         {
+            this.changeInstallDirSuccess = false;
             System.out.println(chooser.getSelectedFile().getAbsolutePath() + " was chosen.");
             this.installDir = chooser.getSelectedFile().getAbsolutePath();
             //Validate that the user's choice is actually the dota directory
@@ -76,7 +77,7 @@ public final class UserPrefs
             if (vpkFile.exists())
             {
                 this.vpkDir = vpkPath.toString();
-                this.success = true;
+                this.changeInstallDirSuccess = true;
             }
         }
     }
@@ -84,6 +85,7 @@ public final class UserPrefs
     public void setInstallDir(String _installDir)
     {
         this.installDir = _installDir;
+        this.changeInstallDirSuccess = false;
         //Validate
         try
         {
@@ -93,13 +95,13 @@ public final class UserPrefs
             if (vpkFile.exists())
             {
                 this.vpkDir = vpkPath.toString();
-                this.success = true;
+                this.changeInstallDirSuccess = true;
             }
         }
         catch (java.nio.file.InvalidPathException ex)
         {
             System.err.println("Unable to find Dota directory from given path: " + _installDir);
-            this.success = false;
+            this.changeInstallDirSuccess = false;
         }
     }
     
