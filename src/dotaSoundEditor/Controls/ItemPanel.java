@@ -442,6 +442,6 @@ public final class ItemPanel extends EditorPanel
     @Override
     String getCustomSoundPathString()
     {
-        return "custom/items/";
+        return ")custom/items/";
     }
 }

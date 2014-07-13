@@ -104,17 +104,20 @@ public final class MusicPanel extends EditorPanel
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
-        this.currentTreeModel = scriptTree;
-        DefaultListModel scriptList = new DefaultListModel();
+        this.currentTreeModel = scriptTree;        
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
 
         TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         ArrayList<String> wavePathsList = new ArrayList<>();
         for (int i = 0; i < childCount; i++)
-        {
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
+        {            
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
+            if(nodeValue.trim().startsWith("//"))
+            {
+                continue;
+            }
+            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));            
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
 
             for (String s : wavePathsList)

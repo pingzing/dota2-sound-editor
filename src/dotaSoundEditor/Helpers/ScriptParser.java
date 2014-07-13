@@ -31,14 +31,14 @@ public class ScriptParser
     private DefaultMutableTreeNode currentNode = null;
     private DefaultMutableTreeNode currentParent = null;
     private File modelFile = null;
-    private StringBuilder outputScriptString = null;    
+    private StringBuilder outputScriptString = null;
 
     public ScriptParser(TreeModel currentHeroTreeModel)
     {
         StringBuilder scriptString = parseModel(currentHeroTreeModel);
         outputScriptString = scriptString;
     }
-    
+
     public ScriptParser(File script)
     {
         //Create the root node
@@ -49,7 +49,7 @@ public class ScriptParser
     }
 
     public ScriptParser(String scriptString)
-    {        
+    {
         scriptTree = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         currentNode = (DefaultMutableTreeNode) scriptTree.getRoot();
         currentParent = currentNode;
@@ -70,8 +70,8 @@ public class ScriptParser
 
             while ((line = br.readLine()) != null)
             {
-                parseScript(line);
-            }            
+                parseLine(line);
+            }
             br.close();
             fis.close();
         }
@@ -84,18 +84,19 @@ public class ScriptParser
             System.out.println("Done generating tree.");
         }
     }
-    
+
     private void generateModelFromString(String script)
     {
         BufferedReader buf = new BufferedReader(new StringReader(script));
         String line = null;
-        try{
-        while((line = buf.readLine()) != null)
+        try
         {
-            parseScript(line);
+            while ((line = buf.readLine()) != null)
+            {
+                parseLine(line);
+            }
         }
-        }
-        catch(IOException ex)
+        catch (IOException ex)
         {
             ex.printStackTrace();
         }
@@ -142,13 +143,31 @@ public class ScriptParser
         return this.scriptTree;
     }
 
-    private void parseScript(String line)
+    private void parseLine(String line)
     {
         //System.out.println("Looking at: " + line);
-        if (line.isEmpty() || line.equals("") || line.startsWith("//") || line.contentEquals("\t") || line.trim().length() <= 0) 
+        if (line.isEmpty() || line.equals("") || line.contentEquals("\t") || line.trim().length() <= 0)
         {
             return;
         }
+        //Need this if we want braces commented out too
+        if (line.trim().startsWith("//"))
+        {
+            try
+            {
+                DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(line);
+                currentNode = newNode;
+                if (currentNode != null)
+                {
+                    currentParent.add(newNode);
+                }
+            }
+            catch (NullPointerException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        //
         else if (line.contains("{"))
         {
             currentLevel++;
@@ -187,7 +206,7 @@ public class ScriptParser
     {
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) currentHeroTreeModel.getRoot();
         StringBuilder scriptString = new StringBuilder();
-        recursiveBuildScript(scriptString, root);
+        recursiveBuildScript(scriptString, root, 0);
 
         //Remove first bracket and newline
         scriptString.deleteCharAt(0);
@@ -198,18 +217,34 @@ public class ScriptParser
         return scriptString;
     }
 
-    private void recursiveBuildScript(StringBuilder scriptString, DefaultMutableTreeNode node)
+    private void recursiveBuildScript(StringBuilder scriptString, DefaultMutableTreeNode node, int level)
     {
         if (!node.getUserObject().toString().contentEquals("root"))
         {
             scriptString.append(node.getUserObject().toString() + "\n");
         }
-        if (!node.isLeaf())
+        /* The condition after the OR clause is a SUPER hacky fix. It's because Dota expects "prestart_stack" to have open/close braces,
+         * but since in the Music script, everything inside that tag gets commented out, it's a node with no children. Because of that,
+         * the parser never writes out any braces (because leaves in the tree don't get open/close braces).
+         * TODO: Figure out a way to track brace placement without just checking too see if a node has children. Maybe 
+         * a custom node object that tracks whether a node is followed by braces?
+         */
+        if (!node.isLeaf() /*|| (node.getUserObject().toString().contains("prestart_stack") && node.isLeaf())*/)
         {
+            for (int i = 1; i < level; i++)
+            {
+                scriptString.append("\t");
+            }
             scriptString.append("{\n");
+            level++;
             for (int i = 0; i < node.getChildCount(); i++)
             {
-                recursiveBuildScript(scriptString, (DefaultMutableTreeNode) node.getChildAt(i));
+                recursiveBuildScript(scriptString, (DefaultMutableTreeNode) node.getChildAt(i), level);
+            }
+            level--;
+            for (int i = 1; i < level; i++)
+            {
+                scriptString.append("\t");
             }
             scriptString.append("}\n");
         }
