@@ -81,47 +81,33 @@ public class NamedItem
     {
         switch (nameToClean)
         {
-            case "Armlet":
-                nameToClean = "Armlet of Mordiggian";
+            case "Armlet":              nameToClean = "Armlet of Mordiggian";
                 break;
-            case "Pipe":
-                nameToClean = "Pipe of Insight";
+            case "Pipe":                nameToClean = "Pipe of Insight";
                 break;
-            case "Orchid":
-                nameToClean = "Orchid Malevolence";
+            case "Orchid":              nameToClean = "Orchid Malevolence";
                 break;
-            case "Cyclone":
-                nameToClean = "Eul's Scepter of Divinity";
+            case "Cyclone":             nameToClean = "Eul's Scepter of Divinity";
                 break;
-            case "Refresher":
-                nameToClean = "Refresher Orb";
+            case "Refresher":           nameToClean = "Refresher Orb";
                 break;
-            case "Shivas Guard":
-                nameToClean = "Shiva's Guard";
+            case "Shivas Guard":        nameToClean = "Shiva's Guard";
                 break;
-            case "Hot D":
-                nameToClean = "Helm of the Dominator";
+            case "Hot D":               nameToClean = "Helm of the Dominator";
                 break;
-            case "Manta":
-                nameToClean = "Manta Style";
+            case "Manta":               nameToClean = "Manta Style";
                 break;
-            case "Invisibility Sword":
-                nameToClean = "Shadow Blade";
+            case "Invisibility Sword":  nameToClean = "Shadow Blade";
                 break;
-            case "Linkens Sphere":
-                nameToClean = "Linken's Sphere";
+            case "Linkens Sphere":      nameToClean = "Linken's Sphere";
                 break;
-            case "Veilof Discord":
-                nameToClean = "Veil of Discord";
+            case "Veilof Discord":      nameToClean = "Veil of Discord";
                 break;
-            case "Heavens Halberd":
-                nameToClean = "Heaven's Halberd";
+            case "Heavens Halberd":     nameToClean = "Heaven's Halberd";
                 break;
-            case "Do E":
-                nameToClean = "Drum of Endurance";
+            case "Do E":                nameToClean = "Drum of Endurance";
                 break;
-            case "Sheepstick":
-                nameToClean = "Scythe of Vyse";
+            case "Sheepstick":          nameToClean = "Scythe of Vyse";
                 break;
         }
         return nameToClean;

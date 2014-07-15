@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package dotaSoundEditor;
 
 import dotaSoundEditor.Helpers.Utility;
@@ -67,6 +63,8 @@ public class NamedHero implements Comparable<NamedHero>
                 break;
             case "Life Stealer":        nameToClean = "Lifestealer";
                 break;
+            case "Necrolyte":           nameToClean = "Necrophos";
+                break;
             case "Magnataur":           nameToClean = "Magnus";
                 break;
             case "Nightstalker":        nameToClean = "Night Stalker";
@@ -92,6 +90,8 @@ public class NamedHero implements Comparable<NamedHero>
             case "Treant":              nameToClean = "Treant Protector";
                 break;
             case "Vengefulspirit":      nameToClean = "Vengeful Spirit";
+                break;
+            case "Windrunner":          nameToClean = "Windranger";
                 break;
             case "Wisp":                nameToClean = "Io";
                 break;                
