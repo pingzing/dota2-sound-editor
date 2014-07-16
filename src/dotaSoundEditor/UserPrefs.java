@@ -12,7 +12,7 @@ public final class UserPrefs
     private String dotaDirPrefName = "dota_install_dir";
     private String mainVPKPrefName = "main_vpk_dir";
     private String installDir = "";
-    private String vpkDir = "";
+    private String vpkPath = "";
     private String currentWorkingDirectoryPrefName = "working_dir";
     private boolean changeInstallDirSuccess = false;
 
@@ -38,14 +38,14 @@ public final class UserPrefs
         return installDir;
     }
 
-    public String getVPKDir()
+    public String getVPKPath()
     {
         boolean exists = prefs.get(mainVPKPrefName, null) != null;
         if (exists)
         {
-            this.vpkDir = prefs.get(mainVPKPrefName, null);
+            this.vpkPath = prefs.get(mainVPKPrefName, null);
         }
-        return this.vpkDir;
+        return this.vpkPath;
     }
 
     public boolean getInstallDirSuccess()
@@ -56,7 +56,7 @@ public final class UserPrefs
     public void setInstallKeys()
     {
         prefs.put(dotaDirPrefName, installDir);
-        prefs.put(mainVPKPrefName, vpkDir);
+        prefs.put(mainVPKPrefName, vpkPath);
     }
 
     public void setInstallDir()
@@ -76,7 +76,7 @@ public final class UserPrefs
             File vpkFile = new File(vpkPath.toString());
             if (vpkFile.exists())
             {
-                this.vpkDir = vpkPath.toString();
+                this.vpkPath = vpkPath.toString();
                 this.changeInstallDirSuccess = true;
             }
         }
@@ -94,7 +94,7 @@ public final class UserPrefs
             File vpkFile = new File(vpkPath.toString());
             if (vpkFile.exists())
             {
-                this.vpkDir = vpkPath.toString();
+                this.vpkPath = vpkPath.toString();
                 this.changeInstallDirSuccess = true;
             }
         }

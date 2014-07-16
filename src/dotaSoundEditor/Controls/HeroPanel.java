@@ -38,10 +38,10 @@ public class HeroPanel extends EditorPanel
         initComponents();
     }
 
-    public HeroPanel(String _vpkDir, String _installDir)
+    public HeroPanel(String _vpkPath, String _installDir)
     {
 
-        vpkDir = _vpkDir;
+        vpkPath = _vpkPath;
         installDir = _installDir;
         this.setName("Hero Spells");
         initComponents();
@@ -157,7 +157,7 @@ public class HeroPanel extends EditorPanel
         currentDropdown.removeAllItems();
         Set heroList = new CopyOnWriteArraySet();
         //Build list of heroes and populate dropwdown with it                
-        File file = new File(vpkDir);
+        File file = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
 
         System.out.println(file);
@@ -250,7 +250,7 @@ public class HeroPanel extends EditorPanel
             fileExistsLocally = true;
         }
 
-        File file = new File(vpkDir);
+        File file = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
         try
         {
@@ -359,7 +359,7 @@ public class HeroPanel extends EditorPanel
             VPKArchive vpk = new VPKArchive();
             try
             {
-                vpk.load(new File(this.vpkDir));
+                vpk.load(new File(this.vpkPath));
             }
             catch (IOException ex)
             {

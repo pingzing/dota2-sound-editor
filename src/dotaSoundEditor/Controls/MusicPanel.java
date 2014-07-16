@@ -30,9 +30,9 @@ public final class MusicPanel extends EditorPanel
         initComponents();
     }
 
-    public MusicPanel(String _vpkDir, String _installDir)
+    public MusicPanel(String _vpkPath, String _installDir)
     {
-        vpkDir = _vpkDir;
+        vpkPath = _vpkPath;
         installDir = _installDir;
         this.setName("Music");
         initComponents();
@@ -45,7 +45,7 @@ public final class MusicPanel extends EditorPanel
 
     private VPKEntry getMusicScriptFile(String fileName)
     {
-        File vpkFile = new File(vpkDir);
+        File vpkFile = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
         VPKEntry entryToReturn = null;
         try
@@ -219,7 +219,7 @@ public final class MusicPanel extends EditorPanel
         vpkSearchPaths.add("sound/music/valve_dota_001/music/");
         vpkSearchPaths.add("sound/music/valve_dota_001/stingers/");
         vpkSearchPaths.add("scripts/");
-        File file = new File(vpkDir);
+        File file = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
 
         try
@@ -259,10 +259,7 @@ public final class MusicPanel extends EditorPanel
         }
         populateSoundListAsTree();
     }
-
-    //This method may not make sense for the music panel--it's the only kind of sound
-    //where all the script files are in different folders, and can't be located with a single
-    //script string.
+    
     @Override
     String getCurrentScriptString()
     {

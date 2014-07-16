@@ -59,14 +59,14 @@ public class Main
             locationCheckDialog.setVisible(true);
         }
 
-        String vpkDir = prefs.getVPKDir();
+        String vpkPath = prefs.getVPKPath();
         String installDir = prefs.getInstallDir();
 
-        if (!(vpkDir.equals("")) && !(installDir.equals("")))
+        if (!(vpkPath.equals("")) && !(installDir.equals("")))
         {
             try
             {
-                SoundEditorMainForm mainForm = new SoundEditorMainForm(vpkDir, installDir);
+                SoundEditorMainForm mainForm = new SoundEditorMainForm(vpkPath, installDir);
             }
             //This should cut down on at least 90% of support emails...
             //TODO: Look into whether this belongs in Handler.java

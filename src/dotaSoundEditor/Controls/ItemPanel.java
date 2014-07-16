@@ -46,9 +46,9 @@ public final class ItemPanel extends EditorPanel
         initComponents();
     }
 
-    public ItemPanel(String _vpkDir, String _installDir)
+    public ItemPanel(String _vpkPath, String _installDir)
     {
-        vpkDir = _vpkDir;
+        vpkPath = _vpkPath;
         installDir = _installDir;
         this.setName("Items");
         initComponents();
@@ -118,7 +118,7 @@ public final class ItemPanel extends EditorPanel
         File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString());
         boolean fileExistsLocally = existsChecker.exists() ? true : false;
 
-        File vpkFile = new File(vpkDir);
+        File vpkFile = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
         try
         {
@@ -246,7 +246,7 @@ public final class ItemPanel extends EditorPanel
             VPKArchive vpk = new VPKArchive();
             try
             {
-                vpk.load(new File(this.vpkDir));
+                vpk.load(new File(this.vpkPath));
             }
             catch (IOException ex)
             {

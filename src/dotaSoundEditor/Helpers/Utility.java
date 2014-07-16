@@ -7,11 +7,11 @@ import java.awt.Window;
 public class Utility
 {
 
-    //TODO: Investigate placement of this, why is it in here?
+    //TODO: Investigate placement of this, why is it in here instead of in PortraitFinder?
     public static PortraitFinder portraitFinder;
-    public static void initPortraitFinder(String vpkDir)
+    public static void initPortraitFinder(String vpkPath)
     {
-        portraitFinder = new PortraitFinder(vpkDir);
+        portraitFinder = new PortraitFinder(vpkPath);
     }
 
     public static void setFrameIcon(Window iconWindow)

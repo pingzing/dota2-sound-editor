@@ -20,7 +20,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 {
 
     private PortraitFinder portraitFinder;
-    private String vpkDir;
+    private String vpkPath;
     private String installDir;
     private JPanel currentTabPanel;
     private static SoundPlayer soundPlayer = SoundPlayer.getInstance();
@@ -51,17 +51,17 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         initComponents();
         soundPlayer.addPropertyChangeListener(soundPlayingListener);
         Utility.setFrameIcon(this);
-        vpkDir = _fileName;
+        vpkPath = _fileName;
         installDir = _installDir;
-        Utility.initPortraitFinder(vpkDir);
+        Utility.initPortraitFinder(vpkPath);
         portraitFinder = Utility.portraitFinder;
         portraitFinder.buildHeroPortraits();
         portraitFinder.buildItemPortraits();
 
         //Create tabs
-        tabPane.add(new HeroPanel(vpkDir, installDir));
-        tabPane.add(new ItemPanel(vpkDir, installDir));
-        tabPane.add(new MusicPanel(vpkDir, installDir));
+        tabPane.add(new HeroPanel(vpkPath, installDir));
+        tabPane.add(new ItemPanel(vpkPath, installDir));
+        tabPane.add(new MusicPanel(vpkPath, installDir));
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
         this.setVisible(true);

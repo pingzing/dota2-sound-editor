@@ -37,20 +37,13 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import org.apache.commons.io.FileUtils;
 
-/**
- *
- * @author
- * Image
- * 17
- */
 public abstract class EditorPanel extends JPanel
 {
-
     protected TreeModel currentTreeModel;
     protected SoundPlayer currentSound = SoundPlayer.getInstance();
     protected JTree currentTree;
     protected JComboBox currentDropdown;
-    protected String vpkDir;
+    protected String vpkPath;
     protected String installDir;
 
     abstract void populateSoundListAsTree();
@@ -220,7 +213,7 @@ public abstract class EditorPanel extends JPanel
             return null;
         }
 
-        File file = new File(vpkDir);
+        File file = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
         File entryFile = new File("");
 
