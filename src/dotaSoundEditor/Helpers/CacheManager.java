@@ -18,7 +18,8 @@ import java.util.Properties;
 
 public class CacheManager
 {
-
+    //TODO: Investigate turning this from a Singleton into something that's
+    //just available in the EditorPanel base class
     private static CacheManager cacheValidatorInstance = null;
     private Properties scriptsProperties = new Properties();
     private HashMap<String, Long> sessionCrcs = new HashMap<>();
@@ -58,65 +59,18 @@ public class CacheManager
     }
 
     /**
-     * @param
-     * scriptKey
-     * The
-     * filename
-     * of
-     * the
-     * script
-     * file.
-     * This
-     * will
-     * be
-     * used
-     * as
-     * the
-     * key
-     * of
-     * the
-     * script's
-     * CRC32
-     * in
-     * the
-     * cache.
-     * @param
-     * scriptPath
-     * The
-     * vpk-internal
-     * file
-     * path
-     * of
-     * the
-     * script
-     * file.
-     * (i.e.
+     * @param scriptKey The filename of the script file. This will be used as
+     * the key of the script's CRC32 in the cache.
+     * @param scriptPath The vpk-internal file path of the script file. (i.e.
      * dota/scripts/game_sounds_heroes/game_sounds_lina.txt)
-     * @return
-     * The
-     * old
-     * CRC
-     * value
-     * of
-     * the
-     * script
-     * that
-     * was
-     * just
-     * updated,
-     * or
-     * null
-     * if
-     * it
-     * was
-     * just
-     * added.
+     * @return The old CRC value of the script that was just updated, or null if
+     * it was just added.
      */
     public String putScript(String scriptKey, String scriptPath, long crc)
     {
         String oldCrc = scriptsProperties.setProperty(scriptKey, Long.toString(crc)) == null ? null
                 : scriptsProperties.setProperty(scriptKey, Long.toString(crc)).toString();
-        scriptsProperties.setProperty(scriptKey + PATH_SEP, scriptPath);
+        putScriptPath(scriptKey, scriptPath);
         sessionCrcs.put(scriptKey + SESSION_CRC_SEP, crc);
         return oldCrc;
     }
@@ -138,42 +92,10 @@ public class CacheManager
     }
 
     /**
-     * @param
-     * scriptKey
-     * The
-     * filename
-     * of
-     * the
-     * script
-     * whose
-     * CRC
-     * you
-     * want.
-     * @param
-     * internalCrc
-     * The
-     * CRC
-     * of
-     * the
-     * up-to-date,
-     * internal
-     * script.
-     * @return
-     * True
-     * if
-     * the
-     * CRC
-     * saved
-     * in
-     * cache
-     * is
-     * equal
-     * to
-     * the
-     * internal
-     * CRC.
-     * False
-     * otherwise.
+     * @param scriptKey The filename of the script whose CRC you want.
+     * @param internalCrc The CRC of the up-to-date, internal script.
+     * @return True if the CRC saved in cache is equal to the internal CRC.
+     * False otherwise.
      *
      */
     public boolean isUpToDate(String scriptKey, long internalCrc)
@@ -189,50 +111,10 @@ public class CacheManager
     }
 
     /**
-     * @param
-     * scriptKey
-     * The
-     * filename
-     * of
-     * the
-     * script
-     * whose
-     * CRC
-     * you
-     * want.
-     * @return
-     * The
-     * CRC
-     * value
-     * of
-     * the
-     * session-cached
-     * script.
-     * These
-     * values
-     * are
-     * retrieved
-     * and
-     * stored
-     * the
-     * first
-     * time
-     * a
-     * script
-     * is
-     * validated
-     * against
-     * cache,
-     * and
-     * cleared
-     * again
-     * on
-     * program
-     * exit.
-     * Returns
-     * 0
-     * on
-     * failure.         
+     * @param scriptKey The filename of the script whose CRC you want.
+     * @return The CRC value of the session-cached script. These values are
+     * retrieved and stored the first time a script is validated against cache,
+     * and cleared again on program exit. Returns 0 on failure.
      *
      */
     public long getSessionCrc(String scriptKey)
@@ -284,7 +166,7 @@ public class CacheManager
 
     public void saveCache() throws IOException, URISyntaxException, SecurityException, NullPointerException
     {
-        String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;                
+        String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;
         URL url = ClassLoader.getSystemResource(savePath);
         OutputStream os = new FileOutputStream(new File(url.toURI()));
         scriptsProperties.store(os, null);

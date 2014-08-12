@@ -6,7 +6,6 @@ import java.awt.Window;
 
 public class Utility
 {
-
     //TODO: Investigate placement of this, why is it in here instead of in PortraitFinder?
     public static PortraitFinder portraitFinder;
     public static void initPortraitFinder(String vpkPath)

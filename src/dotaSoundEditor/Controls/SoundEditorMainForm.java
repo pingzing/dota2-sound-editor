@@ -295,11 +295,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             JOptionPane.showMessageDialog(this, "Error: Unable to save scripts cache."
                     + "\nDetails: " + ex.getMessage(),"Error saving cache",JOptionPane.ERROR_MESSAGE);
-        }        
-        finally
-        {
             System.exit(1);
-        }
+        }                
     }//GEN-LAST:event_formWindowClosing
 
     private void JMenuInstallDirActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_JMenuInstallDirActionPerformed

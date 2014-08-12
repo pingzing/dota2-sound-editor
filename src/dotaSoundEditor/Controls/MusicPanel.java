@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -28,7 +30,7 @@ import org.apache.commons.io.FileUtils;
 //TODO: Deal with music having been suddenly split up into a bunch of different places
 public final class MusicPanel extends EditorPanel
 {
-
+    Executor e = Executors.newSingleThreadExecutor();
     public MusicPanel()
     {
         initComponents();
@@ -345,8 +347,7 @@ public final class MusicPanel extends EditorPanel
         for (NamedMusic nm : namedMusicList)
         {
             currentDropdown.addItem(nm);
-        }
-        populateSoundListAsTree();
+        }        
     }
 
     @Override
@@ -434,7 +435,15 @@ public final class MusicPanel extends EditorPanel
     {//GEN-HEADEREND:event_musicDropdownItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED)
         {
-            populateSoundListAsTree();
+             //In a background thread so the app doesn't choke on fast scroling
+            e.execute(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    populateSoundListAsTree();
+                }
+            });
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
         }

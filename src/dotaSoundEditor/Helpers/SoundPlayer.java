@@ -16,6 +16,8 @@ import javax.swing.JOptionPane;
 
 public final class SoundPlayer
 {
+    //TODO: Investigate turning this from a Singleton into something that just
+    //lives in the EditorPanel base class
     //Singleton stuff
     private static SoundPlayer soundPlayerInstance = null;
     //Objects that make noise

@@ -35,12 +35,11 @@ import org.apache.commons.io.FileUtils;
 
 /**
  *
- * @author
- * Image
- * 17
+ * @author Image 17
  */
 public final class ItemPanel extends EditorPanel
 {
+
     PortraitFinder portraitFinder;
 
     public ItemPanel()
@@ -55,9 +54,10 @@ public final class ItemPanel extends EditorPanel
         this.setName("Items");
         initComponents();
         currentTree = itemTree;
-        portraitFinder = Utility.portraitFinder;       
+        portraitFinder = Utility.portraitFinder;
         this.populateSoundListAsTree();
         initTreeSelectionListener();
+        fillImageFrame("default");
     }
 
     @SuppressWarnings("unchecked")
@@ -116,7 +116,7 @@ public final class ItemPanel extends EditorPanel
     // End of variables declaration//GEN-END:variables
 
     private VPKEntry getItemScriptFile(String nop)
-    {        
+    {
         String internalScriptPath = "scripts/game_sounds_items.txt";
         File vpkFile = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
@@ -124,31 +124,31 @@ public final class ItemPanel extends EditorPanel
         {
             vpk.load(vpkFile);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-             JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(this,
                     "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
                     "Error opening VPK", JOptionPane.ERROR_MESSAGE);
-             ex.printStackTrace();
-             return null;
+            ex.printStackTrace();
+            return null;
         }
-        
+
         VPKEntry entry = vpk.getEntry(internalScriptPath);
         return entry;
     }
-    
+
     private void writeItemScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
     {
         File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString());
         boolean fileExistsLocally = existsChecker.exists() ? true : false;
-        if(fileExistsLocally && !overwriteExisting)
+        if (fileExistsLocally && !overwriteExisting)
         {
             return;
         }
-                
+
         File entryFile = new File(Paths.get(installDir + "\\dota\\").toFile(), entryToWrite.getPath());
         File entryDir = entryFile.getParentFile();
-        if(entryDir != null && !entryDir.exists())
+        if (entryDir != null && !entryDir.exists())
         {
             entryDir.mkdirs();
         }
@@ -156,29 +156,29 @@ public final class ItemPanel extends EditorPanel
         {
             fc.write(entryToWrite.getData());
         }
-        catch(IOException ex)
+        catch (IOException ex)
         {
             JOptionPane.showMessageDialog(this,
                     "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(),
                     "Error writing script file", JOptionPane.ERROR_MESSAGE);
         }
-    }      
+    }
 
     @Override
     void populateSoundListAsTree()
     {
         currentTree.setEditable(false);
-        String scriptKey = "game_sounds_items.txt";        
+        String scriptKey = "game_sounds_items.txt";
         File scriptFile = new File(getCurrentScriptString());
         VPKEntry entry;
         boolean needsValidation = false;
-               
+
         if (!scriptFile.isFile())
         {
             entry = getItemScriptFile("");
             this.writeItemScriptFile(entry, false);
             this.updateCache(scriptKey, entry.getCRC32());
-            scriptFile = new File(getCurrentScriptString());            
+            scriptFile = new File(getCurrentScriptString());
         }
         else
         {
@@ -186,11 +186,11 @@ public final class ItemPanel extends EditorPanel
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
-        if(needsValidation)
+        if (needsValidation)
         {
-            CacheManager cm = CacheManager.getInstance();            
+            CacheManager cm = CacheManager.getInstance();
             boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/" + scriptKey);
-            if(!isUpToDate)
+            if (!isUpToDate)
             {
                 this.writeItemScriptFile(cm.getCachedVpkEntry(), true);
                 mergeNewChanges(scriptTree, scriptFile);
@@ -198,7 +198,7 @@ public final class ItemPanel extends EditorPanel
             }
         }
         this.currentTreeModel = scriptTree;
-        
+
         //TODO: Break this out into a separate method
         DefaultListModel scriptList = new DefaultListModel();
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
@@ -209,11 +209,11 @@ public final class ItemPanel extends EditorPanel
         for (int i = 0; i < childCount; i++)
         {
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
-            if(nodeValue.trim().startsWith("//"))
+            if (nodeValue.trim().startsWith("//"))
             {
                 continue;
             }
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));            
+            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
 
             for (String s : wavePathsList)
@@ -229,27 +229,27 @@ public final class ItemPanel extends EditorPanel
     }
 
     @Override
-    void fillImageFrame(Object _selectedItem) throws IOException
+    void fillImageFrame(Object _selectedItem)
     {
-        NamedItem selectedItem;
-        if (_selectedItem instanceof NamedItem)
-        {
-            selectedItem = (NamedItem) _selectedItem;
-        }
-        else
-        {
-            return;
-        }
+        NamedItem selectedItem = new NamedItem();
         try
         {
-            itemImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.getIconName())));
+            if (_selectedItem instanceof NamedItem)
+            {
+                selectedItem = (NamedItem) _selectedItem;
+                itemImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.getIconName())));
+            }
+            else
+            {
+                itemImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait("default")));
+            }
         }
         catch (NullPointerException ex)
         {
             System.err.println("Icon not found for item: " + selectedItem.getFriendlyName());
             itemImageLabel.setIcon(new ImageIcon(""));
         }
-    } 
+    }
 
     @Override
     void revertButtonActionPerformed(ActionEvent evt)
@@ -343,7 +343,7 @@ public final class ItemPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());            
+            this.playSelectedTreeSound(currentTree.getSelectionPath());
         }
     }
 
@@ -401,7 +401,7 @@ public final class ItemPanel extends EditorPanel
             advancedButton.setMnemonic('a');
             currentTree.setEditable(false);
         }
-    }      
+    }
 
     private void initTreeSelectionListener()
     {
@@ -430,21 +430,18 @@ public final class ItemPanel extends EditorPanel
         {
             node = (DefaultMutableTreeNode) node.getParent();
         }
-        try
-        {
-            NamedItem clickedItem = new NamedItem(node.getUserObject().toString());
-            fillImageFrame(clickedItem);
-            itemLabel.setText("Item: " + clickedItem.getFriendlyName());
-        }
-        catch (IOException ex)
-        {
-            System.err.println(ex.getMessage());
-        }
+
+        NamedItem clickedItem = new NamedItem(node.getUserObject().toString());
+        fillImageFrame(clickedItem);
+        itemLabel.setText("Item: " + clickedItem.getFriendlyName());
+
     }
-    
+
     //This panel doesn't use a dropdown box. No need to implement.
     @Override
-    void populateDropdownBox() {    }
+    void populateDropdownBox()
+    {
+    }
 
     @Override
     String getCurrentScriptString()

@@ -17,10 +17,11 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -32,7 +33,7 @@ import org.apache.commons.io.FileUtils;
 
 public class HeroPanel extends EditorPanel
 {
-
+    Executor e = Executors.newSingleThreadExecutor();
     PortraitFinder portraitFinder;
 
     //Just used for designer compatibility. Should never be called from code.
@@ -131,8 +132,16 @@ public class HeroPanel extends EditorPanel
         //TODO: Find a way to inform the Advanced button that it needs to reset.
         if (evt.getStateChange() == ItemEvent.SELECTED)
         {
-            System.out.println(currentDropdown.getSelectedItem().toString());
-            populateSoundListAsTree();
+            System.out.println("Dropdown selected: " + currentDropdown.getSelectedItem().toString());
+            //In a background thread so the app doesn't choke on fast scroling
+            e.execute(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    populateSoundListAsTree();
+                }
+            });
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
             try
@@ -197,17 +206,15 @@ public class HeroPanel extends EditorPanel
         {
             NamedHero tempHero = (NamedHero) h;
             currentDropdown.addItem(tempHero);
-        }
-
-        populateSoundListAsTree();
+        }       
     }
 
     @Override
     protected void populateSoundListAsTree()
     {
+        currentTree.setEditable(false);
         NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
 
-        currentTree.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
         String scriptKey = "game_sounds_" + selectedHero.getInternalName() + ".txt".toLowerCase();
@@ -249,11 +256,11 @@ public class HeroPanel extends EditorPanel
         for (int i = 0; i < childCount; i++)
         {
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
-            if(nodeValue.trim().startsWith("//"))
+            if (nodeValue.trim().startsWith("//"))
             {
                 continue;
             }
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));            
+            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
 
             for (String s : wavePathsList)
@@ -264,7 +271,7 @@ public class HeroPanel extends EditorPanel
             ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
         }
 
-        currentTree.setModel(soundListTreeModel);
+        currentTree.setModel(soundListTreeModel);        
     }
 
     private VPKEntry getHeroScriptFile(String heroName)
@@ -481,7 +488,7 @@ public class HeroPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());            
+            this.playSelectedTreeSound(currentTree.getSelectionPath());
         }
     }
 
@@ -533,13 +540,13 @@ public class HeroPanel extends EditorPanel
     String getCustomSoundPathString()
     {
         return "custom\\" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + "\\";
-    }   
+    }
 
     @Override
     void updateCache(String scriptKey, long internalCrc)
     {
         CacheManager cm = CacheManager.getInstance();
-        String internalPath = "scripts/game_sounds_heroes/" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + ".txt";
+        String internalPath = "scripts/game_sounds_heroes/game_sounds_" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + ".txt";
         cm.putScript(scriptKey, internalPath, internalCrc);
     }
 }
