@@ -4,6 +4,7 @@ import dotaSoundEditor.Helpers.PortraitFinder;
 import dotaSoundEditor.Helpers.ScriptParser;
 import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
+import dotaSoundEditor.Helpers.CacheManager;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.event.ActionEvent;
@@ -16,11 +17,13 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -207,15 +210,37 @@ public class HeroPanel extends EditorPanel
         currentTree.setEditable(false);
         Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
+        String scriptKey = "game_sounds_" + selectedHero.getInternalName() + ".txt".toLowerCase();
+        VPKEntry entry;
+        boolean needsValidation = false;
 
-        //Defer writing script file to disk until we're sure it doesn't exist
+        //if it doesn't exist yet, don't bother validating, and just write it out
         if (!scriptFile.isFile())
         {
-            this.getAndWriteHeroScriptFile(selectedHero.getInternalName());
+            entry = this.getHeroScriptFile(selectedHero.getInternalName());
+            this.writeHeroScriptFile(entry, false);
+            this.updateCache(scriptKey, entry.getCRC32());
+        }
+        else //if it exists, we need to validate it
+        {
+            needsValidation = true;
         }
         ScriptParser parser = new ScriptParser(scriptPath.toFile());
         TreeModel scriptTree = parser.getTreeModel();
+        if (needsValidation)
+        {
+            CacheManager cm = CacheManager.getInstance();
+            boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/game_sounds_heroes/" + scriptKey);
+            if (!isUpToDate)
+            {
+                this.writeHeroScriptFile(cm.getCachedVpkEntry(), true);
+                mergeNewChanges(scriptTree, scriptPath);
+                this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
+            }
+        }
         this.currentTreeModel = scriptTree;
+
+        //TODO: Break this out into separate method
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
 
@@ -223,8 +248,12 @@ public class HeroPanel extends EditorPanel
         ArrayList<String> wavePathsList = new ArrayList<>();
         for (int i = 0; i < childCount; i++)
         {
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
+            if(nodeValue.trim().startsWith("//"))
+            {
+                continue;
+            }
+            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));            
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
 
             for (String s : wavePathsList)
@@ -238,64 +267,55 @@ public class HeroPanel extends EditorPanel
         currentTree.setModel(soundListTreeModel);
     }
 
-    private VPKEntry getAndWriteHeroScriptFile(String heroName)
+    private VPKEntry getHeroScriptFile(String heroName)
     {
         heroName = heroName.toLowerCase();
-
-        //Don't bother looking if we already have a stored copy locally.
-        File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + heroName + ".txt").toString());
-        boolean fileExistsLocally = false;
-        if (existsChecker.exists())
-        {
-            fileExistsLocally = true;
-        }
-
-        File file = new File(vpkPath);
+        String internalScriptPath = "scripts/game_sounds_heroes/game_sounds_" + heroName + ".txt";
+        File vpkFile = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
         try
         {
-            vpk.load(file);
+            vpk.load(vpkFile);
         }
         catch (Exception ex)
         {
-            System.err.println("Can't open archive: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
+                    "Error opening VPK", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
             return null;
         }
 
-        Path destPath = Paths.get(installDir + "\\dota\\");
-        File destDir = destPath.toFile();
+        VPKEntry entry = vpk.getEntry(internalScriptPath);
+        return entry;
+    }
 
-        //TODO: Change to to .getEntriesForDir(scriptDir)
-        for (VPKEntry entry : vpk.getEntries())
+    //TODO: Possible model for abstracing into the parent
+    private void writeHeroScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
+    {
+        File existsChecker = new File(Paths.get(installDir + entryToWrite.getPath()).toString());
+        boolean fileExistsLocally = existsChecker.exists() ? true : false;
+        if (fileExistsLocally && !overwriteExisting)
         {
-            if (entry.getName().contains("game_sounds_" + heroName))
-            {
-                //If it already exists, break out and move on.
-                if (fileExistsLocally)
-                {
-                    return entry;
-                }
-
-                File entryFile = new File(destDir, entry.getPath());
-
-                File entryDir = entryFile.getParentFile();
-                if (entryDir != null && !entryDir.exists())
-                {
-                    entryDir.mkdirs();
-                }
-
-                try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
-                {
-                    fc.write(entry.getData());
-                    return entry;
-                }
-                catch (IOException ex)
-                {
-                    System.err.println("Can't write " + entry.getPath() + ": " + ex.getMessage());
-                }
-            }
+            return;
         }
-        return null;
+
+        File entryFile = new File(Paths.get(installDir + "\\dota\\").toFile(), entryToWrite.getPath());
+        File entryDir = entryFile.getParentFile();
+        if (entryDir != null && !entryDir.exists())
+        {
+            entryDir.mkdirs();
+        }
+        try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
+        {
+            fc.write(entryToWrite.getData());
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(this,
+                    "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(),
+                    "Error writing script file", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     @Override
@@ -461,11 +481,7 @@ public class HeroPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            boolean regenSound = this.playSelectedTreeSound(currentTree.getSelectionPath());
-            if(regenSound)
-            {
-                this.revertAllButtonActionPerformed(null);
-            }
+            this.playSelectedTreeSound(currentTree.getSelectionPath());            
         }
     }
 
@@ -517,5 +533,13 @@ public class HeroPanel extends EditorPanel
     String getCustomSoundPathString()
     {
         return "custom\\" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + "\\";
+    }   
+
+    @Override
+    void updateCache(String scriptKey, long internalCrc)
+    {
+        CacheManager cm = CacheManager.getInstance();
+        String internalPath = "scripts/game_sounds_heroes/" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + ".txt";
+        cm.putScript(scriptKey, internalPath, internalCrc);
     }
 }

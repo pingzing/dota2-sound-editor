@@ -12,14 +12,20 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Properties;
 
 public class CacheManager
 {
+
     private static CacheManager cacheValidatorInstance = null;
-    Properties scriptsProperties = new Properties();
-    final String SCRIPTS_FILE_NAME = "scripts.properties";
-    final String PATH_SEP = "_path";
+    private Properties scriptsProperties = new Properties();
+    private HashMap<String, Long> sessionCrcs = new HashMap<>();
+    private VPKEntry cachedEntry = null;
+    private final String SCRIPTS_FILE_NAME = "scripts.properties";
+    private final String PATH_SEP = "_path";
+    private final String SESSION_CRC_SEP = "_latestcrc";
 
     private CacheManager()
     {
@@ -27,7 +33,7 @@ public class CacheManager
         {
             try
             {
-                scriptsProperties.loadFromXML(new FileInputStream(SCRIPTS_FILE_NAME));
+                scriptsProperties.load(new FileInputStream(SCRIPTS_FILE_NAME));
             }
             catch (FileNotFoundException fnfe)
             {
@@ -51,11 +57,73 @@ public class CacheManager
         return cacheValidatorInstance;
     }
 
+    /**
+     * @param
+     * scriptKey
+     * The
+     * filename
+     * of
+     * the
+     * script
+     * file.
+     * This
+     * will
+     * be
+     * used
+     * as
+     * the
+     * key
+     * of
+     * the
+     * script's
+     * CRC32
+     * in
+     * the
+     * cache.
+     * @param
+     * scriptPath
+     * The
+     * vpk-internal
+     * file
+     * path
+     * of
+     * the
+     * script
+     * file.
+     * (i.e.
+     * dota/scripts/game_sounds_heroes/game_sounds_lina.txt)
+     * @return
+     * The
+     * old
+     * CRC
+     * value
+     * of
+     * the
+     * script
+     * that
+     * was
+     * just
+     * updated,
+     * or
+     * null
+     * if
+     * it
+     * was
+     * just
+     * added.
+     */
     public String putScript(String scriptKey, String scriptPath, long crc)
     {
-        String oldCrc = scriptsProperties.setProperty(scriptKey, ((Long) crc).toString()).toString();
+        String oldCrc = scriptsProperties.setProperty(scriptKey, Long.toString(crc)) == null ? null
+                : scriptsProperties.setProperty(scriptKey, Long.toString(crc)).toString();
         scriptsProperties.setProperty(scriptKey + PATH_SEP, scriptPath);
+        sessionCrcs.put(scriptKey + SESSION_CRC_SEP, crc);
         return oldCrc;
+    }
+
+    public void putScriptPath(String scriptKey, String scriptPath)
+    {
+        scriptsProperties.setProperty(scriptKey + PATH_SEP, scriptPath);
     }
 
     public String removeScript(String scriptKey)
@@ -64,25 +132,116 @@ public class CacheManager
         if (removed != null)
         {
             scriptsProperties.remove(scriptKey + PATH_SEP);
+            sessionCrcs.remove(scriptKey + SESSION_CRC_SEP);
         }
         return removed.toString();
     }
 
-    public boolean isUpToDate(String scriptKey) throws ScriptNotFoundException
+    /**
+     * @param
+     * scriptKey
+     * The
+     * filename
+     * of
+     * the
+     * script
+     * whose
+     * CRC
+     * you
+     * want.
+     * @param
+     * internalCrc
+     * The
+     * CRC
+     * of
+     * the
+     * up-to-date,
+     * internal
+     * script.
+     * @return
+     * True
+     * if
+     * the
+     * CRC
+     * saved
+     * in
+     * cache
+     * is
+     * equal
+     * to
+     * the
+     * internal
+     * CRC.
+     * False
+     * otherwise.
+     *
+     */
+    public boolean isUpToDate(String scriptKey, long internalCrc)
     {
         long cachedCrc;
         Object value = scriptsProperties.getProperty(scriptKey);
         if (value == null)
         {
-            throw new ScriptNotFoundException(scriptKey + " has no CRC value cached.");
+            return false;
         }
         cachedCrc = Long.parseLong(value.toString());
-        long internalCrc = getInternalCrc(scriptKey);
         return cachedCrc == internalCrc;
     }
 
-    private long getInternalCrc(String scriptKey)
+    /**
+     * @param
+     * scriptKey
+     * The
+     * filename
+     * of
+     * the
+     * script
+     * whose
+     * CRC
+     * you
+     * want.
+     * @return
+     * The
+     * CRC
+     * value
+     * of
+     * the
+     * session-cached
+     * script.
+     * These
+     * values
+     * are
+     * retrieved
+     * and
+     * stored
+     * the
+     * first
+     * time
+     * a
+     * script
+     * is
+     * validated
+     * against
+     * cache,
+     * and
+     * cleared
+     * again
+     * on
+     * program
+     * exit.
+     * Returns
+     * 0
+     * on
+     * failure.         
+     *
+     */
+    public long getSessionCrc(String scriptKey)
     {
+        //check local table first
+        if (sessionCrcs.containsKey(scriptKey + SESSION_CRC_SEP))
+        {
+            return sessionCrcs.get(scriptKey + SESSION_CRC_SEP);
+        }
         String vpkPath = UserPrefs.getInstance().getVPKPath();
         VPKArchive vpk = new VPKArchive();
         long internalCrc = 0;
@@ -99,6 +258,7 @@ public class CacheManager
             {
                 throw new ScriptNotFoundException("Unable to locate VPKEntry at " + scriptPath);
             }
+            cachedEntry = scriptEntry;
         }
         catch (ScriptNotFoundException | VPKException ex)
         {
@@ -107,31 +267,26 @@ public class CacheManager
         }
         catch (IOException ioe)
         {
-            System.out.println("Failed to load PVK in CacheManager. Details: " + ioe.getMessage());
+            System.out.println("Failed to load VPK in CacheManager. Details: " + ioe.getMessage());
             ioe.printStackTrace();
         }
         finally
         {
+            sessionCrcs.put(scriptKey + SESSION_CRC_SEP, internalCrc);
             return internalCrc;
         }
     }
 
-    public void saveCache()
+    public VPKEntry getCachedVpkEntry()
     {
-        try
-        {
-            URL url = ClassLoader.getSystemResource("/dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME);
-            OutputStream os = new FileOutputStream(new File(url.toURI()));
-            scriptsProperties.storeToXML(os, null);
-        }
-        catch (URISyntaxException use)
-        {
-            System.out.println("Unable to convert " + SCRIPTS_FILE_NAME + " filename into URI.");
-            use.printStackTrace();
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
+        return cachedEntry;
+    }
+
+    public void saveCache() throws IOException, URISyntaxException, SecurityException, NullPointerException
+    {
+        String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;                
+        URL url = ClassLoader.getSystemResource(savePath);
+        OutputStream os = new FileOutputStream(new File(url.toURI()));
+        scriptsProperties.store(os, null);
     }
 }

@@ -8,6 +8,7 @@ import dotaSoundEditor.Helpers.SoundPlayer;
 import dotaSoundEditor.Helpers.ScriptParser;
 import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
+import dotaSoundEditor.Helpers.CacheManager;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.event.MouseAdapter;
@@ -39,12 +40,13 @@ import org.apache.commons.io.FileUtils;
 
 public abstract class EditorPanel extends JPanel
 {
+
     protected TreeModel currentTreeModel;
     protected SoundPlayer currentSound = SoundPlayer.getInstance();
     protected JTree currentTree;
     protected JComboBox currentDropdown;
     protected String vpkPath;
-    protected String installDir;
+    protected String installDir;    
 
     abstract void populateSoundListAsTree();
 
@@ -64,7 +66,9 @@ public abstract class EditorPanel extends JPanel
 
     abstract String getCurrentScriptString();
 
-    abstract String getCustomSoundPathString();
+    abstract String getCustomSoundPathString();    
+
+    abstract void updateCache(String scriptString, long internalCrc);
 
     protected final File promptUserForNewFile(String wavePath)
     {
@@ -144,28 +148,19 @@ public abstract class EditorPanel extends JPanel
         currentTree.addMouseListener(ml);
     }
 
-    protected boolean playSelectedTreeSound(TreePath selPath)
-    {
-        boolean regenScript = true;
+    protected void playSelectedTreeSound(TreePath selPath)
+    {        
         try
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
             File soundFile = createSoundFileFromWaveString(waveString);
-            if (soundFile == null)
-            {
-                return regenScript;
-            }
             currentSound.loadSound(soundFile.getAbsolutePath());
-            currentSound.playSound();
-            regenScript = false;
-            return regenScript;
+            currentSound.playSound();                        
         }
         catch (Exception ex)
         {
-            JOptionPane.showMessageDialog(null, "The selected node does not represent a valid sound file.", "Error", JOptionPane.ERROR_MESSAGE);
-            regenScript = false;
-            return regenScript;
+            JOptionPane.showMessageDialog(null, "The selected node does not represent a valid sound file.", "Error", JOptionPane.ERROR_MESSAGE);                        
         }
     }
 
@@ -256,20 +251,7 @@ public abstract class EditorPanel extends JPanel
                 System.err.println("Can't open archive: " + ex.getMessage());
             }
             waveSubstring = "sound/" + waveSubstring;
-            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());
-            if (entry == null)
-            {
-                int result = JOptionPane.showConfirmDialog(this, "A default game sound cannot be found. "
-                        + "This usually happens when Valve "
-                        + "\nchanges the internal location of script files. It's likely that many "
-                        + "\nentries for this script file are now out of date. "
-                        + "\n\nWould you like to regenerate the script file? This "
-                        + "will erase any changes you've made.", "Script File Out of Date", JOptionPane.YES_NO_OPTION);
-                if (result == JOptionPane.YES_OPTION)
-                {
-                    return null;
-                }
-            }
+            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());           
 
             entryFile = entry.getType().contains("wav")
                     ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
@@ -365,5 +347,106 @@ public abstract class EditorPanel extends JPanel
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public boolean validateScriptFile(String scriptKey, String scriptPath)
+    {
+        CacheManager cm = CacheManager.getInstance();        
+        cm.putScriptPath(scriptKey, scriptPath);
+        long crc = cm.getSessionCrc(scriptKey);
+        if(crc == 0)
+        {
+            return false;
+        }
+        return validateScriptFile(scriptKey, crc);
+    }
+    
+    public boolean validateScriptFile(String scriptKey, long internalCrc)
+    {
+        CacheManager cm = CacheManager.getInstance();
+        if (!cm.isUpToDate(scriptKey, internalCrc))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
+    /**
+     * 
+     * @param oldTree The tree that was previously in use.
+     * @param scriptPath The full filepath to the script.
+     * @return The merged tree.
+     */
+    TreeModel mergeNewChanges(TreeModel oldTree, String scriptPath)
+    {
+        return mergeNewChanges(oldTree, new File(scriptPath));
+    }
+    
+    /**
+     * @param oldTree The tree that was previously in use
+     * @param scriptPath The full filepath to the script. 
+     *@return The merged tree.
+     */
+    TreeModel mergeNewChanges(TreeModel oldTree, Path scriptPath)
+    {
+        return mergeNewChanges(oldTree, scriptPath.toFile());
+    }
+         
+    /**
+     * @param oldTree The tree that was previously in use
+     * @param scriptFilePath A File object pointing to or containing a script.
+     *@return The merged tree.
+     */
+    TreeModel mergeNewChanges(TreeModel oldTree, File scriptFilePath)
+    {
+        //Look for any modified wavestrings. Save their nodes, and note their indices.
+        //Parse in updated script tree, replace nodes at indices with saved nodes.   
+        //Return merged tree
+        System.out.println("Running a merge operation!");
+
+        TreeNode oldRoot = (TreeNode) oldTree.getRoot();
+        ArrayList<DefaultMutableTreeNode> savedNodeList = new ArrayList<>();
+        for (Enumeration e = ((DefaultMutableTreeNode) oldRoot).depthFirstEnumeration(); e.hasMoreElements() && oldRoot != null;)
+        {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
+            if (node.getUserObject().toString().contains("custom"))
+            {
+                savedNodeList.add(node);
+            }
+        }
+        ScriptParser parser = new ScriptParser(scriptFilePath);
+        TreeModel newTree = parser.getTreeModel();
+        TreeNode newRoot = (TreeNode) newTree.getRoot();
+        for (DefaultMutableTreeNode savedNode : savedNodeList)
+        {
+            int rndwaveIndex = -1;
+            int childIndex;
+            int parentIndex;
+            DefaultMutableTreeNode parent = (DefaultMutableTreeNode) savedNode.getParent();
+            if (parent.getUserObject().toString().contains("rndwave"))
+            {
+                rndwaveIndex = parent.getParent().getIndex(parent);
+                parent = (DefaultMutableTreeNode) parent.getParent();
+            }
+            parentIndex = parent.getParent().getIndex(parent);
+            childIndex = parent.getIndex(savedNode);
+
+            TreeNode newParentNode = newRoot.getChildAt(parentIndex);
+            TreeNode newChildNode;
+            if (rndwaveIndex != -1)
+            {
+                newChildNode = newParentNode.getChildAt(rndwaveIndex);
+                newChildNode = newChildNode.getChildAt(childIndex);
+            }
+            else
+            {
+                newChildNode = newParentNode.getChildAt(childIndex);
+            }
+            newChildNode = savedNode;
+        }
+        return newTree;
     }
 }

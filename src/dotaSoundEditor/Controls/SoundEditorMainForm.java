@@ -1,5 +1,6 @@
 package dotaSoundEditor.Controls;
 
+import dotaSoundEditor.Helpers.CacheManager;
 import dotaSoundEditor.Helpers.PortraitFinder;
 import dotaSoundEditor.Helpers.SoundPlayer;
 import dotaSoundEditor.UserPrefs;
@@ -10,6 +11,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.*;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -284,6 +286,20 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private void formWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosing
     {//GEN-HEADEREND:event_formWindowClosing
         deleteScratchFiles();
+        CacheManager cm = CacheManager.getInstance();
+        try
+        {
+        cm.saveCache();
+        }
+        catch(IOException | SecurityException | URISyntaxException | NullPointerException ex)
+        {
+            JOptionPane.showMessageDialog(this, "Error: Unable to save scripts cache."
+                    + "\nDetails: " + ex.getMessage(),"Error saving cache",JOptionPane.ERROR_MESSAGE);
+        }        
+        finally
+        {
+            System.exit(1);
+        }
     }//GEN-LAST:event_formWindowClosing
 
     private void JMenuInstallDirActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_JMenuInstallDirActionPerformed

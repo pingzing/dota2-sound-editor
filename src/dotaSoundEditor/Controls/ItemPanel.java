@@ -8,6 +8,7 @@ import dotaSoundEditor.Helpers.PortraitFinder;
 import dotaSoundEditor.Helpers.ScriptParser;
 import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
+import dotaSoundEditor.Helpers.CacheManager;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.event.ActionEvent;
@@ -22,6 +23,7 @@ import java.util.Scanner;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -113,69 +115,91 @@ public final class ItemPanel extends EditorPanel
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 
-    private VPKEntry getAndWriteItemScriptFile()
-    {
-        File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString());
-        boolean fileExistsLocally = existsChecker.exists() ? true : false;
-
+    private VPKEntry getItemScriptFile(String nop)
+    {        
+        String internalScriptPath = "scripts/game_sounds_items.txt";
         File vpkFile = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
         try
         {
             vpk.load(vpkFile);
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
-            System.err.println("Can't open VPK Archive. Details: " + ex.getMessage());
-            return null;
+             JOptionPane.showMessageDialog(this,
+                    "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
+                    "Error opening VPK", JOptionPane.ERROR_MESSAGE);
+             ex.printStackTrace();
+             return null;
         }
-
-        File destDir = Paths.get(installDir + "\\dota\\").toFile();
-
-        //TODO: change to vpk.getentry()
-        for (VPKEntry entry : vpk.getEntries())
-        {
-            if (entry.getName().contains("game_sounds_items"))
-            {
-                if (fileExistsLocally)
-                {
-                    return entry;
-                }
-
-                File entryFile = new File(destDir, entry.getPath());
-                File entryDir = entryFile.getParentFile();
-                if (entryDir != null && !entryDir.exists())
-                {
-                    entryDir.mkdirs();
-                }
-
-                try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
-                {
-                    fc.write(entry.getData());
-                    return entry;
-                }
-                catch (IOException ex)
-                {
-                    System.err.println("Can't write " + entry.getPath() + ": " + ex.getMessage());
-                }
-            }
-        }
-        return null;
+        
+        VPKEntry entry = vpk.getEntry(internalScriptPath);
+        return entry;
     }
+    
+    private void writeItemScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
+    {
+        File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString());
+        boolean fileExistsLocally = existsChecker.exists() ? true : false;
+        if(fileExistsLocally && !overwriteExisting)
+        {
+            return;
+        }
+                
+        File entryFile = new File(Paths.get(installDir + "\\dota\\").toFile(), entryToWrite.getPath());
+        File entryDir = entryFile.getParentFile();
+        if(entryDir != null && !entryDir.exists())
+        {
+            entryDir.mkdirs();
+        }
+        try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
+        {
+            fc.write(entryToWrite.getData());
+        }
+        catch(IOException ex)
+        {
+            JOptionPane.showMessageDialog(this,
+                    "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(),
+                    "Error writing script file", JOptionPane.ERROR_MESSAGE);
+        }
+    }      
 
     @Override
     void populateSoundListAsTree()
     {
         currentTree.setEditable(false);
+        String scriptKey = "game_sounds_items.txt";        
         File scriptFile = new File(getCurrentScriptString());
+        VPKEntry entry;
+        boolean needsValidation = false;
+               
         if (!scriptFile.isFile())
         {
-            this.getAndWriteItemScriptFile();
-            scriptFile = new File(getCurrentScriptString());
+            entry = getItemScriptFile("");
+            this.writeItemScriptFile(entry, false);
+            this.updateCache(scriptKey, entry.getCRC32());
+            scriptFile = new File(getCurrentScriptString());            
+        }
+        else
+        {
+            needsValidation = true;
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
+        if(needsValidation)
+        {
+            CacheManager cm = CacheManager.getInstance();            
+            boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/" + scriptKey);
+            if(!isUpToDate)
+            {
+                this.writeItemScriptFile(cm.getCachedVpkEntry(), true);
+                mergeNewChanges(scriptTree, scriptFile);
+                this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
+            }
+        }
         this.currentTreeModel = scriptTree;
+        
+        //TODO: Break this out into a separate method
         DefaultListModel scriptList = new DefaultListModel();
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
@@ -319,11 +343,7 @@ public final class ItemPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            boolean regenSound = this.playSelectedTreeSound(currentTree.getSelectionPath());
-            if(regenSound)
-            {
-                this.revertAllButtonActionPerformed(null);
-            }
+            this.playSelectedTreeSound(currentTree.getSelectionPath());            
         }
     }
 
@@ -446,5 +466,13 @@ public final class ItemPanel extends EditorPanel
     String getCustomSoundPathString()
     {
         return ")custom/items/";
+    }
+
+    @Override
+    void updateCache(String scriptKey, long internalCrc)
+    {
+        CacheManager cm = CacheManager.getInstance();
+        String internalPath = "scripts/game_sounds_items.txt";
+        cm.putScript(scriptKey, internalPath, internalCrc);
     }
 }

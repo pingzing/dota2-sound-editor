@@ -9,6 +9,7 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,8 +62,7 @@ public final class MusicPanel extends EditorPanel
         String fn = fileName.replace("\\", "/"); //jVPKLib only uses forward slashes in paths.
         return vpk.getEntry(fn);                
     }
-
-    //TODO: Use this as a model and see if we can't at least turn it and the one below into an abstract pair of methods   
+    
     private void writeMusicScriptFile(VPKEntry entryToWrite)
     {
         File existsChecker = new File(Paths.get(installDir + entryToWrite.getPath()).toString());
@@ -95,16 +95,39 @@ public final class MusicPanel extends EditorPanel
     {
         currentTree.setEditable(false);
         File scriptFile = new File(getCurrentScriptString());
+        String scriptKey = ((NamedMusic)currentDropdown.getSelectedItem()).getInternalName().toLowerCase() + ".txt";        
+        VPKEntry entry;
+        boolean needsValidation = false;
         if (!scriptFile.isFile())
         {
             String currentMusicPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
-            VPKEntry scriptEntry = getMusicScriptFile(currentMusicPath);
-            writeMusicScriptFile(scriptEntry);
+            entry = getMusicScriptFile(currentMusicPath);
+            writeMusicScriptFile(entry);
             scriptFile = new File(getCurrentScriptString());
+            this.updateCache(scriptKey, entry.getCRC32());
+        }
+        else
+        {
+            needsValidation = true;
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
-        this.currentTreeModel = scriptTree;        
+        if(needsValidation)
+        {
+            CacheManager cm = CacheManager.getInstance();
+            String internalScriptPath = ((NamedMusic)currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();        
+            internalScriptPath = internalScriptPath.replace("\\", "/");
+            boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
+            if(!isUpToDate)
+            {
+                this.writeMusicScriptFile(cm.getCachedVpkEntry());
+                mergeNewChanges(scriptTree, scriptFile);
+                this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
+            }
+        }
+        this.currentTreeModel = scriptTree;  
+        
+        //TODO: Break this out into separate method
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
 
@@ -149,11 +172,7 @@ public final class MusicPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            boolean regenSound = this.playSelectedTreeSound(currentTree.getSelectionPath());
-            if(regenSound)
-            {
-                this.revertAllButtonActionPerformed(null);
-            }
+            this.playSelectedTreeSound(currentTree.getSelectionPath());            
         }
     }
 
@@ -360,4 +379,13 @@ public final class MusicPanel extends EditorPanel
     private javax.swing.JLabel musicLabel;
     private javax.swing.JTree musicTree;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    void updateCache(String scriptKey, long internalCrc)
+    {
+        CacheManager cm = CacheManager.getInstance();
+        String internalPath = ((NamedMusic)currentDropdown.getSelectedItem()).getFilePath().toString();
+        internalPath = internalPath.replace("\\", "/");
+        cm.putScript(scriptKey, internalPath, internalCrc);
+    }
 }
