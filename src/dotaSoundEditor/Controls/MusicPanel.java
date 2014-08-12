@@ -8,12 +8,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Scanner;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -60,9 +63,9 @@ public final class MusicPanel extends EditorPanel
         }
 
         String fn = fileName.replace("\\", "/"); //jVPKLib only uses forward slashes in paths.
-        return vpk.getEntry(fn);                
+        return vpk.getEntry(fn);
     }
-    
+
     private void writeMusicScriptFile(VPKEntry entryToWrite)
     {
         File existsChecker = new File(Paths.get(installDir + entryToWrite.getPath()).toString());
@@ -95,7 +98,7 @@ public final class MusicPanel extends EditorPanel
     {
         currentTree.setEditable(false);
         File scriptFile = new File(getCurrentScriptString());
-        String scriptKey = ((NamedMusic)currentDropdown.getSelectedItem()).getInternalName().toLowerCase() + ".txt";        
+        String scriptKey = ((NamedMusic) currentDropdown.getSelectedItem()).getInternalName().toLowerCase() + ".txt";
         VPKEntry entry;
         boolean needsValidation = false;
         if (!scriptFile.isFile())
@@ -112,21 +115,21 @@ public final class MusicPanel extends EditorPanel
         }
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
-        if(needsValidation)
+        if (needsValidation)
         {
             CacheManager cm = CacheManager.getInstance();
-            String internalScriptPath = ((NamedMusic)currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();        
+            String internalScriptPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();
             internalScriptPath = internalScriptPath.replace("\\", "/");
             boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
-            if(!isUpToDate)
+            if (!isUpToDate)
             {
                 this.writeMusicScriptFile(cm.getCachedVpkEntry());
                 mergeNewChanges(scriptTree, scriptFile);
                 this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
             }
         }
-        this.currentTreeModel = scriptTree;  
-        
+        this.currentTreeModel = scriptTree;
+
         //TODO: Break this out into separate method
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
@@ -134,13 +137,13 @@ public final class MusicPanel extends EditorPanel
         TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         ArrayList<String> wavePathsList = new ArrayList<>();
         for (int i = 0; i < childCount; i++)
-        {            
+        {
             String nodeValue = scriptTree.getChild(rootNode, i).toString();
-            if(nodeValue.trim().startsWith("//"))
+            if (nodeValue.trim().startsWith("//"))
             {
                 continue;
             }
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));            
+            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
 
             for (String s : wavePathsList)
@@ -163,7 +166,74 @@ public final class MusicPanel extends EditorPanel
     @Override
     void revertButtonActionPerformed(ActionEvent evt)
     {
-        throw new UnsupportedOperationException("This hasn't been implemented yet. Sorry!"); //To change body of generated methods, choose Tools | Templates.
+        if (currentTree.getSelectionRows().length != 0 
+                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
+        {
+            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode)currentTree.getSelectionPath().getLastPathComponent());
+            String selectedWaveString = ((DefaultMutableTreeNode)selectedNode).getUserObject().toString();
+            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode)selectedNode).getParent()).getUserObject().toString();
+            selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
+            
+            //First go in and delete the sound in customSounds   
+            deleteSoundFileByWaveString(selectedWaveString);
+
+            //Get the relevant wavestring from the internal scriptfile                    
+            VPKArchive vpk = new VPKArchive();
+            try
+            {
+                vpk.load(new File(this.vpkPath));
+            }
+            catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }            
+            String scriptDir = ((NamedMusic)currentDropdown.getSelectedItem()).getFilePath().toString();
+            scriptDir = scriptDir.replace("\\", "/");
+                        
+            byte[] bytes = null;
+            VPKEntry entry = vpk.getEntry(scriptDir);
+            try
+            {
+                ByteBuffer scriptBuffer = null;
+                scriptBuffer = entry.getData();
+                bytes = new byte[scriptBuffer.remaining()];
+                scriptBuffer.get(bytes);
+            }
+            catch(IOException ex)
+            {
+                ex.printStackTrace();
+            }
+            String scriptFileString = new String(bytes, Charset.forName("UTF-8"));
+            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
+            int waveStringIndex = wavePathList.indexOf(selectedWaveString);
+            
+            //Cut off every parth of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally stop too early
+            StringBuilder scriptFileStringShortened = new StringBuilder();
+            Scanner scan = new Scanner(scriptFileString);
+            boolean found = false;
+            while(scan.hasNextLine())
+            {
+                String curLine = scan.nextLine();
+                if(curLine.equals(selectedWaveParentString))
+                {
+                    found = true;
+                }
+                if(found)
+                {
+                    scriptFileStringShortened.append(curLine).append(System.lineSeparator());
+                }
+            }
+            scriptFileString = scriptFileStringShortened.toString();                        
+            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);   
+            String replacementString = internalWavePathsList.get(waveStringIndex);                        
+            
+            selectedNode.setUserObject(replacementString);
+            ScriptParser parser = new ScriptParser(this.currentTreeModel);
+            parser.writeModelToFile(Paths.get(installDir, "\\dota\\" + scriptDir).toString());
+            
+            ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
+            ((DefaultTreeModel) currentTree.getModel()).nodeChanged(((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()));
+        }
     }
 
     @Override
@@ -278,7 +348,7 @@ public final class MusicPanel extends EditorPanel
         }
         populateSoundListAsTree();
     }
-    
+
     @Override
     String getCurrentScriptString()
     {
@@ -362,14 +432,13 @@ public final class MusicPanel extends EditorPanel
 
     private void musicDropdownItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_musicDropdownItemStateChanged
     {//GEN-HEADEREND:event_musicDropdownItemStateChanged
-        if(evt.getStateChange() == ItemEvent.SELECTED)
+        if (evt.getStateChange() == ItemEvent.SELECTED)
         {
             populateSoundListAsTree();
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
         }
     }//GEN-LAST:event_musicDropdownItemStateChanged
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
@@ -384,7 +453,7 @@ public final class MusicPanel extends EditorPanel
     void updateCache(String scriptKey, long internalCrc)
     {
         CacheManager cm = CacheManager.getInstance();
-        String internalPath = ((NamedMusic)currentDropdown.getSelectedItem()).getFilePath().toString();
+        String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
         internalPath = internalPath.replace("\\", "/");
         cm.putScript(scriptKey, internalPath, internalCrc);
     }

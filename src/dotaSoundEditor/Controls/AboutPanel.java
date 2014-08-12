@@ -7,7 +7,7 @@ public class AboutPanel extends javax.swing.JPanel
 {
 
     private JDialog hostingDialog = null;
-    private final String VERSION = "v1.2 beta 7";
+    private final String VERSION = "v1.2 beta 8";
     public AboutPanel(JDialog _hostingDialog)
     {        
         this.hostingDialog = _hostingDialog;

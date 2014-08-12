@@ -1,19 +1,15 @@
 //Features to add:
-//Roadmap to next release:
-    // - One-time cache invalidation, or at least notification that users should update Items panel.
-    // - Implement Revert button for Music
+//Roadmap to next release:        
+    // - Make Advanced button reeset to "Advanced" state when swtiching tabs
     // - Add troubleshooting section to Readme
     // - It should cover:
-    //  - Cache invalidation and script regeneration
-    //  - Troubleshooting steps: lib folder, check dota/sounds/custom, check original script file, check dota's console
+    //    - Cache invalidation and script regeneration
+    //    - Troubleshooting steps: lib folder, check dota/sounds/custom, check original script file, check dota's console
 
-// - Some sort of cache invalidation that checks to see if anything has been added. Currently it's pretty weak
-// - Improve cache invalidation to preserve users' changes
 // - Make multi-pressing play impossible
 // - Handle Advanced mode changes actually applying to tree (*note: make this COMPLETELY BREAK automatic cache invalidation. I ain't regenerating dis shit)
 // - Hero VO
 // - UI sounds
-// - Announcers??? maybe not...investigate legal ramifications
 // - Get sound length, display along bottom of window
 // - Find way to play sound files from memory instead of writing to local filesys, then playing. So slow!
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
@@ -23,7 +19,7 @@
 //   - This one may not be possible with the MusicPanel. It's scripts are scattered all over the place. A list of scriptFilePaths, maybe?
 // - Generally refactor the panels. There's a lot of improvement that can happen in the vpk-handling sections.
 // - Expand "Advanced" functionality to allow for adding of nodes. (Also add a right-click menu with Add, Edit, Delete)
-// - Turn the Dropdown and Image handling code into Dropdownnable and Imageable interfaces
+// - Turn the Dropdown and Image handling code into Dropdownnable and Imageable interfaces?
 // - Javadoc. Need to document things!
 // - Localization?
 package dotaSoundEditor;
