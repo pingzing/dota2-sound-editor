@@ -5,13 +5,10 @@ import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import info.ata4.vpk.VPKException;
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Properties;
-import javax.swing.JOptionPane;
 
 public class CacheManager
 {

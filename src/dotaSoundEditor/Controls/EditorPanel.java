@@ -60,7 +60,7 @@ public abstract class EditorPanel extends JPanel
 
     abstract void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt);
 
-    abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);   
+    abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);
 
     abstract void populateDropdownBox();
 
@@ -423,16 +423,21 @@ public abstract class EditorPanel extends JPanel
         for (DefaultMutableTreeNode savedNode : savedNodeList)
         {
             int rndwaveIndex = -1;
-            int childIndex;
-            int parentIndex;
+            int childIndex = -1;
+            int parentIndex = -1;
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) savedNode.getParent();
             if (parent.getUserObject().toString().contains("rndwave"))
             {
                 rndwaveIndex = parent.getParent().getIndex(parent);
+                childIndex = parent.getIndex(savedNode);
                 parent = (DefaultMutableTreeNode) parent.getParent();
+                parentIndex = parent.getParent().getIndex(parent);                
             }
-            parentIndex = parent.getParent().getIndex(parent);
-            childIndex = parent.getIndex(savedNode);
+            else
+            {
+                parentIndex = parent.getParent().getIndex(parent);
+                childIndex = parent.getIndex(savedNode);
+            }
 
             TreeNode newParentNode = newRoot.getChildAt(parentIndex);
             TreeNode newChildNode;
@@ -449,7 +454,7 @@ public abstract class EditorPanel extends JPanel
         }
         return newTree;
     }
-    
+
     void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton)
     {
         if (!getAdvancedMode())
@@ -486,7 +491,7 @@ public abstract class EditorPanel extends JPanel
     {
         return inAdvancedMode;
     }
-    
+
     public void setAdvancedMode(boolean _newMode)
     {
         inAdvancedMode = _newMode;
