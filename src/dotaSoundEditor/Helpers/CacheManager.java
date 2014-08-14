@@ -33,34 +33,16 @@ public class CacheManager
     {
         String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;
         URL url = ClassLoader.getSystemResource(savePath);
-        File cacheFile = null;
         try
         {
-            cacheFile = new File(url.toURI());
+        scriptsProperties.load(ClassLoader.getSystemResourceAsStream(savePath));
         }
-        catch(URISyntaxException ex)
+        catch(IOException ex)
         {
-            System.out.println("URL " + url.toString() + " could not be converted"
-                    + "into a URI.");
+            System.out.println("Could not load cache file.");
             ex.printStackTrace();
-        }        
-        if (cacheFile != null && cacheFile.isFile())
-        {
-            try
-            {
-                scriptsProperties.load(new FileInputStream(cacheFile));
-            }
-            catch (FileNotFoundException fnfe)
-            {
-                System.out.println("File not found: " + SCRIPTS_FILE_NAME + ". This should NEVER happen. What gives?");
-                fnfe.printStackTrace();
-            }
-            catch (IOException ioe)
-            {
-                System.out.println("Failed to load cache from " + SCRIPTS_FILE_NAME);
-                ioe.printStackTrace();
-            }
         }
+
     }
 
     public static synchronized CacheManager getInstance()
