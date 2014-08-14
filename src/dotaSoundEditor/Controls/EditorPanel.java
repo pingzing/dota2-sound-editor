@@ -46,9 +46,11 @@ public abstract class EditorPanel extends JPanel
     protected JTree currentTree;
     protected JComboBox currentDropdown;
     protected String vpkPath;
-    protected String installDir;    
+    protected String installDir;
+    //TODO: Create some ActionListeners that pay attention to this value and react to it changing
+    boolean inAdvancedMode = false;
 
-    abstract void populateSoundListAsTree();
+    abstract void populateSoundList();
 
     abstract void fillImageFrame(Object selectedItem) throws IOException;
 
@@ -58,15 +60,13 @@ public abstract class EditorPanel extends JPanel
 
     abstract void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt);
 
-    abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);
-
-    abstract void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton);
+    abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);   
 
     abstract void populateDropdownBox();
 
     abstract String getCurrentScriptString();
 
-    abstract String getCustomSoundPathString();    
+    abstract String getCustomSoundPathString();
 
     abstract void updateCache(String scriptString, long internalCrc);
 
@@ -88,7 +88,7 @@ public abstract class EditorPanel extends JPanel
 
             try
             {
-                boolean success = new File(destPath.toString()).mkdirs();
+                new File(destPath.toString()).mkdirs();
                 Files.copy(chosenFile, destPath, StandardCopyOption.REPLACE_EXISTING);
 
                 String waveString = selectedFile.getUserObject().toString();
@@ -116,7 +116,7 @@ public abstract class EditorPanel extends JPanel
                 parser.writeModelToFile(scriptPath.toString());
 
                 //Update UI
-                populateSoundListAsTree();
+                populateSoundList();
                 JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
 
             }
@@ -149,18 +149,18 @@ public abstract class EditorPanel extends JPanel
     }
 
     protected void playSelectedTreeSound(TreePath selPath)
-    {        
+    {
         try
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
             File soundFile = createSoundFileFromWaveString(waveString);
             currentSound.loadSound(soundFile.getAbsolutePath());
-            currentSound.playSound();                        
+            currentSound.playSound();
         }
         catch (Exception ex)
         {
-            JOptionPane.showMessageDialog(null, "The selected node does not represent a valid sound file.", "Error", JOptionPane.ERROR_MESSAGE);                        
+            JOptionPane.showMessageDialog(null, "The selected node does not represent a valid sound file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -251,7 +251,7 @@ public abstract class EditorPanel extends JPanel
                 System.err.println("Can't open archive: " + ex.getMessage());
             }
             waveSubstring = "sound/" + waveSubstring;
-            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());           
+            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());
 
             entryFile = entry.getType().contains("wav")
                     ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
@@ -351,16 +351,16 @@ public abstract class EditorPanel extends JPanel
 
     public boolean validateScriptFile(String scriptKey, String scriptPath)
     {
-        CacheManager cm = CacheManager.getInstance();        
+        CacheManager cm = CacheManager.getInstance();
         cm.putScriptPath(scriptKey, scriptPath);
         long crc = cm.getSessionCrc(scriptKey);
-        if(crc == 0)
+        if (crc == 0)
         {
             return false;
         }
         return validateScriptFile(scriptKey, crc);
     }
-    
+
     public boolean validateScriptFile(String scriptKey, long internalCrc)
     {
         CacheManager cm = CacheManager.getInstance();
@@ -373,9 +373,9 @@ public abstract class EditorPanel extends JPanel
             return true;
         }
     }
-    
+
     /**
-     * 
+     *
      * @param oldTree The tree that was previously in use.
      * @param scriptPath The full filepath to the script.
      * @return The merged tree.
@@ -384,21 +384,21 @@ public abstract class EditorPanel extends JPanel
     {
         return mergeNewChanges(oldTree, new File(scriptPath));
     }
-    
+
     /**
      * @param oldTree The tree that was previously in use
-     * @param scriptPath The full filepath to the script. 
-     *@return The merged tree.
+     * @param scriptPath The full filepath to the script.
+     * @return The merged tree.
      */
     TreeModel mergeNewChanges(TreeModel oldTree, Path scriptPath)
     {
         return mergeNewChanges(oldTree, scriptPath.toFile());
     }
-         
+
     /**
      * @param oldTree The tree that was previously in use
      * @param scriptFilePath A File object pointing to or containing a script.
-     *@return The merged tree.
+     * @return The merged tree.
      */
     TreeModel mergeNewChanges(TreeModel oldTree, File scriptFilePath)
     {
@@ -448,5 +448,47 @@ public abstract class EditorPanel extends JPanel
             newChildNode = savedNode;
         }
         return newTree;
+    }
+    
+    void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton)
+    {
+        if (!getAdvancedMode())
+        {
+            setAdvancedMode(true);
+            String scriptPath = getCurrentScriptString();
+            ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
+            TreeModel model = parser.getTreeModel();
+            currentTree.setModel(model);
+            currentTree.setEditable(true);
+            for (int i = 0; i < currentTree.getRowCount(); i++)
+            {
+                currentTree.expandRow(i);
+            }
+
+            //Change button and action to Basic-revert:
+            advancedButton.setText("Basic <<");
+            advancedButton.setMnemonic('a');
+        }
+        else if (getAdvancedMode())
+        {
+            setAdvancedMode(false);
+            this.populateSoundList();
+            advancedButton.setText("Advanced >>");
+            advancedButton.setMnemonic('a');
+            currentTree.setEditable(false);
+        }
+    }
+
+    /**
+     * @return Whether or not the panel is currently in advanced mode or not.
+     */
+    public boolean getAdvancedMode()
+    {
+        return inAdvancedMode;
+    }
+    
+    public void setAdvancedMode(boolean _newMode)
+    {
+        inAdvancedMode = _newMode;
     }
 }

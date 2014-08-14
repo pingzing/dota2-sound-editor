@@ -33,6 +33,7 @@ import org.apache.commons.io.FileUtils;
 
 public class HeroPanel extends EditorPanel
 {
+
     Executor e = Executors.newSingleThreadExecutor();
     PortraitFinder portraitFinder;
 
@@ -134,14 +135,29 @@ public class HeroPanel extends EditorPanel
         {
             System.out.println("Dropdown selected: " + currentDropdown.getSelectedItem().toString());
             //In a background thread so the app doesn't choke on fast scroling
-            e.execute(new Runnable()
+            if (!getAdvancedMode())
             {
-                @Override
-                public void run()
+                e.execute(new Runnable()
                 {
-                    populateSoundListAsTree();
+                    @Override
+                    public void run()
+                    {
+                        populateSoundList();
+                    }
+                });
+            }
+            else
+            {
+                String scriptPath = getCurrentScriptString();
+                ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
+                TreeModel model = parser.getTreeModel();
+                currentTree.setModel(model);
+                currentTree.setEditable(true);
+                for (int i = 0; i < currentTree.getRowCount(); i++)
+                {
+                    currentTree.expandRow(i);
                 }
-            });
+            }
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
             try
@@ -206,12 +222,13 @@ public class HeroPanel extends EditorPanel
         {
             NamedHero tempHero = (NamedHero) h;
             currentDropdown.addItem(tempHero);
-        }       
+        }
     }
 
     @Override
-    protected void populateSoundListAsTree()
+    protected void populateSoundList()
     {
+        inAdvancedMode = false;
         currentTree.setEditable(false);
         NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
 
@@ -271,7 +288,7 @@ public class HeroPanel extends EditorPanel
             ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
         }
 
-        currentTree.setModel(soundListTreeModel);        
+        currentTree.setModel(soundListTreeModel);
     }
 
     private VPKEntry getHeroScriptFile(String heroName)
@@ -479,7 +496,7 @@ public class HeroPanel extends EditorPanel
         }
 
         //Repopulate soundtree
-        populateSoundListAsTree();
+        populateSoundList();
     }
 
     @Override
@@ -500,33 +517,6 @@ public class HeroPanel extends EditorPanel
         {
             TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
             promptUserForNewFile(selectedFile.toString());
-        }
-    }
-
-    @Override
-    protected void advancedButtonActionPerformed(java.awt.event.ActionEvent evt, JButton advancedButton)
-    {
-        if (advancedButton.getText().equals("Advanced >>"))
-        {
-            String scriptPath = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-            ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
-            TreeModel model = parser.getTreeModel();
-            currentTree.setModel(model);
-            currentTree.setEditable(true);
-            for (int i = 0; i < currentTree.getRowCount(); i++)
-            {
-                currentTree.expandRow(i);
-            }
-            //Change button and action to Basic-revert:
-            advancedButton.setText("Basic <<");
-            advancedButton.setMnemonic('a');
-        }
-        else if (advancedButton.getText().equals("Basic <<"))
-        {
-            this.populateSoundListAsTree();
-            advancedButton.setText("Advanced >>");
-            advancedButton.setMnemonic('a');
-            currentTree.setEditable(false);
         }
     }
 

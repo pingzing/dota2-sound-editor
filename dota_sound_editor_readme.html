@@ -2,7 +2,7 @@
 Java version 7. Java can be found at <a href="http://www.java.com/getjava"/‎>www.java.com/getjava</a>.
 
 <h1>How to use</h1>
-<h2>Setting up</h2>
+<h2><a name="setting">Setting up</a></h2>
 1. Open Steam and click on Library.<br>
  2. Right click on Dota 2, and select Properties.<br>
  3. Select <i>Set Launch Options</i>.<br>
@@ -42,6 +42,38 @@ Java version 7. Java can be found at <a href="http://www.java.com/getjava"/‎>w
  
  <h1>Contact</h1>
  I can be reached at psychozagal [at-symbol] gmail [dot] com.
+ 
+ <h1>Troubleshooting</h1>
+ <h2>I can't launch the sound editor!</h2>
+ <li>Check to make sure that the <i>Dota_Sound_Editor.jar</i> is in the same folder as the <i>lib</i> folder.</li>
+ <li>Ensure that your Java<a href="http://www.java.com/en/download/installed.jsp?detect=jre&try=1"/‎> is up to date</a>.</li>
+ <br>
+ 
+ <h2>My custom sounds aren't playing in game!</h2>
+ <li>Make sure you have -override_vpk set, as described in <a href="#setting">Setting Up</a>.</li>
+ <li>Check that your sound file is a .WAV or .MP3 file. If it is, try re-encoding it at a lower 
+ frequency or bitrate--it's possible that Dota 2 only supports sound files in certain encodings.</li>
+ <li>Check that your sound was copied successfully. The program copies custom sounds to
+ <YOUR STEAM LOCATION>/Steam/steamapps/common/dota 2 beta/dota/sound/custom.</li>
+ <li>Check that the script file was modified appropriately. For example, if you changed Abaddon's 
+ Death sound to <i>wilhelm.wav</i>, you would navigate to 
+ <YOUR STEAM LOCATION>/Steam/steamapps/common/dota 2 beta/dota/scripts/game_sounds_heroes/ and open
+ game_sounds_abaddon.txt. Under the Hero_Abbadon.Death section, you would check to see if the <i>wave</i>
+ section was pointed to <i>custom\abaddon\wilhelm.wav</i>.</li>
+ <br>
+ 
+ <h2>Some of my regular game sounds aren't playing!</h2>
+ This can happen if Valve adds a new sound for an existing action. To fix this, just open the sound 
+ editor, and select the Hero/Item/Music from the dropdown box. When the program loads those sounds, it
+ will automatically update with any new sounds Valve has added.
+ <br>
+ 
+<h2>Wait, why does that happen?</h2>
+The sound editor copies the script files that describe what sounds to play from the internal game files.
+It then uses those copied script files to hold all your modifications, and to tell the game which sounds to play.
+Unfortunately, if Valve updates these script files, your modified files won't have those changes, so the 
+editor has to get a fresh, updated version from the internal game files. Until it does so, any new 
+actions won't know what sound to play.
  
  <h1>Found a bug?</h1>
  Please let me know. When the program crashes, it attempts to generate an error.txt. Attaching these 

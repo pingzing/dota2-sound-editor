@@ -55,7 +55,7 @@ public final class ItemPanel extends EditorPanel
         initComponents();
         currentTree = itemTree;
         portraitFinder = Utility.portraitFinder;
-        this.populateSoundListAsTree();
+        this.populateSoundList();
         initTreeSelectionListener();
         fillImageFrame("default");
     }
@@ -165,8 +165,9 @@ public final class ItemPanel extends EditorPanel
     }
 
     @Override
-    void populateSoundListAsTree()
+    void populateSoundList()
     {
+        inAdvancedMode = false;
         currentTree.setEditable(false);
         String scriptKey = "game_sounds_items.txt";
         File scriptFile = new File(getCurrentScriptString());
@@ -362,7 +363,7 @@ public final class ItemPanel extends EditorPanel
         {
             System.err.println("Unable to delete script file at " + scriptFileToDelete.getAbsolutePath());
         }
-        populateSoundListAsTree();
+        populateSoundList();
     }
 
     @Override
@@ -373,35 +374,7 @@ public final class ItemPanel extends EditorPanel
             TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
             promptUserForNewFile(selectedFile.toString());
         }
-    }
-
-    //TODO: Move this method into the parent.
-    @Override
-    void advancedButtonActionPerformed(ActionEvent evt, JButton advancedButton)
-    {
-        if (advancedButton.getText().equals("Advanced >>"))
-        {
-            String scriptPath = this.getCurrentScriptString();
-            ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
-            TreeModel model = parser.getTreeModel();
-            currentTree.setModel(model);
-            currentTree.setEditable(true);
-            for (int i = 0; i < currentTree.getRowCount(); i++)
-            {
-                currentTree.expandRow(i);
-            }
-            //Change button and action to Basic-revert:
-            advancedButton.setText("Basic <<");
-            advancedButton.setMnemonic('a');
-        }
-        else if (advancedButton.getText().equals("Basic <<"))
-        {
-            this.populateSoundListAsTree();
-            advancedButton.setText("Advanced >>");
-            advancedButton.setMnemonic('a');
-            currentTree.setEditable(false);
-        }
-    }
+    }   
 
     private void initTreeSelectionListener()
     {

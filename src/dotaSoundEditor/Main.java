@@ -1,23 +1,29 @@
 //Features to add:
-//Roadmap to next release:        
-    // - Make Advanced button reeset to "Advanced" state when swtiching tabs
+//Roadmap to next release:            
     // - Add troubleshooting section to Readme
     // - It should cover:
     //    - Cache invalidation and script regeneration
     //    - Troubleshooting steps: lib folder, check dota/sounds/custom, check original script file, check dota's console
 
+// - Heavy refactoring pass: Move more functions into EditorPanel, 
+//    de-singleton-ify the SoundPlayer and CacheManager, check out all my TODOs
+// - Look into abstracting more methods into EditorPanel by adding a 
+//    "scriptFilePath" instance member that each child implements
+// - Generally refactor the panels. There's a lot of improvement that can 
+//     happen in the vpk-handling sections.
 // - Make multi-pressing play impossible
-// - Handle Advanced mode changes actually applying to tree (*note: make this COMPLETELY BREAK automatic cache invalidation. I ain't regenerating dis shit)
 // - Hero VO
+// - Make Advanced button handling less spaghetti-codey. Events! Something!
+// - Handle Advanced mode changes actually applying to tree (*note: make this 
+//     COMPLETELY BREAK automatic cache invalidation. I ain't regenerating dis shit)
 // - UI sounds
 // - Get sound length, display along bottom of window
-// - Find way to play sound files from memory instead of writing to local filesys, then playing. So slow!
+// - Find way to play sound files from memory instead of writing to local 
+//     filesys, then playing. ByteBuffer to byte[] to File, maybe?
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 // - Investigate scanning common install paths for Dota before asking the user
 // - Rewrite image-extraction and loading code to avoid disk IO every time we start the program. Check flash3's modified-date in vpk. if diff, update!
-// - Look into abstracting more methods into EditorPanel by adding a "scriptFilePath" instance member that each child implements
 //   - This one may not be possible with the MusicPanel. It's scripts are scattered all over the place. A list of scriptFilePaths, maybe?
-// - Generally refactor the panels. There's a lot of improvement that can happen in the vpk-handling sections.
 // - Expand "Advanced" functionality to allow for adding of nodes. (Also add a right-click menu with Add, Edit, Delete)
 // - Turn the Dropdown and Image handling code into Dropdownnable and Imageable interfaces?
 // - Javadoc. Need to document things!

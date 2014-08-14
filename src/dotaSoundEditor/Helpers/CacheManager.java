@@ -20,6 +20,7 @@ public class CacheManager
 {
     //TODO: Investigate turning this from a Singleton into something that's
     //just available in the EditorPanel base class
+
     private static CacheManager cacheValidatorInstance = null;
     private Properties scriptsProperties = new Properties();
     private HashMap<String, Long> sessionCrcs = new HashMap<>();
@@ -30,11 +31,24 @@ public class CacheManager
 
     private CacheManager()
     {
-        if (new File(SCRIPTS_FILE_NAME).isFile())
+        String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;
+        URL url = ClassLoader.getSystemResource(savePath);
+        File cacheFile = null;
+        try
+        {
+            cacheFile = new File(url.toURI());
+        }
+        catch(URISyntaxException ex)
+        {
+            System.out.println("URL " + url.toString() + " could not be converted"
+                    + "into a URI.");
+            ex.printStackTrace();
+        }        
+        if (cacheFile != null && cacheFile.isFile())
         {
             try
             {
-                scriptsProperties.load(new FileInputStream(SCRIPTS_FILE_NAME));
+                scriptsProperties.load(new FileInputStream(cacheFile));
             }
             catch (FileNotFoundException fnfe)
             {

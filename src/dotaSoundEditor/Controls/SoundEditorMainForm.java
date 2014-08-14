@@ -289,14 +289,14 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         CacheManager cm = CacheManager.getInstance();
         try
         {
-        cm.saveCache();
+            cm.saveCache();
         }
-        catch(IOException | SecurityException | URISyntaxException | NullPointerException ex)
+        catch (IOException | SecurityException | URISyntaxException | NullPointerException ex)
         {
             JOptionPane.showMessageDialog(this, "Error: Unable to save scripts cache."
-                    + "\nDetails: " + ex.getMessage(),"Error saving cache",JOptionPane.ERROR_MESSAGE);
+                    + "\nDetails: " + ex.getMessage(), "Error saving cache", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
-        }                
+        }
     }//GEN-LAST:event_formWindowClosing
 
     private void JMenuInstallDirActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_JMenuInstallDirActionPerformed
@@ -349,12 +349,22 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void advancedButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_advancedButtonActionPerformed
     {//GEN-HEADEREND:event_advancedButtonActionPerformed
-        ((EditorPanel) currentTabPanel).advancedButtonActionPerformed(evt, advancedButton);
+        ((EditorPanel) currentTabPanel).advancedButtonActionPerformed(evt, advancedButton);        
     }//GEN-LAST:event_advancedButtonActionPerformed
 
     private void tabPaneStateChanged(javax.swing.event.ChangeEvent evt)//GEN-FIRST:event_tabPaneStateChanged
     {//GEN-HEADEREND:event_tabPaneStateChanged
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
+        if (!((EditorPanel) currentTabPanel).getAdvancedMode())
+        {
+            advancedButton.setText("Advanced >>");
+            advancedButton.setMnemonic('a');
+        }
+        else
+        {
+            advancedButton.setText("Basic <<");
+            advancedButton.setMnemonic('a');
+        }
     }//GEN-LAST:event_tabPaneStateChanged
 
     private void deleteScratchFiles()
@@ -445,8 +455,8 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             System.err.println(ex);
         }
         return autoExecFile.getAbsolutePath();
-    }
-
+    }   
+    
     class SoundPlayingListener implements PropertyChangeListener
     {
         @Override
@@ -457,11 +467,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             {
                 Object source = evt.getSource();
                 //Sound started playing. Change Play button to Stop butotn.
-                if ((boolean)evt.getNewValue() == true)
+                if ((boolean) evt.getNewValue() == true)
                 {
                     playStopButton.setMnemonic('o');
                     playStopButton.setText("Stop Sound");
-                    removeActionListeners();                    
+                    removeActionListeners();
                     playStopButton.addActionListener(new java.awt.event.ActionListener()
                     {
                         @Override
@@ -472,7 +482,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     });
                 }
                 //Sound just stopped. Change it back to play button.
-                if ((boolean)evt.getNewValue() == false)
+                if ((boolean) evt.getNewValue() == false)
                 {
                     playStopButton.setMnemonic('a');
                     playStopButton.setText("Play Sound");
@@ -487,11 +497,11 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                     });
                 }
             }
-        }
+        }                
 
         private void removeActionListeners()
         {
-            for(ActionListener listener : playStopButton.getActionListeners())
+            for (ActionListener listener : playStopButton.getActionListeners())
             {
                 playStopButton.removeActionListener(listener);
             }

@@ -30,7 +30,9 @@ import org.apache.commons.io.FileUtils;
 //TODO: Deal with music having been suddenly split up into a bunch of different places
 public final class MusicPanel extends EditorPanel
 {
+
     Executor e = Executors.newSingleThreadExecutor();
+
     public MusicPanel()
     {
         initComponents();
@@ -45,7 +47,7 @@ public final class MusicPanel extends EditorPanel
         currentDropdown = musicDropdown;
         currentTree = musicTree;
         this.populateDropdownBox();
-        this.populateSoundListAsTree();
+        this.populateSoundList();
         attachDoubleClickListenerToTree();
     }
 
@@ -96,9 +98,10 @@ public final class MusicPanel extends EditorPanel
     }
 
     @Override
-    void populateSoundListAsTree()
+    void populateSoundList()
     {
         currentTree.setEditable(false);
+        inAdvancedMode = false;
         File scriptFile = new File(getCurrentScriptString());
         String scriptKey = ((NamedMusic) currentDropdown.getSelectedItem()).getInternalName().toLowerCase() + ".txt";
         VPKEntry entry;
@@ -168,14 +171,14 @@ public final class MusicPanel extends EditorPanel
     @Override
     void revertButtonActionPerformed(ActionEvent evt)
     {
-        if (currentTree.getSelectionRows().length != 0 
+        if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode)currentTree.getSelectionPath().getLastPathComponent());
-            String selectedWaveString = ((DefaultMutableTreeNode)selectedNode).getUserObject().toString();
-            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode)selectedNode).getParent()).getUserObject().toString();
+            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) currentTree.getSelectionPath().getLastPathComponent());
+            String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
+            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
             selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
-            
+
             //First go in and delete the sound in customSounds   
             deleteSoundFileByWaveString(selectedWaveString);
 
@@ -188,10 +191,10 @@ public final class MusicPanel extends EditorPanel
             catch (IOException ex)
             {
                 ex.printStackTrace();
-            }            
-            String scriptDir = ((NamedMusic)currentDropdown.getSelectedItem()).getFilePath().toString();
+            }
+            String scriptDir = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
             scriptDir = scriptDir.replace("\\", "/");
-                        
+
             byte[] bytes = null;
             VPKEntry entry = vpk.getEntry(scriptDir);
             try
@@ -201,38 +204,38 @@ public final class MusicPanel extends EditorPanel
                 bytes = new byte[scriptBuffer.remaining()];
                 scriptBuffer.get(bytes);
             }
-            catch(IOException ex)
+            catch (IOException ex)
             {
                 ex.printStackTrace();
             }
             String scriptFileString = new String(bytes, Charset.forName("UTF-8"));
             ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
             int waveStringIndex = wavePathList.indexOf(selectedWaveString);
-            
+
             //Cut off every parth of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally stop too early
             StringBuilder scriptFileStringShortened = new StringBuilder();
             Scanner scan = new Scanner(scriptFileString);
             boolean found = false;
-            while(scan.hasNextLine())
+            while (scan.hasNextLine())
             {
                 String curLine = scan.nextLine();
-                if(curLine.equals(selectedWaveParentString))
+                if (curLine.equals(selectedWaveParentString))
                 {
                     found = true;
                 }
-                if(found)
+                if (found)
                 {
                     scriptFileStringShortened.append(curLine).append(System.lineSeparator());
                 }
             }
-            scriptFileString = scriptFileStringShortened.toString();                        
-            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);   
-            String replacementString = internalWavePathsList.get(waveStringIndex);                        
-            
+            scriptFileString = scriptFileStringShortened.toString();
+            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);
+            String replacementString = internalWavePathsList.get(waveStringIndex);
+
             selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentTreeModel);
             parser.writeModelToFile(Paths.get(installDir, "\\dota\\" + scriptDir).toString());
-            
+
             ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
             ((DefaultTreeModel) currentTree.getModel()).nodeChanged(((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()));
         }
@@ -244,7 +247,7 @@ public final class MusicPanel extends EditorPanel
         if (currentTree.getSelectionRows().length != 0
                 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());            
+            this.playSelectedTreeSound(currentTree.getSelectionPath());
         }
     }
 
@@ -263,7 +266,7 @@ public final class MusicPanel extends EditorPanel
         {
             System.err.println("Unable to delete file at " + scriptFileToDelete.getAbsolutePath());
         }
-        populateSoundListAsTree();
+        populateSoundList();
     }
 
     @Override
@@ -273,31 +276,6 @@ public final class MusicPanel extends EditorPanel
         {
             TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
             promptUserForNewFile(selectedFile.toString());
-        }
-    }
-
-    //TODO: Move this method into the parent.
-    @Override
-    void advancedButtonActionPerformed(ActionEvent evt, JButton advancedButton)
-    {
-        if (advancedButton.getText().equals("Advanced >>"))
-        {
-            String scriptPath = getCurrentScriptString();
-            ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
-            TreeModel model = parser.getTreeModel();
-            currentTree.setModel(model);
-            currentTree.setEditable(true);
-
-            //Change button and action to Basic-revert:
-            advancedButton.setText("Basic <<");
-            advancedButton.setMnemonic('a');
-        }
-        else if (advancedButton.getText().equals("Basic <<"))
-        {
-            this.populateSoundListAsTree();
-            advancedButton.setText("Advanced >>");
-            advancedButton.setMnemonic('a');
-            currentTree.setEditable(false);
         }
     }
 
@@ -347,7 +325,7 @@ public final class MusicPanel extends EditorPanel
         for (NamedMusic nm : namedMusicList)
         {
             currentDropdown.addItem(nm);
-        }        
+        }
     }
 
     @Override
@@ -434,16 +412,31 @@ public final class MusicPanel extends EditorPanel
     private void musicDropdownItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_musicDropdownItemStateChanged
     {//GEN-HEADEREND:event_musicDropdownItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED)
-        {
-             //In a background thread so the app doesn't choke on fast scroling
-            e.execute(new Runnable()
+        {            
+            if (!getAdvancedMode())
             {
-                @Override
-                public void run()
+                //In a background thread so the app doesn't choke on fast scroling
+                e.execute(new Runnable()
                 {
-                    populateSoundListAsTree();
+                    @Override
+                    public void run()
+                    {
+                        populateSoundList();
+                    }
+                });
+            }
+            else
+            {
+                String scriptPath = getCurrentScriptString();
+                ScriptParser parser = new ScriptParser(new File(Paths.get(scriptPath).toString()));
+                TreeModel model = parser.getTreeModel();
+                currentTree.setModel(model);
+                currentTree.setEditable(true);
+                for (int i = 0; i < currentTree.getRowCount(); i++)
+                {
+                    currentTree.expandRow(i);
                 }
-            });
+            }
             currentTree.setRootVisible(false);
             currentTree.setShowsRootHandles(true);
         }
