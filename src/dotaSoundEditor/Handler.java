@@ -51,6 +51,7 @@ class Handler implements Thread.UncaughtExceptionHandler
                 ex.printStackTrace();
             }
             frame.dispose();
+            System.exit((1));
         }
     }
 }

@@ -4,17 +4,14 @@ import dotaSoundEditor.UserPrefs;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import info.ata4.vpk.VPKException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Properties;
+import javax.swing.JOptionPane;
 
 public class CacheManager
 {
@@ -25,24 +22,47 @@ public class CacheManager
     private Properties scriptsProperties = new Properties();
     private HashMap<String, Long> sessionCrcs = new HashMap<>();
     private VPKEntry cachedEntry = null;
+    private String relativePath;
     private final String SCRIPTS_FILE_NAME = "scripts.properties";
     private final String PATH_SEP = "_path";
     private final String SESSION_CRC_SEP = "_latestcrc";
 
     private CacheManager()
     {
-        String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;
-        URL url = ClassLoader.getSystemResource(savePath);
         try
         {
-        scriptsProperties.load(ClassLoader.getSystemResourceAsStream(savePath));
+            relativePath = CacheManager.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();            
         }
-        catch(IOException ex)
+        catch (URISyntaxException ex)
+        {
+            ex.printStackTrace();
+            return;
+        }
+        relativePath = relativePath.substring(1);
+        relativePath = relativePath.substring(0, relativePath.lastIndexOf('/')+ 1);        
+        File propsFile = Paths.get(relativePath, SCRIPTS_FILE_NAME).toFile();
+        try
+        {
+            if (!propsFile.isFile())
+            {
+                propsFile.createNewFile();
+            }
+            FileInputStream fis = new FileInputStream(propsFile);
+            try
+            {
+                scriptsProperties.load(fis);
+            }
+            catch (IOException ex)
+            {
+                System.out.println("Could not load cache file.");
+                ex.printStackTrace();
+            }
+        }
+        catch (IOException ex)
         {
             System.out.println("Could not load cache file.");
             ex.printStackTrace();
         }
-
     }
 
     public static synchronized CacheManager getInstance()
@@ -161,10 +181,9 @@ public class CacheManager
     }
 
     public void saveCache() throws IOException, URISyntaxException, SecurityException, NullPointerException
-    {
-        String savePath = "dotaSoundEditor/resources/" + SCRIPTS_FILE_NAME;
-        URL url = ClassLoader.getSystemResource(savePath);
-        OutputStream os = new FileOutputStream(new File(url.toURI()));
+    {        
+        File outFile = Paths.get(relativePath, SCRIPTS_FILE_NAME).toFile();
+        OutputStream os = new FileOutputStream(outFile);
         scriptsProperties.store(os, null);
     }
 }
