@@ -1,9 +1,6 @@
 //Features to add:
 //Roadmap to next release:            
-    // - Add troubleshooting section to Readme
-    // - It should cover:
-    //    - Cache invalidation and script regeneration
-    //    - Troubleshooting steps: lib folder, check dota/sounds/custom, check original script file, check dota's console
+
 
 // - Heavy refactoring pass: Move more functions into EditorPanel, 
 //    de-singleton-ify the SoundPlayer and CacheManager, check out all my TODOs
