@@ -3,7 +3,8 @@
 
 
 // - Heavy refactoring pass: Move more functions into EditorPanel, 
-//    de-singleton-ify the SoundPlayer and CacheManager, check out all my TODOs
+//    de-singleton-ify the SoundPlayer and CacheManager, check out all my TODOs,
+//    standardize parameter naming schemes (underscores or not?)
 // - Look into abstracting more methods into EditorPanel by adding a 
 //    "scriptFilePath" instance member that each child implements
 // - Generally refactor the panels. There's a lot of improvement that can 
@@ -65,10 +66,11 @@ public class Main
         {
             try
             {
+                //TODO: Don't automatically run the mainForm in its constructor. Make a .run() method.
                 SoundEditorMainForm mainForm = new SoundEditorMainForm(vpkPath, installDir);
             }
             //This should cut down on at least 90% of support emails...
-            //TODO: Look into whether this belongs in Handler.java
+            //TODO: Look into whether this belongs i_n Handler.java
             catch(java.lang.NoClassDefFoundError nce)
             {
                 JFrame errorFrame = new JFrame();                      

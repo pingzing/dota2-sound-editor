@@ -284,10 +284,11 @@ public final class MusicPanel extends EditorPanel
     {
         currentDropdown.removeAllItems();
         ArrayList<String> vpkSearchPaths = new ArrayList<>();
-        ArrayList<NamedMusic> namedMusicList = new ArrayList<>();
-        vpkSearchPaths.add("sound/music/valve_dota_001/music/");
-        vpkSearchPaths.add("sound/music/valve_dota_001/stingers/");
-        vpkSearchPaths.add("scripts/");
+        ArrayList<NamedMusic> namedMusicList = new ArrayList<>();        
+        vpkSearchPaths.add("scripts/music/");
+        vpkSearchPaths.add("scripts/music/terrorblade_arcana/");
+        vpkSearchPaths.add("scripts/music/valve_dota_001/");
+        vpkSearchPaths.add("scripts/music/valve_ti4/");
         File file = new File(vpkPath);
         VPKArchive vpk = new VPKArchive();
 
@@ -310,11 +311,18 @@ public final class MusicPanel extends EditorPanel
                         || entry.getPath().contains("game_sounds_music_int.txt")
                         || entry.getPath().contains("game_sounds_music_spectator.txt")
                         || entry.getPath().contains("game_sounds_music_tutorial.txt")
-                        || entry.getPath().contains("game_sounds_stingers.txt"))
+                        || entry.getPath().contains("game_sounds_stingers.txt")
+                        || entry.getPath().contains("game_sounds_music_util.txt")
+                        || entry.getPath().contains("game_sounds_stingers_diretide.txt")
+                        || entry.getPath().contains("game_sounds_stingers_greevil.txt")
+                        || entry.getPath().contains("game_sounds_stingers_main.txt"))
                 {
-                    String internalName = entry.getName();
+                    int lastSlashIndex = entry.getDir().lastIndexOf("/");
+                    int firstSlashIndex = entry.getDir().substring(0, lastSlashIndex - 1).lastIndexOf("/");
+                    String parentDir = entry.getDir().substring(firstSlashIndex + 1, lastSlashIndex);
+                    String internalName = parentDir + "/" + entry.getName();
+                    
                     //format internal name a little bit, remove prefixes
-
                     NamedMusic nm = new NamedMusic(internalName, entry.getPath());
                     namedMusicList.add(nm);
                 }
@@ -331,16 +339,21 @@ public final class MusicPanel extends EditorPanel
     @Override
     String getCurrentScriptString()
     {
-        String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
-        String scriptPathString = Paths.get(installDir, "dota", internalPath).toString();
-        if (new File(scriptPathString).isFile())
+        if (currentDropdown.getSelectedItem() != null)
         {
-            return new File(scriptPathString).getAbsolutePath();
+            String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
+            String scriptPathString = Paths.get(installDir, "dota", internalPath).toString();
+
+            if (new File(scriptPathString).isFile())
+            {
+                return new File(scriptPathString).getAbsolutePath();
+            }
         }
         else
         {
             return "";
         }
+        return "";
     }
 
     @Override
@@ -412,7 +425,7 @@ public final class MusicPanel extends EditorPanel
     private void musicDropdownItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_musicDropdownItemStateChanged
     {//GEN-HEADEREND:event_musicDropdownItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED)
-        {            
+        {
             if (!getAdvancedMode())
             {
                 //In a background thread so the app doesn't choke on fast scroling

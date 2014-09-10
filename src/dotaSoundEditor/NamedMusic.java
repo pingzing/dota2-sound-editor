@@ -61,17 +61,34 @@ public class NamedMusic implements Comparable<NamedMusic>
     {
         switch(nameToClean)
         {
-            case "Game Sounds Music Int":       nameToClean = "The International";
+            case "Music/game Sounds Music Int":         nameToClean = "The International";
                 break;
-            case "Game Sounds Music":           nameToClean = "Music";
+            case "Music/game Sounds Music Spectator":   nameToClean = "Spectator";
                 break;
-            case "Game Sounds Music Spectator": nameToClean = "Spectator";
+            case "Music/game Sounds Music Tutorial":    nameToClean = "Tutorial";
                 break;
-            case "Game Sounds Music Tutorial":  nameToClean = "Tutorial";
-                break;        
-            case "Game Sounds Stingers":        nameToClean = "Stingers";
+            case "Music/game Sounds Music Util":        nameToClean = "Misc.";
+                break;
+            case "Music/game Sounds Stingers Diretide": nameToClean = "Diretide";
+                break;
+            case "Music/game Sounds Stingers Greevil":  nameToClean = "The Greeviling";
+                break;
+            case "Music/game Sounds Stingers Main":     nameToClean = "Stingers - 1";
+                break;                                            
+            case "Terrorblade Arcana/game Sounds Music":      nameToClean = "Terrorblade Arcana";
+                break;
+            case "Terrorblade Arcana/game Sounds Stingers":   nameToClean = "Terrorblade Arcana Stingers";
+                break;
+            case "Valve Dota 001/Game Sounds Music":          nameToClean = "Music";
+                break;
+            case "Valve Dota 001/Game Sounds Stingers":       nameToClean = "Stingers - 2";
+                break;
+            case "Valve Ti4/game Sounds Music":               nameToClean = "TI4 Compendium Music";
+                break;
+            case "Valve Ti4/game Sounds Stingers":            nameToClean = "TI4 Compendium Stingers";
                 break;
         }
+        
         return nameToClean;
     }
     
