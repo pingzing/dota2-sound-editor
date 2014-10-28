@@ -10,6 +10,8 @@
 // - Generally refactor the panels. There's a lot of improvement that can 
 //     happen in the vpk-handling sections.
 // - Make multi-pressing play impossible
+// - Try to auto-find Dota install dir via Registry (if Windows). Might be at: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 570
+// - Or: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam
 // - Hero VO
 // - Make Advanced button handling less spaghetti-codey. Events! Something!
 // - Handle Advanced mode changes actually applying to tree (*note: make this 

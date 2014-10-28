@@ -529,7 +529,7 @@ public class HeroPanel extends EditorPanel
     @Override
     String getCustomSoundPathString()
     {
-        return "custom\\" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + "\\";
+        return Paths.get("custom", ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()).toString() + File.separator;
     }
 
     @Override
