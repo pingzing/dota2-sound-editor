@@ -28,20 +28,25 @@ public class CacheManager
     {
         try
         {
-            relativePath = CacheManager.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();            
+            relativePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();    
+            relativePath = relativePath.substring(0, relativePath.lastIndexOf("/"));
+            relativePath = relativePath.replaceAll("%20"," "); // Surely need to do this here
         }
-        catch (URISyntaxException ex)
+        catch (Exception ex)
         {
             ex.printStackTrace();
             return;
         }
-        relativePath = relativePath.substring(1);
-        relativePath = relativePath.substring(0, relativePath.lastIndexOf('/')+ 1);        
+        if(System.getProperty("os.name").toUpperCase().contains("WINDOWS"))
+        {
+            relativePath = relativePath.substring(1);                     
+        }
         File propsFile = Paths.get(relativePath, SCRIPTS_FILE_NAME).toFile();
         try
         {
             if (!propsFile.isFile())
             {
+                propsFile.getParentFile().mkdirs();
                 propsFile.createNewFile();
             }
             FileInputStream fis = new FileInputStream(propsFile);
