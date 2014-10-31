@@ -43,7 +43,7 @@ public class CacheManager
             if (!propsFile.isFile())
             {
                 propsFile.getParentFile().mkdirs();
-                boolean success = propsFile.createNewFile();
+                boolean success = propsFile.createNewFile(); 
             }
             FileInputStream fis = new FileInputStream(propsFile);
             try
