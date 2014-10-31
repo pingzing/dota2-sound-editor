@@ -83,7 +83,7 @@ public abstract class EditorPanel extends JPanel
         {
             DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            Path destPath = Paths.get(installDir + "\\dota\\sound\\" + getCustomSoundPathString() + chosenFile.getFileName());
+            Path destPath = Paths.get(installDir, "/dota/sound/" + getCustomSoundPathString() + chosenFile.getFileName());
             UserPrefs.getInstance().setWorkingDirectory(chosenFile.getParent().toString());
 
             try
@@ -236,7 +236,7 @@ public abstract class EditorPanel extends JPanel
 
         if (!waveString.contains("custom"))
         {
-            File localFile = new File(Paths.get(installDir + "\\sound\\" + waveSubstring).toString());
+            File localFile = new File(Paths.get(installDir + "/sound/" + waveSubstring).toString());
             if (localFile.isFile())
             {
                 return localFile;
@@ -254,8 +254,8 @@ public abstract class EditorPanel extends JPanel
             VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());
 
             entryFile = entry.getType().contains("wav")
-                    ? new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav").toString())
-                    : new File(Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3").toString());
+                    ? new File(Paths.get(System.getProperty("user.dir") + "/scratch/scratch.wav").toString())
+                    : new File(Paths.get(System.getProperty("user.dir") + "/scratch/scratch.mp3").toString());
 
             try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
             {
@@ -270,7 +270,7 @@ public abstract class EditorPanel extends JPanel
         }
         else    //If it's NOT stored in the VPK, it's on the local filesys
         {
-            entryFile = new File(Paths.get(installDir + "\\dota\\sound\\" + waveSubstring).toString());
+            entryFile = new File(Paths.get(installDir, "/dota/sound/" + waveSubstring).toString());
             return entryFile;
         }
     }
@@ -309,7 +309,7 @@ public abstract class EditorPanel extends JPanel
         String waveSubstring = selectedWaveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
-        File soundFileToDelete = new File(Paths.get(installDir + "\\dota\\sound\\" + waveSubstring).toString());
+        File soundFileToDelete = new File(Paths.get(installDir, "/dota/sound/" + waveSubstring).toString());
         if (soundFileToDelete.isFile())
         {
             soundFileToDelete.delete();

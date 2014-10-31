@@ -79,7 +79,7 @@ public final class MusicPanel extends EditorPanel
             return;
         }
 
-        File entryFile = new File(Paths.get(installDir + "\\dota\\").toFile(), entryToWrite.getPath());
+        File entryFile = new File(Paths.get(installDir, "/dota/").toFile(), entryToWrite.getPath());
         File entryDir = entryFile.getParentFile();
         if (entryDir != null && !entryDir.exists())
         {
@@ -124,7 +124,7 @@ public final class MusicPanel extends EditorPanel
         {
             CacheManager cm = CacheManager.getInstance();
             String internalScriptPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();
-            internalScriptPath = internalScriptPath.replace("\\", "/");
+            internalScriptPath = internalScriptPath.replace("/", "/");
             boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
             if (!isUpToDate)
             {
@@ -234,7 +234,7 @@ public final class MusicPanel extends EditorPanel
 
             selectedNode.setUserObject(replacementString);
             ScriptParser parser = new ScriptParser(this.currentTreeModel);
-            parser.writeModelToFile(Paths.get(installDir, "\\dota\\" + scriptDir).toString());
+            parser.writeModelToFile(Paths.get(installDir, "/dota/" + scriptDir).toString());
 
             ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
             ((DefaultTreeModel) currentTree.getModel()).nodeChanged(((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()));

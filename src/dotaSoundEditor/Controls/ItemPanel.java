@@ -139,14 +139,14 @@ public final class ItemPanel extends EditorPanel
 
     private void writeItemScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
     {
-        File existsChecker = new File(Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString());
+        File existsChecker = new File(Paths.get(installDir, "/dota/scripts/game_sounds_items.txt").toString());
         boolean fileExistsLocally = existsChecker.exists() ? true : false;
         if (fileExistsLocally && !overwriteExisting)
         {
             return;
         }
 
-        File entryFile = new File(Paths.get(installDir + "\\dota\\").toFile(), entryToWrite.getPath());
+        File entryFile = new File(Paths.get(installDir + "/dota/").toFile(), entryToWrite.getPath());
         File entryDir = entryFile.getParentFile();
         if (entryDir != null && !entryDir.exists())
         {
@@ -278,7 +278,7 @@ public final class ItemPanel extends EditorPanel
                 ex.printStackTrace();
             }
             String scriptDir = this.getCurrentScriptString();
-            scriptDir = scriptDir.replace(Paths.get(installDir + "\\dota\\").toString(), "");
+            scriptDir = scriptDir.replace(Paths.get(installDir, "/dota/").toString(), "");
             scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
             scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
             scriptDir = scriptDir.substring(0, scriptDir.lastIndexOf("/") + 1); //Cut off file extension            
@@ -419,7 +419,7 @@ public final class ItemPanel extends EditorPanel
     @Override
     String getCurrentScriptString()
     {
-        String scriptPathString = Paths.get(installDir + "\\dota\\scripts\\game_sounds_items.txt").toString();
+        String scriptPathString = Paths.get(installDir, "/dota/scripts/game_sounds_items.txt").toString();
         File scriptFilePath = new File(scriptPathString);
 
         if (scriptFilePath.isFile())

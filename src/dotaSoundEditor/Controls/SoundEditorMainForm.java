@@ -369,14 +369,14 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private void deleteScratchFiles()
     {
-        Path scratchMp3Path = Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.mp3");
+        Path scratchMp3Path = Paths.get(System.getProperty("user.dir") + "/scratch/scratch.mp3");
         File scratchMp3File = new File(scratchMp3Path.toString());
         if (scratchMp3File.isFile())
         {
             boolean success = scratchMp3File.delete();
             System.out.println("mp3 success: " + success);
         }
-        Path scratchWavPath = Paths.get(System.getProperty("user.dir") + "\\scratch\\scratch.wav");
+        Path scratchWavPath = Paths.get(System.getProperty("user.dir") + "/scratch/scratch.wav");
         File scratchWavFile = new File(scratchWavPath.toString());
         if (scratchWavFile.isFile())
         {

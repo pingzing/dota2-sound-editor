@@ -232,7 +232,7 @@ public class HeroPanel extends EditorPanel
         currentTree.setEditable(false);
         NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
 
-        Path scriptPath = Paths.get(this.installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_" + selectedHero.getInternalName() + ".txt");
+        Path scriptPath = Paths.get(this.installDir, "/dota/scripts/game_sounds_heroes/game_sounds_" + selectedHero.getInternalName() + ".txt");
         File scriptFile = new File(scriptPath.toString());
         String scriptKey = "game_sounds_" + selectedHero.getInternalName() + ".txt".toLowerCase();
         VPKEntry entry;
@@ -317,14 +317,14 @@ public class HeroPanel extends EditorPanel
     //TODO: Possible model for abstracing into the parent
     private void writeHeroScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
     {
-        File existsChecker = new File(Paths.get(installDir + entryToWrite.getPath()).toString());
+        File existsChecker = new File(Paths.get(installDir, entryToWrite.getPath()).toString());
         boolean fileExistsLocally = existsChecker.exists() ? true : false;
         if (fileExistsLocally && !overwriteExisting)
         {
             return;
         }
 
-        File entryFile = new File(Paths.get(installDir + "\\dota\\").toFile(), entryToWrite.getPath());
+        File entryFile = new File(Paths.get(installDir, "/dota/").toFile(), entryToWrite.getPath());
         File entryDir = entryFile.getParentFile();
         if (entryDir != null && !entryDir.exists())
         {
@@ -368,7 +368,7 @@ public class HeroPanel extends EditorPanel
     private String getScriptPathByHeroName(String internalName)
     {
         String scriptPathString =
-                Paths.get(installDir + "\\dota\\scripts\\game_sounds_heroes\\game_sounds_"
+                Paths.get(installDir, "/dota/scripts/game_sounds_heroes/game_sounds_"
                 + internalName + ".txt").toString();
 
         File scriptFilePath = new File(scriptPathString);
@@ -410,7 +410,7 @@ public class HeroPanel extends EditorPanel
                 ex.printStackTrace();
             }
             String scriptDir = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-            scriptDir = scriptDir.replace(Paths.get(installDir + "\\dota\\").toString(), "");
+            scriptDir = scriptDir.replace(Paths.get(installDir, "/dota/").toString(), "");
             scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
             scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
             scriptDir = scriptDir.substring(0, scriptDir.lastIndexOf("/") + 1); //Cut off file extension            
