@@ -29,8 +29,18 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private SoundPlayingListener soundPlayingListener = new SoundPlayingListener();
 
     public SoundEditorMainForm(String _fileName, String _installDir)
-    {
-        try
+    {       
+        initComponents();
+        soundPlayer.addPropertyChangeListener(soundPlayingListener);
+        Utility.setFrameIcon(this);
+        vpkPath = _fileName;
+        installDir = _installDir;
+        Utility.initPortraitFinder(vpkPath);
+        portraitFinder = Utility.portraitFinder;
+        portraitFinder.buildHeroPortraits();
+        portraitFinder.buildItemPortraits();
+        
+         try
         {
             //See if they have an autoexec.cfg
             String autoExecPath = checkForAutoExec();
@@ -49,16 +59,6 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             System.err.println("File not found");
         }
-
-        initComponents();
-        soundPlayer.addPropertyChangeListener(soundPlayingListener);
-        Utility.setFrameIcon(this);
-        vpkPath = _fileName;
-        installDir = _installDir;
-        Utility.initPortraitFinder(vpkPath);
-        portraitFinder = Utility.portraitFinder;
-        portraitFinder.buildHeroPortraits();
-        portraitFinder.buildItemPortraits();
 
         //Create tabs
         tabPane.add(new HeroPanel(vpkPath, installDir));
