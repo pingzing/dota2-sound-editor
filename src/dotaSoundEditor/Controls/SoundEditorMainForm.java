@@ -387,7 +387,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
 
     private String checkForAutoExec()
     {
-        Path autoExecPath = Paths.get(installDir + "//dota//cfg//autoexec.cfg");
+        Path autoExecPath = Paths.get(installDir + "/dota/cfg/autoexec.cfg");
         File autoExecFile = new File(autoExecPath.toString());
         File[] fileList = autoExecFile.getParentFile().listFiles();
         if(fileList == null) { return null; }
