@@ -15,11 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public final class SoundPlayer
-{
-    //TODO: Investigate turning this from a Singleton into something that just
-    //lives in the EditorPanel base class
-    //Singleton stuff
-    private static SoundPlayer soundPlayerInstance = null;
+{   
     //Objects that make noise
     private Player mp3Player;
     private Clip clip;
@@ -29,27 +25,18 @@ public final class SoundPlayer
     private boolean soundIsPlaying = false;
     private JFrame parentFrame = null;
     //Event foundation
-    private PropertyChangeSupport support = new PropertyChangeSupport(this);
+    private final PropertyChangeSupport handler = new PropertyChangeSupport(this);
 
-    private SoundPlayer(){    }
-
-    public static synchronized SoundPlayer getInstance()
-    {
-        if (soundPlayerInstance == null)
-        {
-            soundPlayerInstance = new SoundPlayer();
-        }
-        return soundPlayerInstance;
-    }
+    public SoundPlayer(){    }
     
     public void addPropertyChangeListener(PropertyChangeListener pcl)
     {
-        support.addPropertyChangeListener(pcl);
+        handler.addPropertyChangeListener(pcl);
     }
     
     public void removePropertyChangeListener(PropertyChangeListener pcl)
     {
-        support.removePropertyChangeListener(pcl);
+        handler.removePropertyChangeListener(pcl);
     }
 
     public void loadSound(String filePath)
@@ -71,13 +58,13 @@ public final class SoundPlayer
         {
             mp3Player.close();
             soundIsPlaying = false;
-            support.firePropertyChange("soundIsPlaying", true, false);
+            handler.firePropertyChange("soundIsPlaying", true, false);
         }
         if(clip != null)
         {
             clip.stop();
             soundIsPlaying = false;
-            support.firePropertyChange("soundIsPlaying", true, false);
+            handler.firePropertyChange("soundIsPlaying", true, false);
         }
     }
 
@@ -110,7 +97,7 @@ public final class SoundPlayer
                     try
                     {
                         soundIsPlaying = true;
-                        support.firePropertyChange("soundIsPlaying", false, true);
+                        handler.firePropertyChange("soundIsPlaying", false, true);
                         mp3Player.play();
                         
                     }
@@ -137,14 +124,14 @@ public final class SoundPlayer
                         if (event.getType() == Type.STOP)
                         {
                             soundIsPlaying = false;
-                            support.firePropertyChange("soundIsPlaying", true, false);
+                            handler.firePropertyChange("soundIsPlaying", true, false);
                             clip.close();
                         }
                     }
                 };
                 clip.addLineListener(listener);
                 soundIsPlaying = true;
-                support.firePropertyChange("soundIsPlaying", false, true);
+                handler.firePropertyChange("soundIsPlaying", false, true);
                 clip.open(ais);
                 clip.start();
             }

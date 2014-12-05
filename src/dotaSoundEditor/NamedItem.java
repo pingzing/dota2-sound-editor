@@ -5,7 +5,7 @@ import dotaSoundEditor.Helpers.Utility;
 public class NamedItem
 {
 
-    private String internalName;
+    private String internalName;    
     private String friendlyName;
     private String iconName;
     
@@ -19,7 +19,7 @@ public class NamedItem
     public NamedItem(String _internalName)
     {
         internalName = _internalName;
-        friendlyName = cleanUpName(internalName);
+        friendlyName = cleanUpName(internalName);        
         iconName = setIconName();
     }
 
@@ -65,6 +65,22 @@ public class NamedItem
         else if (nameToClean.contains("SkullBasher"))
         {
             nameToClean = "Skull Basher";
+        }
+        else if(nameToClean.contains("Butterfly"))
+        {
+            nameToClean = "Butterfly";
+        }
+        else if(nameToClean.contains("BattleFury"))
+        {
+            nameToClean = "Battle Fury";
+        }
+        else if(nameToClean.contains("MKB"))
+        {
+            nameToClean = "Monkey King Bar";
+        }
+        else if(nameToClean.contains("Desolator"))
+        {
+            nameToClean = "Desolator";
         }
         else
         {
@@ -131,7 +147,7 @@ public class NamedItem
         localIconName = this.friendlyName.toLowerCase();
         localIconName = localIconName.replaceAll(" ", "_");
         switch (localIconName)
-        {
+        {            
             case "clarity_potion":              localIconName = "clarity";
                 break;            
             case "healing_salve":               localIconName = "flask";
@@ -172,6 +188,8 @@ public class NamedItem
                 break;
             case "daedalus":                    localIconName = "greater_crit";
                 break;
+            case "battle_fury":                 localIconName = "bfury";
+                break;            
         }
         return localIconName;
     }

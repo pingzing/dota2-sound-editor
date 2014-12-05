@@ -202,13 +202,13 @@ public class ScriptParser
         }
     }
 
-    private StringBuilder parseModel(TreeModel currentHeroTreeModel)
+    private StringBuilder parseModel(TreeModel currentTreeModel)
     {
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) currentHeroTreeModel.getRoot();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) currentTreeModel.getRoot();
         StringBuilder scriptString = new StringBuilder();
         recursiveBuildScript(scriptString, root, 0);
 
-        //Remove first bracket and newline
+        //Remove first, final braces, starting newline. We don't need that first layer of nesting the braces would cause
         scriptString.deleteCharAt(0);
         scriptString.deleteCharAt(0);
 
@@ -223,13 +223,11 @@ public class ScriptParser
         {
             scriptString.append(node.getUserObject().toString() + "\n");
         }
-        /* The condition after the OR clause is a SUPER hacky fix. It's because Dota expects "prestart_stack" to have open/close braces,
-         * but since in the Music script, everything inside that tag gets commented out, it's a node with no children. Because of that,
-         * the parser never writes out any braces (because leaves in the tree don't get open/close braces).
+        /* 
          * TODO: Figure out a way to track brace placement without just checking too see if a node has children. Maybe 
          * a custom node object that tracks whether a node is followed by braces?
          */
-        if (!node.isLeaf() /*|| (node.getUserObject().toString().contains("prestart_stack") && node.isLeaf())*/)
+        if (!node.isLeaf())
         {
             for (int i = 1; i < level; i++)
             {

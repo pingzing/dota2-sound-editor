@@ -25,9 +25,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private String vpkPath;
     private String installDir;
     private JPanel currentTabPanel;
-    private static SoundPlayer soundPlayer = SoundPlayer.getInstance();
+    private static final SoundPlayer soundPlayer = new SoundPlayer();
     private SoundPlayingListener soundPlayingListener = new SoundPlayingListener();
-
+    private CacheManager cacheManager = new CacheManager();
+    
     public SoundEditorMainForm(String _fileName, String _installDir)
     {       
         initComponents();
@@ -38,7 +39,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         Utility.initPortraitFinder(vpkPath);
         portraitFinder = Utility.portraitFinder;
         portraitFinder.buildHeroPortraits();
-        portraitFinder.buildItemPortraits();
+        portraitFinder.buildItemPortraits();        
         
          try
         {
@@ -61,9 +62,9 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         }
 
         //Create tabs
-        tabPane.add(new HeroPanel(vpkPath, installDir));
-        tabPane.add(new ItemPanel(vpkPath, installDir));
-        tabPane.add(new MusicPanel(vpkPath, installDir));
+        tabPane.add(new HeroPanel(vpkPath, installDir, cacheManager, soundPlayer));
+        tabPane.add(new ItemPanel(vpkPath, installDir, cacheManager, soundPlayer));
+        tabPane.add(new MusicPanel(vpkPath, installDir, cacheManager, soundPlayer));
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
         this.setVisible(true);
@@ -285,11 +286,10 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     //Should probably do this on load too, just to be nice
     private void formWindowClosing(java.awt.event.WindowEvent evt)//GEN-FIRST:event_formWindowClosing
     {//GEN-HEADEREND:event_formWindowClosing
-        deleteScratchFiles();
-        CacheManager cm = CacheManager.getInstance();
+        deleteScratchFiles();        
         try
         {
-            cm.saveCache();
+            cacheManager.saveCache();
         }
         catch (IOException | SecurityException | URISyntaxException | NullPointerException ex)
         {
@@ -465,8 +465,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         {
             String propertyName = evt.getPropertyName();
             if (propertyName.equals("soundIsPlaying"))
-            {
-                Object source = evt.getSource();
+            {                
                 //Sound started playing. Change Play button to Stop butotn.
                 if ((boolean) evt.getNewValue() == true)
                 {

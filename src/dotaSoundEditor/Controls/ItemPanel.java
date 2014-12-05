@@ -8,7 +8,7 @@ import dotaSoundEditor.Helpers.PortraitFinder;
 import dotaSoundEditor.Helpers.ScriptParser;
 import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
-import dotaSoundEditor.Helpers.CacheManager;
+import dotaSoundEditor.Helpers.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.event.ActionEvent;
@@ -47,12 +47,15 @@ public final class ItemPanel extends EditorPanel
         initComponents();
     }
 
-    public ItemPanel(String _vpkPath, String _installDir)
+    public ItemPanel(String _vpkPath, String _installDir, CacheManager _cm, SoundPlayer _sp)
     {
         vpkPath = _vpkPath;
         installDir = _installDir;
         this.setName("Items");
         initComponents();
+        
+        soundPlayer = _sp;
+        cacheManager = _cm;
         currentTree = itemTree;
         portraitFinder = Utility.portraitFinder;
         this.populateSoundList();
@@ -136,34 +139,7 @@ public final class ItemPanel extends EditorPanel
         VPKEntry entry = vpk.getEntry(internalScriptPath);
         return entry;
     }
-
-    private void writeItemScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
-    {
-        File existsChecker = new File(Paths.get(installDir, "/dota/scripts/game_sounds_items.txt").toString());
-        boolean fileExistsLocally = existsChecker.exists() ? true : false;
-        if (fileExistsLocally && !overwriteExisting)
-        {
-            return;
-        }
-
-        File entryFile = new File(Paths.get(installDir + "/dota/").toFile(), entryToWrite.getPath());
-        File entryDir = entryFile.getParentFile();
-        if (entryDir != null && !entryDir.exists())
-        {
-            entryDir.mkdirs();
-        }
-        try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
-        {
-            fc.write(entryToWrite.getData());
-        }
-        catch (IOException ex)
-        {
-            JOptionPane.showMessageDialog(this,
-                    "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(),
-                    "Error writing script file", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
+   
     @Override
     void populateSoundList()
     {
@@ -177,7 +153,7 @@ public final class ItemPanel extends EditorPanel
         if (!scriptFile.isFile())
         {
             entry = getItemScriptFile("");
-            this.writeItemScriptFile(entry, false);
+            this.writeScriptFileToDisk(entry, false);
             this.updateCache(scriptKey, entry.getCRC32());
             scriptFile = new File(getCurrentScriptString());
         }
@@ -188,43 +164,18 @@ public final class ItemPanel extends EditorPanel
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
         if (needsValidation)
-        {
-            CacheManager cm = CacheManager.getInstance();
+        {            
             boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/" + scriptKey);
             if (!isUpToDate)
             {
-                this.writeItemScriptFile(cm.getCachedVpkEntry(), true);
+                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
                 mergeNewChanges(scriptTree, scriptFile);
-                this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
+                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
             }
         }
-        this.currentTreeModel = scriptTree;
-
-        //TODO: Break this out into a separate method
-        DefaultListModel scriptList = new DefaultListModel();
-        TreeNode rootNode = (TreeNode) scriptTree.getRoot();
-        int childCount = rootNode.getChildCount();
-
-        TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
-        ArrayList<String> wavePathsList = new ArrayList<>();
-        for (int i = 0; i < childCount; i++)
-        {
-            String nodeValue = scriptTree.getChild(rootNode, i).toString();
-            if (nodeValue.trim().startsWith("//"))
-            {
-                continue;
-            }
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
-            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
-
-            for (String s : wavePathsList)
-            {
-                DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
-                newNode.add(tempNode);
-            }
-            ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
-        }
-        currentTree.setModel(soundListTreeModel);
+        this.currentTreeModel = scriptTree;       
+        
+        currentTree.setModel(BuildSoundListTree(scriptTree));        
         currentTree.setRootVisible(false);
         currentTree.setShowsRootHandles(true);
     }
@@ -440,9 +391,8 @@ public final class ItemPanel extends EditorPanel
 
     @Override
     void updateCache(String scriptKey, long internalCrc)
-    {
-        CacheManager cm = CacheManager.getInstance();
+    {        
         String internalPath = "scripts/game_sounds_items.txt";
-        cm.putScript(scriptKey, internalPath, internalCrc);
+        cacheManager.putScript(scriptKey, internalPath, internalCrc);
     }
 }

@@ -2,9 +2,10 @@
 //Roadmap to next release:            
 
 
-// - Heavy refactoring pass: Move more functions into EditorPanel, 
-//    de-singleton-ify the SoundPlayer and CacheManager, check out all my TODOs,
+// - Heavy refactoring pass: Move more functions into EditorPanel, check out all my TODOs,
 //    standardize parameter naming schemes (underscores or not?)
+// - Rewrite prefs to not write to the registry. Just a local, serialized dictionary is a
+//    waaay better choice
 // - Look into abstracting more methods into EditorPanel by adding a 
 //    "scriptFilePath" instance member that each child implements
 // - Generally refactor the panels. There's a lot of improvement that can 
@@ -12,11 +13,13 @@
 // - Make multi-pressing play impossible
 // - Try to auto-find Dota install dir via Registry (if Windows). Might be at: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 570
 // - Or: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam
+// - Automatically fill in the relevant console launch args for Dota 2. The file is in the same place as autoexec.cfg. (maybe)
 // - Hero VO
 // - Make Advanced button handling less spaghetti-codey. Events! Something!
 // - Handle Advanced mode changes actually applying to tree (*note: make this 
 //     COMPLETELY BREAK automatic cache invalidation. I ain't regenerating dis shit)
 // - UI sounds
+// - Fix the libraries and dependencies to actually get into source control, so somebody cloning the repo can build right away
 // - Get sound length, display along bottom of window
 // - Find way to play sound files from memory instead of writing to local 
 //     filesys, then playing. ByteBuffer to byte[] to File, maybe?
@@ -27,7 +30,7 @@
 // - Expand "Advanced" functionality to allow for adding of nodes. (Also add a right-click menu with Add, Edit, Delete)
 // - Turn the Dropdown and Image handling code into Dropdownnable and Imageable interfaces?
 // - Javadoc. Need to document things!
-// - Localization?
+// - Localization? Investigate how Java handles localized strings
 package dotaSoundEditor;
 
 import dotaSoundEditor.Controls.SteamLocationPanel;

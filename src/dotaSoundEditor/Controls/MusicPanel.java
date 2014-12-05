@@ -27,10 +27,8 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import org.apache.commons.io.FileUtils;
 
-//TODO: Deal with music having been suddenly split up into a bunch of different places
 public final class MusicPanel extends EditorPanel
 {
-
     Executor e = Executors.newSingleThreadExecutor();
 
     public MusicPanel()
@@ -38,12 +36,15 @@ public final class MusicPanel extends EditorPanel
         initComponents();
     }
 
-    public MusicPanel(String _vpkPath, String _installDir)
+    public MusicPanel(String _vpkPath, String _installDir, CacheManager _cm, SoundPlayer _sp)
     {
         vpkPath = _vpkPath;
         installDir = _installDir;
         this.setName("Music");
         initComponents();
+        
+        soundPlayer = _sp;
+        cacheManager = _cm;
         currentDropdown = musicDropdown;
         currentTree = musicTree;
         this.populateDropdownBox();
@@ -68,34 +69,7 @@ public final class MusicPanel extends EditorPanel
 
         String fn = fileName.replace("\\", "/"); //jVPKLib only uses forward slashes in paths.
         return vpk.getEntry(fn);
-    }
-
-    private void writeMusicScriptFile(VPKEntry entryToWrite)
-    {
-        File existsChecker = new File(Paths.get(installDir + entryToWrite.getPath()).toString());
-        boolean fileExistsLocally = existsChecker.exists() ? true : false;
-        if (fileExistsLocally)
-        {
-            return;
-        }
-
-        File entryFile = new File(Paths.get(installDir, "/dota/").toFile(), entryToWrite.getPath());
-        File entryDir = entryFile.getParentFile();
-        if (entryDir != null && !entryDir.exists())
-        {
-            entryDir.mkdirs();
-        }
-
-        try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
-        {
-            int written = fc.write(entryToWrite.getData());
-            System.out.println(written + " bytes written in SoundPanel");
-        }
-        catch (IOException ex)
-        {
-            System.err.println("Can't write " + entryToWrite.getPath() + ": " + ex.getMessage());
-        }
-    }
+    }    
 
     @Override
     void populateSoundList()
@@ -110,7 +84,7 @@ public final class MusicPanel extends EditorPanel
         {
             String currentMusicPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
             entry = getMusicScriptFile(currentMusicPath);
-            writeMusicScriptFile(entry);
+            writeScriptFileToDisk(entry, false);
             scriptFile = new File(getCurrentScriptString());
             this.updateCache(scriptKey, entry.getCRC32());
         }
@@ -121,44 +95,19 @@ public final class MusicPanel extends EditorPanel
         ScriptParser parser = new ScriptParser(scriptFile);
         TreeModel scriptTree = parser.getTreeModel();
         if (needsValidation)
-        {
-            CacheManager cm = CacheManager.getInstance();
+        {            
             String internalScriptPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();
             internalScriptPath = internalScriptPath.replace("/", "/");
             boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
             if (!isUpToDate)
             {
-                this.writeMusicScriptFile(cm.getCachedVpkEntry());
+                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
                 mergeNewChanges(scriptTree, scriptFile);
-                this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
+                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
             }
         }
         this.currentTreeModel = scriptTree;
-
-        //TODO: Break this out into separate method
-        TreeNode rootNode = (TreeNode) scriptTree.getRoot();
-        int childCount = rootNode.getChildCount();
-
-        TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
-        ArrayList<String> wavePathsList = new ArrayList<>();
-        for (int i = 0; i < childCount; i++)
-        {
-            String nodeValue = scriptTree.getChild(rootNode, i).toString();
-            if (nodeValue.trim().startsWith("//"))
-            {
-                continue;
-            }
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
-            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
-
-            for (String s : wavePathsList)
-            {
-                DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
-                newNode.add(tempNode);
-            }
-            ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
-        }
-        currentTree.setModel(soundListTreeModel);
+        currentTree.setModel(BuildSoundListTree(scriptTree));
         currentTree.setRootVisible(false);
         currentTree.setShowsRootHandles(true);
     }
@@ -466,10 +415,9 @@ public final class MusicPanel extends EditorPanel
 
     @Override
     void updateCache(String scriptKey, long internalCrc)
-    {
-        CacheManager cm = CacheManager.getInstance();
+    {        
         String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
         internalPath = internalPath.replace("\\", "/");
-        cm.putScript(scriptKey, internalPath, internalCrc);
+        cacheManager.putScript(scriptKey, internalPath, internalCrc);
     }
 }

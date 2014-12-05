@@ -9,14 +9,14 @@ public class NamedMusic implements Comparable<NamedMusic>
 {
 
     private String internalName;
-    private Path filePath;
+    private Path internalFilePath;
     private String friendlyName;
 
     public NamedMusic(String _internalName, String _filePath)
     {
         internalName = _internalName;
         friendlyName = cleanUpName(internalName);
-        filePath = Paths.get(_filePath);
+        internalFilePath = Paths.get(_filePath);
     }
     
     public String getFriendlyName()
@@ -26,7 +26,7 @@ public class NamedMusic implements Comparable<NamedMusic>
     
     public Path getFilePath()
     {
-        return this.filePath;
+        return this.internalFilePath;
     }
     
     public String getInternalName()
@@ -41,12 +41,12 @@ public class NamedMusic implements Comparable<NamedMusic>
     
     public void setFilePath(Path _newFP)
     {
-        this.filePath = _newFP;
+        this.internalFilePath = _newFP;
     }
     
     public void setFilePath(String _newFP)
     {
-        this.filePath = Paths.get(_newFP);
+        this.internalFilePath = Paths.get(_newFP);
     }
 
     private String cleanUpName(String nameToClean)

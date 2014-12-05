@@ -12,10 +12,6 @@ import java.util.Properties;
 
 public class CacheManager
 {
-    //TODO: Investigate turning this from a Singleton into something that's
-    //just available in the EditorPanel base class
-
-    private static CacheManager cacheValidatorInstance = null;
     private Properties scriptsProperties = new Properties();
     private HashMap<String, Long> sessionCrcs = new HashMap<>();
     private VPKEntry cachedEntry = null;
@@ -24,13 +20,13 @@ public class CacheManager
     private final String PATH_SEP = "_path";
     private final String SESSION_CRC_SEP = "_latestcrc";
 
-    private CacheManager()
+    public CacheManager()
     {
         try
         {
             relativePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();    
             relativePath = relativePath.substring(0, relativePath.lastIndexOf("/"));
-            relativePath = relativePath.replaceAll("%20"," "); // Surely need to do this here
+            relativePath = relativePath.replaceAll("%20"," ");
         }
         catch (Exception ex)
         {
@@ -39,6 +35,7 @@ public class CacheManager
         }
         if(System.getProperty("os.name").toUpperCase().contains("WINDOWS"))
         {
+            //Kill the leading slash for Windows systems, windows paths don't start with /
             relativePath = relativePath.substring(1);                     
         }
         File propsFile = Paths.get(relativePath, SCRIPTS_FILE_NAME).toFile();
@@ -65,15 +62,6 @@ public class CacheManager
             System.out.println("Could not load cache file.");
             ex.printStackTrace();
         }
-    }
-
-    public static synchronized CacheManager getInstance()
-    {
-        if (cacheValidatorInstance == null)
-        {
-            cacheValidatorInstance = new CacheManager();
-        }
-        return cacheValidatorInstance;
     }
 
     /**

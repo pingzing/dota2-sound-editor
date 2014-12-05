@@ -32,21 +32,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 import org.apache.commons.io.FileUtils;
 
 public abstract class EditorPanel extends JPanel
 {
-
     protected TreeModel currentTreeModel;
-    protected SoundPlayer currentSound = SoundPlayer.getInstance();
+    protected SoundPlayer soundPlayer;
     protected JTree currentTree;
     protected JComboBox currentDropdown;
     protected String vpkPath;
     protected String installDir;
+    protected CacheManager cacheManager;    
     //TODO: Create some ActionListeners that pay attention to this value and react to it changing
     boolean inAdvancedMode = false;
 
@@ -155,8 +152,8 @@ public abstract class EditorPanel extends JPanel
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
             File soundFile = createSoundFileFromWaveString(waveString);
-            currentSound.loadSound(soundFile.getAbsolutePath());
-            currentSound.playSound();
+            soundPlayer.loadSound(soundFile.getAbsolutePath());
+            soundPlayer.playSound();
         }
         catch (Exception ex)
         {
@@ -351,9 +348,12 @@ public abstract class EditorPanel extends JPanel
 
     public boolean validateScriptFile(String scriptKey, String scriptPath)
     {
-        CacheManager cm = CacheManager.getInstance();
-        cm.putScriptPath(scriptKey, scriptPath);
-        long crc = cm.getSessionCrc(scriptKey);
+        if(cacheManager == null)
+        {
+            cacheManager = new CacheManager();
+        }
+        cacheManager.putScriptPath(scriptKey, scriptPath);
+        long crc = cacheManager.getSessionCrc(scriptKey);
         if (crc == 0)
         {
             return false;
@@ -363,8 +363,11 @@ public abstract class EditorPanel extends JPanel
 
     public boolean validateScriptFile(String scriptKey, long internalCrc)
     {
-        CacheManager cm = CacheManager.getInstance();
-        if (!cm.isUpToDate(scriptKey, internalCrc))
+        if(cacheManager == null)
+        {
+            cacheManager = new CacheManager();
+        }
+        if (!cacheManager.isUpToDate(scriptKey, internalCrc))
         {
             return false;
         }
@@ -495,5 +498,55 @@ public abstract class EditorPanel extends JPanel
     public void setAdvancedMode(boolean _newMode)
     {
         inAdvancedMode = _newMode;
+    }
+
+    protected TreeModel BuildSoundListTree(TreeModel scriptTree)
+    {
+        TreeNode rootNode = (TreeNode) scriptTree.getRoot();
+        int childCount = rootNode.getChildCount();
+        TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
+        ArrayList<String> wavePathsList = new ArrayList<>();
+        for (int i = 0; i < childCount; i++)
+        {
+            String nodeValue = scriptTree.getChild(rootNode, i).toString();
+            if (nodeValue.trim().startsWith("//"))
+            {
+                continue;
+            }
+            wavePathsList = getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
+            for (String s : wavePathsList)
+            {
+                DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
+                newNode.add(tempNode);
+            }
+            ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
+        }
+        return soundListTreeModel;
+    }
+
+    //TODO: Possible model for abstracing into the parent
+    protected void writeScriptFileToDisk(VPKEntry entryToWrite, boolean overwriteExisting)
+    {
+        File existsChecker = new File(Paths.get(installDir, entryToWrite.getPath()).toString());
+        boolean fileExistsLocally = existsChecker.exists();
+        if (fileExistsLocally && !overwriteExisting)
+        {
+            return;
+        }
+        File entryFile = new File(Paths.get(installDir, "/dota/").toFile(), entryToWrite.getPath());
+        File entryDir = entryFile.getParentFile();
+        if (entryDir != null && !entryDir.exists())
+        {
+            entryDir.mkdirs();
+        }
+        try (final FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
+        {
+            fc.write(entryToWrite.getData());
+        }
+        catch (IOException ex)
+        {
+            JOptionPane.showMessageDialog(this, "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(), "Error writing script file", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

@@ -1,6 +1,8 @@
 package dotaSoundEditor;
 
 import dotaSoundEditor.Helpers.Utility;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -11,28 +13,44 @@ public class NamedHero implements Comparable<NamedHero>
 {
 
     private String internalName;
+    private Path internalFilePath;
     private String friendlyName;
 
-    public NamedHero(String _internalName)
+    public NamedHero(String _internalName, String _filePath)
     {
         internalName = _internalName;
         friendlyName = cleanUpName(internalName);
+        internalFilePath = Paths.get(_filePath);
     }
 
+       public String getFriendlyName()
+    {
+        return this.friendlyName;
+    }
+    
+    public Path getFilePath()
+    {
+        return this.internalFilePath;
+    }
+    
     public String getInternalName()
     {
         return this.internalName;
     }
-
-    public String getFriendlyName()
+    
+    public void setInternalName(String _newIntName)
     {
-        return this.friendlyName;
+        this.internalName = _newIntName;
     }
-
-    public void setInternalName(String _internalName)
+    
+    public void setFilePath(Path _newFP)
     {
-        internalName = _internalName;
-        friendlyName = cleanUpName(internalName);
+        this.internalFilePath = _newFP;
+    }
+    
+    public void setFilePath(String _newFP)
+    {
+        this.internalFilePath = Paths.get(_newFP);
     }
 
     private String cleanUpName(String nameToClean)
@@ -101,8 +119,8 @@ public class NamedHero implements Comparable<NamedHero>
                 break;                
         }
         return nameToClean;
-    }    
-
+    }  
+       
     //Overrides what the dropdown box displays. Screw renderers! =D
     @Override
     public String toString()

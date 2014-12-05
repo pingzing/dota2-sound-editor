@@ -4,7 +4,7 @@ import dotaSoundEditor.Helpers.PortraitFinder;
 import dotaSoundEditor.Helpers.ScriptParser;
 import dotaSoundEditor.Helpers.Utility;
 import dotaSoundEditor.*;
-import dotaSoundEditor.Helpers.CacheManager;
+import dotaSoundEditor.Helpers.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.awt.event.ActionEvent;
@@ -15,10 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -43,7 +40,7 @@ public class HeroPanel extends EditorPanel
         initComponents();
     }
 
-    public HeroPanel(String _vpkPath, String _installDir)
+    public HeroPanel(String _vpkPath, String _installDir, CacheManager _cm, SoundPlayer _sp)
     {
 
         vpkPath = _vpkPath;
@@ -51,6 +48,8 @@ public class HeroPanel extends EditorPanel
         this.setName("Hero Spells");
         initComponents();
 
+        soundPlayer = _sp;
+        cacheManager = _cm;
         portraitFinder = Utility.portraitFinder;
         currentDropdown = heroSpellsDropdown;
         currentTree = heroSpellTree;
@@ -177,18 +176,15 @@ public class HeroPanel extends EditorPanel
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
-
-    //TODO: Use the much better-written MusicPanel populateDropdownBox to refactor this mess
+    
     @Override
     protected void populateDropdownBox()
     {
         currentDropdown.removeAllItems();
-        Set heroList = new CopyOnWriteArraySet();
+        ArrayList<NamedHero> namedHeroList = new ArrayList<>();
         //Build list of heroes and populate dropwdown with it                
         File file = new File(vpkPath);
-        VPKArchive vpk = new VPKArchive();
-
-        System.out.println(file);
+        VPKArchive vpk = new VPKArchive();        
 
         try
         {
@@ -200,28 +196,20 @@ public class HeroPanel extends EditorPanel
             return;
         }
 
-        for (VPKEntry entry : vpk.getEntries())
+        String vpkHeroSoundsDir = "scripts/game_sounds_heroes/";
+        for (VPKEntry entry : vpk.getEntriesForDir(vpkHeroSoundsDir))
         {
-            if (entry.getPath().contains("scripts/game_sounds_heroes/"))
-            {
-                heroList.add(entry.getName());
-            }
+           String internalName = entry.getName();
+           internalName = internalName.replace("game_sounds_", "");
+
+            NamedHero nh = new NamedHero(internalName, entry.getPath());
+            namedHeroList.add(nh);
         }
-        //Format and prettify hero list
-        for (Object hero : heroList)
+
+        Collections.sort(namedHeroList);
+        for (NamedHero nh : namedHeroList)
         {
-            String heroString = hero.toString();
-            heroString = heroString.replace("game_sounds_", "");
-            NamedHero tempNamedHero = new NamedHero(heroString);
-            heroList.remove(hero);
-            heroList.add(tempNamedHero);
-        }
-        Object[] heroListArray = heroList.toArray();
-        Arrays.sort(heroListArray);
-        for (Object h : heroListArray)
-        {
-            NamedHero tempHero = (NamedHero) h;
-            currentDropdown.addItem(tempHero);
+            currentDropdown.addItem(nh);
         }
     }
 
@@ -242,7 +230,7 @@ public class HeroPanel extends EditorPanel
         if (!scriptFile.isFile())
         {
             entry = this.getHeroScriptFile(selectedHero.getInternalName());
-            this.writeHeroScriptFile(entry, false);
+            this.writeScriptFileToDisk(entry, false);
             this.updateCache(scriptKey, entry.getCRC32());
         }
         else //if it exists, we need to validate it
@@ -253,44 +241,18 @@ public class HeroPanel extends EditorPanel
         TreeModel scriptTree = parser.getTreeModel();
         if (needsValidation)
         {
-            CacheManager cm = CacheManager.getInstance();
             boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/game_sounds_heroes/" + scriptKey);
             if (!isUpToDate)
             {
-                this.writeHeroScriptFile(cm.getCachedVpkEntry(), true);
+                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
                 mergeNewChanges(scriptTree, scriptPath);
-                this.updateCache(cm.getCachedVpkEntry().getName() + ".txt", cm.getCachedVpkEntry().getCRC32());
+                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
             }
         }
-        this.currentTreeModel = scriptTree;
-
-        //TODO: Break this out into separate method
-        TreeNode rootNode = (TreeNode) scriptTree.getRoot();
-        int childCount = rootNode.getChildCount();
-
-        TreeModel soundListTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
-        ArrayList<String> wavePathsList = new ArrayList<>();
-        for (int i = 0; i < childCount; i++)
-        {
-            String nodeValue = scriptTree.getChild(rootNode, i).toString();
-            if (nodeValue.trim().startsWith("//"))
-            {
-                continue;
-            }
-            wavePathsList = super.getWavePathsAsList((TreeNode) scriptTree.getChild(rootNode, i));
-            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(nodeValue);
-
-            for (String s : wavePathsList)
-            {
-                DefaultMutableTreeNode tempNode = new DefaultMutableTreeNode(s);
-                newNode.add(tempNode);
-            }
-            ((DefaultMutableTreeNode) soundListTreeModel.getRoot()).add(newNode);
-        }
-
-        currentTree.setModel(soundListTreeModel);
+        this.currentTreeModel = scriptTree;              
+        currentTree.setModel(BuildSoundListTree(scriptTree));
     }
-
+    
     private VPKEntry getHeroScriptFile(String heroName)
     {
         heroName = heroName.toLowerCase();
@@ -314,33 +276,6 @@ public class HeroPanel extends EditorPanel
         return entry;
     }
 
-    //TODO: Possible model for abstracing into the parent
-    private void writeHeroScriptFile(VPKEntry entryToWrite, boolean overwriteExisting)
-    {
-        File existsChecker = new File(Paths.get(installDir, entryToWrite.getPath()).toString());
-        boolean fileExistsLocally = existsChecker.exists() ? true : false;
-        if (fileExistsLocally && !overwriteExisting)
-        {
-            return;
-        }
-
-        File entryFile = new File(Paths.get(installDir, "/dota/").toFile(), entryToWrite.getPath());
-        File entryDir = entryFile.getParentFile();
-        if (entryDir != null && !entryDir.exists())
-        {
-            entryDir.mkdirs();
-        }
-        try (FileChannel fc = FileUtils.openOutputStream(entryFile).getChannel())
-        {
-            fc.write(entryToWrite.getData());
-        }
-        catch (IOException ex)
-        {
-            JOptionPane.showMessageDialog(this,
-                    "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(),
-                    "Error writing script file", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
     @Override
     protected void fillImageFrame(Object _selectedItem) throws IOException
@@ -367,9 +302,9 @@ public class HeroPanel extends EditorPanel
 
     private String getScriptPathByHeroName(String internalName)
     {
-        String scriptPathString =
-                Paths.get(installDir, "/dota/scripts/game_sounds_heroes/game_sounds_"
-                + internalName + ".txt").toString();
+        String scriptPathString
+                = Paths.get(installDir, "/dota/scripts/game_sounds_heroes/game_sounds_"
+                        + internalName + ".txt").toString();
 
         File scriptFilePath = new File(scriptPathString);
 
@@ -535,8 +470,7 @@ public class HeroPanel extends EditorPanel
     @Override
     void updateCache(String scriptKey, long internalCrc)
     {
-        CacheManager cm = CacheManager.getInstance();
         String internalPath = "scripts/game_sounds_heroes/game_sounds_" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName() + ".txt";
-        cm.putScript(scriptKey, internalPath, internalCrc);
+        cacheManager.putScript(scriptKey, internalPath, internalCrc);
     }
 }
