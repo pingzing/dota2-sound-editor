@@ -7,30 +7,19 @@ import dotaSoundEditor.*;
 import dotaSoundEditor.Helpers.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
-import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
-import org.apache.commons.io.FileUtils;
 
 public class HeroPanel extends EditorPanel
 {
-
     Executor e = Executors.newSingleThreadExecutor();
     PortraitFinder portraitFinder;
 
@@ -42,7 +31,6 @@ public class HeroPanel extends EditorPanel
 
     public HeroPanel(String _vpkPath, String _installDir, CacheManager _cm, SoundPlayer _sp)
     {
-
         vpkPath = _vpkPath;
         installDir = _installDir;
         this.setName("Hero Spells");
@@ -63,15 +51,15 @@ public class HeroPanel extends EditorPanel
     private void initComponents()
     {
 
-        jLabel1 = new javax.swing.JLabel();
+        heroLabel = new javax.swing.JLabel();
         heroImageLabel = new javax.swing.JLabel();
         heroSpellsDropdown = new javax.swing.JComboBox();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        heroPanelScrollFrame = new javax.swing.JScrollPane();
 
         setPreferredSize(new java.awt.Dimension(485, 495));
 
-        jLabel1.setText("Hero:");
-        jLabel1.setName("heroLabel"); // NOI18N
+        heroLabel.setText("Hero:");
+        heroLabel.setName("heroLabel"); // NOI18N
 
         heroImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         heroImageLabel.setMaximumSize(new java.awt.Dimension(128, 72));
@@ -88,10 +76,10 @@ public class HeroPanel extends EditorPanel
             }
         });
 
-        jScrollPane1.setName("heroListFrame"); // NOI18N
+        heroPanelScrollFrame.setName("heroListFrame"); // NOI18N
 
         heroSpellTree.setMinimumSize(new java.awt.Dimension(72, 64));
-        jScrollPane1.setViewportView(heroSpellTree);
+        heroPanelScrollFrame.setViewportView(heroSpellTree);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -101,11 +89,11 @@ public class HeroPanel extends EditorPanel
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                        .addComponent(heroLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(heroSpellsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
+                    .addComponent(heroPanelScrollFrame, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -117,12 +105,12 @@ public class HeroPanel extends EditorPanel
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
+                    .addComponent(heroLabel)
                     .addComponent(heroSpellsDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(heroImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                .addComponent(heroPanelScrollFrame, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -171,111 +159,11 @@ public class HeroPanel extends EditorPanel
     }//GEN-LAST:event_heroSpellsDropdownStateChanged
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel heroImageLabel;
+    private javax.swing.JLabel heroLabel;
+    private javax.swing.JScrollPane heroPanelScrollFrame;
     private final javax.swing.JTree heroSpellTree = new javax.swing.JTree();
     private javax.swing.JComboBox heroSpellsDropdown;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
-    
-    @Override
-    protected void populateDropdownBox()
-    {
-        currentDropdown.removeAllItems();
-        ArrayList<NamedHero> namedHeroList = new ArrayList<>();
-        //Build list of heroes and populate dropwdown with it                
-        File file = new File(vpkPath);
-        VPKArchive vpk = new VPKArchive();        
-
-        try
-        {
-            vpk.load(file);
-        }
-        catch (Exception ex)
-        {
-            System.err.println("Can't open archive: " + ex.getMessage());
-            return;
-        }
-
-        String vpkHeroSoundsDir = "scripts/game_sounds_heroes/";
-        for (VPKEntry entry : vpk.getEntriesForDir(vpkHeroSoundsDir))
-        {
-           String internalName = entry.getName();
-           internalName = internalName.replace("game_sounds_", "");
-
-            NamedHero nh = new NamedHero(internalName, entry.getPath());
-            namedHeroList.add(nh);
-        }
-
-        Collections.sort(namedHeroList);
-        for (NamedHero nh : namedHeroList)
-        {
-            currentDropdown.addItem(nh);
-        }
-    }
-
-    @Override
-    protected void populateSoundList()
-    {
-        inAdvancedMode = false;
-        currentTree.setEditable(false);
-        NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
-
-        Path scriptPath = Paths.get(this.installDir, "/dota/scripts/game_sounds_heroes/game_sounds_" + selectedHero.getInternalName() + ".txt");
-        File scriptFile = new File(scriptPath.toString());
-        String scriptKey = "game_sounds_" + selectedHero.getInternalName() + ".txt".toLowerCase();
-        VPKEntry entry;
-        boolean needsValidation = false;
-
-        //if it doesn't exist yet, don't bother validating, and just write it out
-        if (!scriptFile.isFile())
-        {
-            entry = this.getHeroScriptFile(selectedHero.getInternalName());
-            this.writeScriptFileToDisk(entry, false);
-            this.updateCache(scriptKey, entry.getCRC32());
-        }
-        else //if it exists, we need to validate it
-        {
-            needsValidation = true;
-        }
-        ScriptParser parser = new ScriptParser(scriptPath.toFile());
-        TreeModel scriptTree = parser.getTreeModel();
-        if (needsValidation)
-        {
-            boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/game_sounds_heroes/" + scriptKey);
-            if (!isUpToDate)
-            {
-                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
-                mergeNewChanges(scriptTree, scriptPath);
-                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
-            }
-        }
-        this.currentTreeModel = scriptTree;              
-        currentTree.setModel(BuildSoundListTree(scriptTree));
-    }
-    
-    private VPKEntry getHeroScriptFile(String heroName)
-    {
-        heroName = heroName.toLowerCase();
-        String internalScriptPath = "scripts/game_sounds_heroes/game_sounds_" + heroName + ".txt";
-        File vpkFile = new File(vpkPath);
-        VPKArchive vpk = new VPKArchive();
-        try
-        {
-            vpk.load(vpkFile);
-        }
-        catch (Exception ex)
-        {
-            JOptionPane.showMessageDialog(this,
-                    "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
-                    "Error opening VPK", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-            return null;
-        }
-
-        VPKEntry entry = vpk.getEntry(internalScriptPath);
-        return entry;
-    }
-
 
     @Override
     protected void fillImageFrame(Object _selectedItem) throws IOException
@@ -300,6 +188,88 @@ public class HeroPanel extends EditorPanel
         }
     }
 
+    @Override
+    protected void populateDropdownBox()
+    {
+        currentDropdown.removeAllItems();
+        ArrayList<NamedHero> namedHeroList = new ArrayList<>();
+        //Build list of heroes and populate dropwdown with it                
+        File file = new File(vpkPath);
+        VPKArchive vpk = new VPKArchive();
+
+        try
+        {
+            vpk.load(file);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Can't open archive: " + ex.getMessage());
+            return;
+        }
+
+        String vpkHeroSoundsDir = "scripts/game_sounds_heroes/";
+        for (VPKEntry entry : vpk.getEntriesForDir(vpkHeroSoundsDir))
+        {
+            String internalName = entry.getName();
+            internalName = internalName.replace("game_sounds_", "");
+
+            NamedHero nh = new NamedHero(internalName, entry.getPath());
+            namedHeroList.add(nh);
+        }
+
+        Collections.sort(namedHeroList);
+        for (NamedHero nh : namedHeroList)
+        {
+            currentDropdown.addItem(nh);
+        }
+    }
+
+    @Override
+    protected void populateSoundList()
+    {
+        inAdvancedMode = false;
+        currentTree.setEditable(false);
+        NamedHero selectedHero = (NamedHero) currentDropdown.getSelectedItem();
+
+        Path scriptPath = Paths.get(this.installDir, "/dota/scripts/game_sounds_heroes/game_sounds_" + selectedHero.getInternalName() + ".txt");
+        File scriptFile = new File(scriptPath.toString());
+        String scriptKey = "game_sounds_" + selectedHero.getInternalName() + ".txt".toLowerCase();
+                
+        boolean needsValidation = false;
+        //if it doesn't exist yet, don't bother validating, and just write it out
+        VPKEntry entry;
+        if (!scriptFile.isFile())
+        {
+            entry = this.getHeroScriptFile(selectedHero.getInternalName());
+            this.writeScriptFileToDisk(entry, false);
+            this.updateCache(scriptKey, entry.getCRC32());
+        }
+        else //if it exists, we need to validate it
+        {
+            needsValidation = true;
+        }
+        ScriptParser parser = new ScriptParser(scriptPath.toFile());
+        TreeModel scriptTree = parser.getTreeModel();
+        if (needsValidation)
+        {
+            boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/game_sounds_heroes/" + scriptKey);
+            if (!isUpToDate)
+            {
+                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
+                mergeNewChanges(scriptTree, scriptPath);
+                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
+            }
+        }
+        this.currentTreeModel = scriptTree;
+        currentTree.setModel(buildSoundListTree(scriptTree));
+    }
+
+    @Override
+    String getCurrentScriptString()
+    {
+        return this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
+    }
+
     private String getScriptPathByHeroName(String internalName)
     {
         String scriptPathString
@@ -319,152 +289,32 @@ public class HeroPanel extends EditorPanel
     }
 
     @Override
-    protected void revertButtonActionPerformed(java.awt.event.ActionEvent evt)
-    {
-        //TODO: See if we can abstract away some of this + promptUserForNewFile()'s functionality        
-
-        if (currentTree.getSelectionRows().length != 0
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) currentTree.getSelectionPath().getLastPathComponent());
-            String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
-            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
-            selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
-
-            //First go in and delete the sound in customSounds   
-            deleteSoundFileByWaveString(selectedWaveString);
-
-            //Get the relevant wavestring from the internal scriptfile                    
-            VPKArchive vpk = new VPKArchive();
-            try
-            {
-                vpk.load(new File(this.vpkPath));
-            }
-            catch (IOException ex)
-            {
-                ex.printStackTrace();
-            }
-            String scriptDir = this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-            scriptDir = scriptDir.replace(Paths.get(installDir, "/dota/").toString(), "");
-            scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
-            scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
-            scriptDir = scriptDir.substring(0, scriptDir.lastIndexOf("/") + 1); //Cut off file extension            
-
-            String scriptFileString = null;
-            byte[] bytes = null;
-            for (VPKEntry entry : vpk.getEntriesForDir(scriptDir))
-            {
-                if (entry.getName().contains("game_sounds_" + ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()))
-                {
-                    try
-                    {
-                        ByteBuffer scriptBuffer = null;
-                        scriptBuffer = entry.getData();
-                        bytes = new byte[scriptBuffer.remaining()];
-                        scriptBuffer.get(bytes);
-                    }
-                    catch (IOException ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                    scriptFileString = new String(bytes, Charset.forName("UTF-8"));
-                    break;
-                }
-            }
-            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
-            int waveStringIndex = wavePathList.indexOf(selectedWaveString);
-
-            //Cut off every part of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally get the wrong wavepaths            
-            StringBuilder scriptFileStringShortened = new StringBuilder();
-            Scanner scan = new Scanner(scriptFileString);
-            boolean found = false;
-            while (scan.hasNextLine())
-            {
-                String curLine = scan.nextLine();
-                if (curLine.equals(selectedWaveParentString))
-                {
-                    found = true;
-                }
-                if (found == true)
-                {
-                    scriptFileStringShortened.append(curLine).append(System.lineSeparator());
-                }
-            }
-            scriptFileString = scriptFileStringShortened.toString();
-            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);
-            String replacementString = internalWavePathsList.get(waveStringIndex);
-
-            selectedNode.setUserObject(replacementString);
-            ScriptParser parser = new ScriptParser(this.currentTreeModel);
-            parser.writeModelToFile(this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName()));
-
-            //Modify the UI treeNode in addition to the backing TreeNode
-            ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
-            ((DefaultTreeModel) currentTree.getModel()).nodeChanged(((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()));
-        }
-    }
-
-    @Override
-    protected void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt)
-    {
-        //Delete existing script file
-        String scriptFilePath = getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-        File scriptFileToDelete = new File(scriptFilePath);
-        if (scriptFileToDelete.isFile())
-        {
-            try
-            {
-                java.nio.file.Files.delete(Paths.get(scriptFilePath));
-            }
-            catch (NoSuchFileException | DirectoryNotEmptyException | SecurityException ex)
-            {
-                ex.printStackTrace();
-            }
-            catch (IOException ex)
-            {
-                System.err.println("IOException in delete.");
-            }
-        }
-        else
-        {
-            System.err.println("Unable to delete script file at " + scriptFileToDelete.getAbsolutePath());
-        }
-
-        //Repopulate soundtree
-        populateSoundList();
-    }
-
-    @Override
-    protected void playSoundButtonActionPerformed(ActionEvent evt)
-    {
-        if (currentTree.getSelectionRows().length != 0
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
-        }
-    }
-
-    @Override
-    protected void replaceButtonActionPerformed(java.awt.event.ActionEvent evt)
-    {
-        if (currentTree.getSelectionRows() != null
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
-            promptUserForNewFile(selectedFile.toString());
-        }
-    }
-
-    @Override
-    String getCurrentScriptString()
-    {
-        return this.getScriptPathByHeroName(((NamedHero) currentDropdown.getSelectedItem()).getInternalName());
-    }
-
-    @Override
     String getCustomSoundPathString()
     {
         return Paths.get("custom", ((NamedHero) currentDropdown.getSelectedItem()).getInternalName()).toString() + File.separator;
+    }
+
+    private VPKEntry getHeroScriptFile(String heroName)
+    {
+        heroName = heroName.toLowerCase();
+        String internalScriptPath = "scripts/game_sounds_heroes/game_sounds_" + heroName + ".txt";
+        File vpkFile = new File(vpkPath);
+        VPKArchive vpk = new VPKArchive();
+        try
+        {
+            vpk.load(vpkFile);
+        }
+        catch (Exception ex)
+        {
+            JOptionPane.showMessageDialog(this,
+                    "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
+                    "Error opening VPK", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+            return null;
+        }
+
+        VPKEntry entry = vpk.getEntry(internalScriptPath);
+        return entry;
     }
 
     @Override

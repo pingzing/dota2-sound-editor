@@ -4,31 +4,19 @@ import dotaSoundEditor.Helpers.*;
 import dotaSoundEditor.NamedMusic;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
-import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Scanner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
-import org.apache.commons.io.FileUtils;
 
 public final class MusicPanel extends EditorPanel
 {
+
     Executor e = Executors.newSingleThreadExecutor();
 
     public MusicPanel()
@@ -42,7 +30,7 @@ public final class MusicPanel extends EditorPanel
         installDir = _installDir;
         this.setName("Music");
         initComponents();
-        
+
         soundPlayer = _sp;
         cacheManager = _cm;
         currentDropdown = musicDropdown;
@@ -50,265 +38,6 @@ public final class MusicPanel extends EditorPanel
         this.populateDropdownBox();
         this.populateSoundList();
         attachDoubleClickListenerToTree();
-    }
-
-    private VPKEntry getMusicScriptFile(String fileName)
-    {
-        File vpkFile = new File(vpkPath);
-        VPKArchive vpk = new VPKArchive();
-        VPKEntry entryToReturn = null;
-        try
-        {
-            vpk.load(vpkFile);
-        }
-        catch (Exception ex)
-        {
-            System.err.println("Can't open VPK Archive. Details: " + ex.getMessage());
-            return entryToReturn;
-        }
-
-        String fn = fileName.replace("\\", "/"); //jVPKLib only uses forward slashes in paths.
-        return vpk.getEntry(fn);
-    }    
-
-    @Override
-    void populateSoundList()
-    {
-        currentTree.setEditable(false);
-        inAdvancedMode = false;
-        File scriptFile = new File(getCurrentScriptString());
-        String scriptKey = ((NamedMusic) currentDropdown.getSelectedItem()).getInternalName().toLowerCase() + ".txt";
-        VPKEntry entry;
-        boolean needsValidation = false;
-        if (!scriptFile.isFile())
-        {
-            String currentMusicPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
-            entry = getMusicScriptFile(currentMusicPath);
-            writeScriptFileToDisk(entry, false);
-            scriptFile = new File(getCurrentScriptString());
-            this.updateCache(scriptKey, entry.getCRC32());
-        }
-        else
-        {
-            needsValidation = true;
-        }
-        ScriptParser parser = new ScriptParser(scriptFile);
-        TreeModel scriptTree = parser.getTreeModel();
-        if (needsValidation)
-        {            
-            String internalScriptPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();
-            internalScriptPath = internalScriptPath.replace("/", "/");
-            boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
-            if (!isUpToDate)
-            {
-                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
-                mergeNewChanges(scriptTree, scriptFile);
-                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
-            }
-        }
-        this.currentTreeModel = scriptTree;
-        currentTree.setModel(BuildSoundListTree(scriptTree));
-        currentTree.setRootVisible(false);
-        currentTree.setShowsRootHandles(true);
-    }
-
-    @Override
-    void fillImageFrame(Object selectedItem) throws IOException
-    {
-    } //This panel has no image Frame, and so this method is unecessary
-
-    @Override
-    void revertButtonActionPerformed(ActionEvent evt)
-    {
-        if (currentTree.getSelectionRows().length != 0
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) currentTree.getSelectionPath().getLastPathComponent());
-            String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
-            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
-            selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
-
-            //First go in and delete the sound in customSounds   
-            deleteSoundFileByWaveString(selectedWaveString);
-
-            //Get the relevant wavestring from the internal scriptfile                    
-            VPKArchive vpk = new VPKArchive();
-            try
-            {
-                vpk.load(new File(this.vpkPath));
-            }
-            catch (IOException ex)
-            {
-                ex.printStackTrace();
-            }
-            String scriptDir = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
-            scriptDir = scriptDir.replace("\\", "/");
-
-            byte[] bytes = null;
-            VPKEntry entry = vpk.getEntry(scriptDir);
-            try
-            {
-                ByteBuffer scriptBuffer = null;
-                scriptBuffer = entry.getData();
-                bytes = new byte[scriptBuffer.remaining()];
-                scriptBuffer.get(bytes);
-            }
-            catch (IOException ex)
-            {
-                ex.printStackTrace();
-            }
-            String scriptFileString = new String(bytes, Charset.forName("UTF-8"));
-            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
-            int waveStringIndex = wavePathList.indexOf(selectedWaveString);
-
-            //Cut off every parth of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally stop too early
-            StringBuilder scriptFileStringShortened = new StringBuilder();
-            Scanner scan = new Scanner(scriptFileString);
-            boolean found = false;
-            while (scan.hasNextLine())
-            {
-                String curLine = scan.nextLine();
-                if (curLine.equals(selectedWaveParentString))
-                {
-                    found = true;
-                }
-                if (found)
-                {
-                    scriptFileStringShortened.append(curLine).append(System.lineSeparator());
-                }
-            }
-            scriptFileString = scriptFileStringShortened.toString();
-            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);
-            String replacementString = internalWavePathsList.get(waveStringIndex);
-
-            selectedNode.setUserObject(replacementString);
-            ScriptParser parser = new ScriptParser(this.currentTreeModel);
-            parser.writeModelToFile(Paths.get(installDir, "/dota/" + scriptDir).toString());
-
-            ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
-            ((DefaultTreeModel) currentTree.getModel()).nodeChanged(((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()));
-        }
-    }
-
-    @Override
-    void playSoundButtonActionPerformed(ActionEvent evt)
-    {
-        if (currentTree.getSelectionRows().length != 0
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
-        }
-    }
-
-    @Override
-    void revertAllButtonActionPerformed(ActionEvent evt)
-    {
-        String scriptFilePath = getCurrentScriptString();
-        File scriptFileToDelete = new File(scriptFilePath);
-
-        if (scriptFileToDelete.isFile())
-        {
-            boolean deleteSuccess = scriptFileToDelete.delete();
-            System.out.println("Deleting old script file successful? " + deleteSuccess);
-        }
-        else
-        {
-            System.err.println("Unable to delete file at " + scriptFileToDelete.getAbsolutePath());
-        }
-        populateSoundList();
-    }
-
-    @Override
-    void replaceButtonActionPerformed(ActionEvent evt)
-    {
-        if (currentTree.getSelectionRows() != null && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
-            promptUserForNewFile(selectedFile.toString());
-        }
-    }
-
-    @Override
-    void populateDropdownBox()
-    {
-        currentDropdown.removeAllItems();
-        ArrayList<String> vpkSearchPaths = new ArrayList<>();
-        ArrayList<NamedMusic> namedMusicList = new ArrayList<>();        
-        vpkSearchPaths.add("scripts/music/");
-        vpkSearchPaths.add("scripts/music/terrorblade_arcana/");
-        vpkSearchPaths.add("scripts/music/valve_dota_001/");
-        vpkSearchPaths.add("scripts/music/valve_ti4/");
-        File file = new File(vpkPath);
-        VPKArchive vpk = new VPKArchive();
-
-        try
-        {
-            vpk.load(file);
-        }
-        catch (Exception ex)
-        {
-            System.err.println("Can't open archive: " + ex.getMessage());
-            return;
-        }
-
-        for (String dir : vpkSearchPaths)
-        {
-            for (VPKEntry entry : vpk.getEntriesForDir(dir))
-            {
-                //TODO: Replace this with a (user-editable?) list of paths to search read in from a file(?)
-                if (entry.getPath().contains("game_sounds_music.txt")
-                        || entry.getPath().contains("game_sounds_music_int.txt")
-                        || entry.getPath().contains("game_sounds_music_spectator.txt")
-                        || entry.getPath().contains("game_sounds_music_tutorial.txt")
-                        || entry.getPath().contains("game_sounds_stingers.txt")
-                        || entry.getPath().contains("game_sounds_music_util.txt")
-                        || entry.getPath().contains("game_sounds_stingers_diretide.txt")
-                        || entry.getPath().contains("game_sounds_stingers_greevil.txt")
-                        || entry.getPath().contains("game_sounds_stingers_main.txt"))
-                {
-                    int lastSlashIndex = entry.getDir().lastIndexOf("/");
-                    int firstSlashIndex = entry.getDir().substring(0, lastSlashIndex - 1).lastIndexOf("/");
-                    String parentDir = entry.getDir().substring(firstSlashIndex + 1, lastSlashIndex);
-                    String internalName = parentDir + "/" + entry.getName();
-                    
-                    //format internal name a little bit, remove prefixes
-                    NamedMusic nm = new NamedMusic(internalName, entry.getPath());
-                    namedMusicList.add(nm);
-                }
-            }
-        }
-
-        Collections.sort(namedMusicList);
-        for (NamedMusic nm : namedMusicList)
-        {
-            currentDropdown.addItem(nm);
-        }
-    }
-
-    @Override
-    String getCurrentScriptString()
-    {
-        if (currentDropdown.getSelectedItem() != null)
-        {
-            String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
-            String scriptPathString = Paths.get(installDir, "dota", internalPath).toString();
-
-            if (new File(scriptPathString).isFile())
-            {
-                return new File(scriptPathString).getAbsolutePath();
-            }
-        }
-        else
-        {
-            return "";
-        }
-        return "";
-    }
-
-    @Override
-    String getCustomSoundPathString()
-    {
-        return "custom/music/";
     }
 
     @SuppressWarnings("unchecked")
@@ -414,8 +143,158 @@ public final class MusicPanel extends EditorPanel
     // End of variables declaration//GEN-END:variables
 
     @Override
+    void fillImageFrame(Object selectedItem) throws IOException
+    {
+    } //This panel has no image Frame, implementation is unecessary
+
+    @Override
+    void populateDropdownBox()
+    {
+        currentDropdown.removeAllItems();
+        ArrayList<String> vpkSearchPaths = new ArrayList<>();
+        ArrayList<NamedMusic> namedMusicList = new ArrayList<>();
+        vpkSearchPaths.add("scripts/music/");
+        vpkSearchPaths.add("scripts/music/terrorblade_arcana/");
+        vpkSearchPaths.add("scripts/music/valve_dota_001/");
+        vpkSearchPaths.add("scripts/music/valve_ti4/");
+        File file = new File(vpkPath);
+        VPKArchive vpk = new VPKArchive();
+
+        try
+        {
+            vpk.load(file);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Can't open archive: " + ex.getMessage());
+            return;
+        }
+
+        for (String dir : vpkSearchPaths)
+        {
+            for (VPKEntry entry : vpk.getEntriesForDir(dir))
+            {
+                //TODO: Replace this with a (user-editable?) list of paths to search read in from a file(?)
+                //Music is scattered in a bunch of different directories, so look in all of them
+                //Pretty brittle right now, thus the TODO up there
+                if (entry.getPath().contains("game_sounds_music.txt")
+                        || entry.getPath().contains("game_sounds_music_int.txt")
+                        || entry.getPath().contains("game_sounds_music_spectator.txt")
+                        || entry.getPath().contains("game_sounds_music_tutorial.txt")
+                        || entry.getPath().contains("game_sounds_stingers.txt")
+                        || entry.getPath().contains("game_sounds_music_util.txt")
+                        || entry.getPath().contains("game_sounds_stingers_diretide.txt")
+                        || entry.getPath().contains("game_sounds_stingers_greevil.txt")
+                        || entry.getPath().contains("game_sounds_stingers_main.txt"))
+                {
+                    //format internal name a little bit, remove prefixes
+                    int lastSlashIndex = entry.getDir().lastIndexOf("/");
+                    int firstSlashIndex = entry.getDir().substring(0, lastSlashIndex - 1).lastIndexOf("/");
+                    String parentDir = entry.getDir().substring(firstSlashIndex + 1, lastSlashIndex);
+                    String internalName = parentDir + "/" + entry.getName();
+                   
+                    NamedMusic nm = new NamedMusic(internalName, entry.getPath());
+                    namedMusicList.add(nm);
+                }
+            }
+        }
+
+        Collections.sort(namedMusicList);
+        for (NamedMusic nm : namedMusicList)
+        {
+            currentDropdown.addItem(nm);
+        }
+    }
+
+    @Override
+    void populateSoundList()
+    {
+        currentTree.setEditable(false);
+        inAdvancedMode = false;
+        File scriptFile = new File(getCurrentScriptString());
+        String scriptKey = ((NamedMusic) currentDropdown.getSelectedItem()).getInternalName().toLowerCase() + ".txt";
+        VPKEntry entry;
+        boolean needsValidation = false;
+        if (!scriptFile.isFile())
+        {
+            String currentMusicPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
+            entry = getMusicScriptFile(currentMusicPath);
+            writeScriptFileToDisk(entry, false);
+            scriptFile = new File(getCurrentScriptString());
+            this.updateCache(scriptKey, entry.getCRC32());
+        }
+        else
+        {
+            needsValidation = true;
+        }
+        ScriptParser parser = new ScriptParser(scriptFile);
+        TreeModel scriptTree = parser.getTreeModel();
+        if (needsValidation)
+        {
+            String internalScriptPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();
+            internalScriptPath = internalScriptPath.replace("/", "/");
+            boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
+            if (!isUpToDate)
+            {
+                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
+                mergeNewChanges(scriptTree, scriptFile);
+                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
+            }
+        }
+        this.currentTreeModel = scriptTree;
+        currentTree.setModel(buildSoundListTree(scriptTree));
+        currentTree.setRootVisible(false);
+        currentTree.setShowsRootHandles(true);
+    }
+
+    @Override
+    String getCurrentScriptString()
+    {
+        if (currentDropdown.getSelectedItem() != null)
+        {
+            String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
+            String scriptPathString = Paths.get(installDir, "dota", internalPath).toString();
+
+            if (new File(scriptPathString).isFile())
+            {
+                return new File(scriptPathString).getAbsolutePath();
+            }
+        }
+        else
+        {
+            return "";
+        }
+        return "";
+    }
+
+    @Override
+    String getCustomSoundPathString()
+    {
+        return "custom/music/";
+    }
+
+    private VPKEntry getMusicScriptFile(String fileName)
+    {
+        File vpkFile = new File(vpkPath);
+        VPKArchive vpk = new VPKArchive();
+        VPKEntry entryToReturn = null;
+        try
+        {
+            vpk.load(vpkFile);
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Can't open VPK Archive. Details: " + ex.getMessage());
+            return entryToReturn;
+        }
+
+        String fn = fileName.replace("\\", "/"); //jVPKLib only uses forward slashes in paths.
+        return vpk.getEntry(fn);
+    }
+
+    @Override
     void updateCache(String scriptKey, long internalCrc)
-    {        
+    {
         String internalPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString();
         internalPath = internalPath.replace("\\", "/");
         cacheManager.putScript(scriptKey, internalPath, internalCrc);

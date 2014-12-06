@@ -165,6 +165,11 @@ public class CacheManager
         }
     }
 
+    /**
+     * Returns the VPKEntry that corresponds to file whose CRC32 was most recently checked in 
+     * getSessionCrc.
+     * @return The VPKEntry of the most recently looked-up file.
+     */
     public VPKEntry getCachedVpkEntry()
     {
         return cachedEntry;

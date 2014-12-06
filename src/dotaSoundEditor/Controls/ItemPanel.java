@@ -11,27 +11,15 @@ import dotaSoundEditor.*;
 import dotaSoundEditor.Helpers.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
-import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Scanner;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreeSelectionModel;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -53,7 +41,7 @@ public final class ItemPanel extends EditorPanel
         installDir = _installDir;
         this.setName("Items");
         initComponents();
-        
+
         soundPlayer = _sp;
         cacheManager = _cm;
         currentTree = itemTree;
@@ -118,68 +106,6 @@ public final class ItemPanel extends EditorPanel
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 
-    private VPKEntry getItemScriptFile(String nop)
-    {
-        String internalScriptPath = "scripts/game_sounds_items.txt";
-        File vpkFile = new File(vpkPath);
-        VPKArchive vpk = new VPKArchive();
-        try
-        {
-            vpk.load(vpkFile);
-        }
-        catch (Exception ex)
-        {
-            JOptionPane.showMessageDialog(this,
-                    "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
-                    "Error opening VPK", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-            return null;
-        }
-
-        VPKEntry entry = vpk.getEntry(internalScriptPath);
-        return entry;
-    }
-   
-    @Override
-    void populateSoundList()
-    {
-        inAdvancedMode = false;
-        currentTree.setEditable(false);
-        String scriptKey = "game_sounds_items.txt";
-        File scriptFile = new File(getCurrentScriptString());
-        VPKEntry entry;
-        boolean needsValidation = false;
-
-        if (!scriptFile.isFile())
-        {
-            entry = getItemScriptFile("");
-            this.writeScriptFileToDisk(entry, false);
-            this.updateCache(scriptKey, entry.getCRC32());
-            scriptFile = new File(getCurrentScriptString());
-        }
-        else
-        {
-            needsValidation = true;
-        }
-        ScriptParser parser = new ScriptParser(scriptFile);
-        TreeModel scriptTree = parser.getTreeModel();
-        if (needsValidation)
-        {            
-            boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/" + scriptKey);
-            if (!isUpToDate)
-            {
-                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
-                mergeNewChanges(scriptTree, scriptFile);
-                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
-            }
-        }
-        this.currentTreeModel = scriptTree;       
-        
-        currentTree.setModel(BuildSoundListTree(scriptTree));        
-        currentTree.setRootVisible(false);
-        currentTree.setShowsRootHandles(true);
-    }
-
     @Override
     void fillImageFrame(Object _selectedItem)
     {
@@ -203,129 +129,102 @@ public final class ItemPanel extends EditorPanel
         }
     }
 
+    //This panel doesn't use a dropdown box. No need to implement.
     @Override
-    void revertButtonActionPerformed(ActionEvent evt)
+    void populateDropdownBox()
     {
-        //TODO: See if we can abstract away some of this + promptUserForNewFile()'s functionality        
-        if (currentTree.getSelectionRows().length != 0
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            DefaultMutableTreeNode selectedNode = ((DefaultMutableTreeNode) currentTree.getSelectionPath().getLastPathComponent());
-            String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
-            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
-            selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
-
-            //First go in and delete the sound in customSounds   
-            deleteSoundFileByWaveString(selectedWaveString);
-
-            //Get the relevant wavestring from the internal scriptfile                    
-            VPKArchive vpk = new VPKArchive();
-            try
-            {
-                vpk.load(new File(this.vpkPath));
-            }
-            catch (IOException ex)
-            {
-                ex.printStackTrace();
-            }
-            String scriptDir = this.getCurrentScriptString();
-            scriptDir = scriptDir.replace(Paths.get(installDir, "/dota/").toString(), "");
-            scriptDir = scriptDir.replace("\\", "/");                           //Match internal forward slashes
-            scriptDir = scriptDir.substring(1);                                 //Cut off leading slash
-            scriptDir = scriptDir.substring(0, scriptDir.lastIndexOf("/") + 1); //Cut off file extension            
-
-            String scriptFileString = null;
-            byte[] bytes = null;
-            for (VPKEntry entry : vpk.getEntriesForDir(scriptDir))
-            {
-                if (entry.getName().contains("game_sounds_items"))
-                {
-                    try
-                    {
-                        ByteBuffer scriptBuffer = null;
-                        scriptBuffer = entry.getData();
-                        bytes = new byte[scriptBuffer.remaining()];
-                        scriptBuffer.get(bytes);
-                    }
-                    catch (IOException ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                    scriptFileString = new String(bytes, Charset.forName("UTF-8"));
-                    break;
-                }
-            }
-            //First, getWavePathListAsString() from currently-selected sound's parent, and get the index of the relevant wavepath
-            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
-            int waveListIndex = wavePathList.indexOf(selectedWaveString);
-
-            //Cut off every part of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally get the wrong wavepaths            
-            StringBuilder scriptFileStringShortened = new StringBuilder();
-            Scanner scan = new Scanner(scriptFileString);
-            boolean found = false;
-            while (scan.hasNextLine())
-            {
-                String curLine = scan.nextLine();
-                if (curLine.equals(selectedWaveParentString))
-                {
-                    found = true;
-                }
-                if (found == true)
-                {
-                    scriptFileStringShortened.append(curLine).append(System.lineSeparator());
-                }
-            }
-            scriptFileString = scriptFileStringShortened.toString();
-            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);
-            String replacementString = internalWavePathsList.get(waveListIndex);
-
-            selectedNode.setUserObject(replacementString);
-            ScriptParser parser = new ScriptParser(this.currentTreeModel);
-            parser.writeModelToFile(this.getCurrentScriptString());
-
-            //Modify the UI treeNode in addition to the backing TreeNode
-            ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
-            ((DefaultTreeModel) currentTree.getModel()).nodeChanged(((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()));
-        }
     }
 
     @Override
-    void playSoundButtonActionPerformed(ActionEvent evt)
+    void populateSoundList()
     {
-        if (currentTree.getSelectionRows().length != 0
-                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
-        {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
-        }
-    }
+        inAdvancedMode = false;
+        currentTree.setEditable(false);
+        String scriptKey = "game_sounds_items.txt";
+        File scriptFile = new File(getCurrentScriptString());
+        VPKEntry entry;
+        boolean needsValidation = false;
 
-    @Override
-    void revertAllButtonActionPerformed(ActionEvent evt)
-    {
-        String scriptFilePath = getCurrentScriptString();
-        File scriptFileToDelete = new File(scriptFilePath);
-
-        if (scriptFileToDelete.isFile())
+        if (!scriptFile.isFile())
         {
-            boolean deleteSuccess = scriptFileToDelete.delete();
-            System.out.println("Deleting old item script file successful?" + deleteSuccess);
+            entry = getItemScriptFile();
+            this.writeScriptFileToDisk(entry, false);
+            this.updateCache(scriptKey, entry.getCRC32());
+            scriptFile = new File(getCurrentScriptString());
         }
         else
         {
-            System.err.println("Unable to delete script file at " + scriptFileToDelete.getAbsolutePath());
+            needsValidation = true;
         }
-        populateSoundList();
+        ScriptParser parser = new ScriptParser(scriptFile);
+        TreeModel scriptTree = parser.getTreeModel();
+        if (needsValidation)
+        {
+            boolean isUpToDate = this.validateScriptFile(scriptKey, "scripts/" + scriptKey);
+            if (!isUpToDate)
+            {
+                this.writeScriptFileToDisk(cacheManager.getCachedVpkEntry(), true);
+                mergeNewChanges(scriptTree, scriptFile);
+                this.updateCache(cacheManager.getCachedVpkEntry().getName() + ".txt", cacheManager.getCachedVpkEntry().getCRC32());
+            }
+        }
+        this.currentTreeModel = scriptTree;
+
+        currentTree.setModel(buildSoundListTree(scriptTree));
+        currentTree.setRootVisible(false);
+        currentTree.setShowsRootHandles(true);
     }
 
     @Override
-    void replaceButtonActionPerformed(ActionEvent evt)
+    String getCurrentScriptString()
     {
-        if (currentTree.getSelectionRows() != null && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
+        String scriptPathString = Paths.get(installDir, "/dota/scripts/game_sounds_items.txt").toString();
+        File scriptFilePath = new File(scriptPathString);
+
+        if (scriptFilePath.isFile())
         {
-            TreeNode selectedFile = ((TreeNode) currentTree.getSelectionPath().getLastPathComponent());
-            promptUserForNewFile(selectedFile.toString());
+            return scriptFilePath.getAbsolutePath();
         }
-    }   
+        else
+        {
+            return "";
+        }
+    }
+
+    @Override
+    String getCustomSoundPathString()
+    {
+        return "custom/items/";
+    }
+
+    private VPKEntry getItemScriptFile()
+    {
+        String internalScriptPath = "scripts/game_sounds_items.txt";
+        File vpkFile = new File(vpkPath);
+        VPKArchive vpk = new VPKArchive();
+        try
+        {
+            vpk.load(vpkFile);
+        }
+        catch (Exception ex)
+        {
+            JOptionPane.showMessageDialog(this,
+                    "Error: Unable to open VPK file.\nDetails: " + ex.getMessage(),
+                    "Error opening VPK", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+            return null;
+        }
+
+        VPKEntry entry = vpk.getEntry(internalScriptPath);
+        return entry;
+    }
+
+    @Override
+    void updateCache(String scriptKey, long internalCrc)
+    {
+        String internalPath = "scripts/game_sounds_items.txt";
+        cacheManager.putScript(scriptKey, internalPath, internalCrc);
+    }
 
     private void initTreeSelectionListener()
     {
@@ -359,40 +258,5 @@ public final class ItemPanel extends EditorPanel
         fillImageFrame(clickedItem);
         itemLabel.setText("Item: " + clickedItem.getFriendlyName());
 
-    }
-
-    //This panel doesn't use a dropdown box. No need to implement.
-    @Override
-    void populateDropdownBox()
-    {
-    }
-
-    @Override
-    String getCurrentScriptString()
-    {
-        String scriptPathString = Paths.get(installDir, "/dota/scripts/game_sounds_items.txt").toString();
-        File scriptFilePath = new File(scriptPathString);
-
-        if (scriptFilePath.isFile())
-        {
-            return scriptFilePath.getAbsolutePath();
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    @Override
-    String getCustomSoundPathString()
-    {
-        return ")custom/items/";
-    }
-
-    @Override
-    void updateCache(String scriptKey, long internalCrc)
-    {        
-        String internalPath = "scripts/game_sounds_items.txt";
-        cacheManager.putScript(scriptKey, internalPath, internalCrc);
     }
 }

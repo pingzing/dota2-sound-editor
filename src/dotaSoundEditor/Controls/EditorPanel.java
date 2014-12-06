@@ -11,6 +11,7 @@ import dotaSoundEditor.*;
 import dotaSoundEditor.Helpers.CacheManager;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -18,13 +19,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.charset.Charset;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Scanner;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -49,15 +50,7 @@ public abstract class EditorPanel extends JPanel
 
     abstract void populateSoundList();
 
-    abstract void fillImageFrame(Object selectedItem) throws IOException;
-
-    abstract void revertButtonActionPerformed(java.awt.event.ActionEvent evt);
-
-    abstract void playSoundButtonActionPerformed(java.awt.event.ActionEvent evt);
-
-    abstract void revertAllButtonActionPerformed(java.awt.event.ActionEvent evt);
-
-    abstract void replaceButtonActionPerformed(java.awt.event.ActionEvent evt);
+    abstract void fillImageFrame(Object selectedItem) throws IOException;          
 
     abstract void populateDropdownBox();
 
@@ -113,13 +106,14 @@ public abstract class EditorPanel extends JPanel
                 parser.writeModelToFile(scriptPath.toString());
 
                 //Update UI
-                populateSoundList();
+                ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(waveString);
+                ((DefaultTreeModel) currentTree.getModel()).nodeChanged((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent());
                 JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
 
             }
             catch (IOException ex)
             {
-                System.err.println(ex);
+                JOptionPane.showMessageDialog(null, "Unable to replace sound.\nDetails: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
         return null;
@@ -129,6 +123,7 @@ public abstract class EditorPanel extends JPanel
     {
         MouseListener ml = new MouseAdapter()
         {
+            @Override
             public void mousePressed(MouseEvent e)
             {
                 int selRow = currentTree.getRowForLocation(e.getX(), e.getY());
@@ -500,7 +495,7 @@ public abstract class EditorPanel extends JPanel
         inAdvancedMode = _newMode;
     }
 
-    protected TreeModel BuildSoundListTree(TreeModel scriptTree)
+    protected TreeModel buildSoundListTree(TreeModel scriptTree)
     {
         TreeNode rootNode = (TreeNode) scriptTree.getRoot();
         int childCount = rootNode.getChildCount();
@@ -524,8 +519,7 @@ public abstract class EditorPanel extends JPanel
         }
         return soundListTreeModel;
     }
-
-    //TODO: Possible model for abstracing into the parent
+    
     protected void writeScriptFileToDisk(VPKEntry entryToWrite, boolean overwriteExisting)
     {
         File existsChecker = new File(Paths.get(installDir, entryToWrite.getPath()).toString());
@@ -548,5 +542,118 @@ public abstract class EditorPanel extends JPanel
         {
             JOptionPane.showMessageDialog(this, "Error: Unable to write script file to disk.\nDetails: " + ex.getMessage(), "Error writing script file", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    protected void revertButtonActionPerformed(ActionEvent evt)
+    {
+        //TODO: See if we can abstract away some of this functionality
+        if (currentTree.getSelectionRows().length != 0 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
+        {
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) currentTree.getSelectionPath().getLastPathComponent();
+            String selectedWaveString = ((DefaultMutableTreeNode) selectedNode).getUserObject().toString();
+            String selectedWaveParentString = ((DefaultMutableTreeNode) ((DefaultMutableTreeNode) selectedNode).getParent()).getUserObject().toString();
+            selectedNode = (DefaultMutableTreeNode) this.getTreeNodeFromWavePath(selectedWaveString);
+            //First go in and delete the sound in customSounds
+            deleteSoundFileByWaveString(selectedWaveString);
+            //Get the relevant wavestring from the internal scriptfile
+            VPKArchive vpk = new VPKArchive();
+            try
+            {
+                vpk.load(new File(this.vpkPath));
+            }
+            catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
+            String scriptDir = getCurrentScriptString();
+            scriptDir = scriptDir.replace(Paths.get(installDir, "/dota/").toString(), "");
+            scriptDir = scriptDir.replace("\\", "/"); //Match internal forward slashes
+            scriptDir = scriptDir.substring(1); //Cut off leading slash
+            byte[] bytes = null;
+            VPKEntry entry = vpk.getEntry(scriptDir);
+            try
+            {
+                ByteBuffer scriptBuffer = entry.getData();
+                bytes = new byte[scriptBuffer.remaining()];
+                scriptBuffer.get(bytes);
+            }
+            catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
+            String scriptFileString = new String(bytes, Charset.forName("UTF-8"));
+            ArrayList<String> wavePathList = this.getWavePathsAsList(selectedNode.getParent());
+            int waveStringIndex = wavePathList.indexOf(selectedWaveString);
+            //Cut off every part of the scriptFileString before we get to the entry describing the relevant hero action, so we don't accidentally get the wrong wavepaths
+            StringBuilder scriptFileStringShortened = new StringBuilder();
+            Scanner scan = new Scanner(scriptFileString);
+            boolean found = false;
+            while (scan.hasNextLine())
+            {
+                String curLine = scan.nextLine();
+                if (curLine.equals(selectedWaveParentString))
+                {
+                    found = true;
+                }
+                if (found == true)
+                {
+                    scriptFileStringShortened.append(curLine).append(System.lineSeparator());
+                }
+            }
+            scriptFileString = scriptFileStringShortened.toString();
+            ArrayList<String> internalWavePathsList = getWavePathListFromString(scriptFileString);
+            String replacementString = internalWavePathsList.get(waveStringIndex);
+            selectedNode.setUserObject(replacementString);
+            ScriptParser parser = new ScriptParser(this.currentTreeModel);
+            parser.writeModelToFile(getCurrentScriptString());
+            //Modify the UI treeNode in addition to the backing TreeNode
+            ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
+            ((DefaultTreeModel) currentTree.getModel()).nodeChanged((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent());
+        }
+    }
+
+    protected void playSoundButtonActionPerformed(ActionEvent evt)
+    {
+        if (currentTree.getSelectionRows().length != 0 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
+        {
+            this.playSelectedTreeSound(currentTree.getSelectionPath());
+        }
+    }
+
+    protected void replaceButtonActionPerformed(ActionEvent evt)
+    {
+        if (currentTree.getSelectionRows() != null && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
+        {
+            TreeNode selectedFile = (TreeNode) currentTree.getSelectionPath().getLastPathComponent();
+            promptUserForNewFile(selectedFile.toString());
+        }
+    }
+
+    protected void revertAllButtonActionPerformed(ActionEvent evt)
+    {
+        //Delete existing script file
+        String scriptFilePath = getCurrentScriptString();
+        File scriptFileToDelete = new File(scriptFilePath);
+        if (scriptFileToDelete.isFile())
+        {
+            try
+            {
+                Files.delete(Paths.get(scriptFilePath));
+            }
+            catch (NoSuchFileException | DirectoryNotEmptyException | SecurityException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IOException ex)
+            {
+                System.err.println("IOException in delete.");
+            }
+        }
+        else
+        {
+            System.err.println("Unable to delete script file at " + scriptFileToDelete.getAbsolutePath());
+        }
+        //Repopulate soundtree
+        populateSoundList();
     }
 }

@@ -99,6 +99,8 @@ public final class SoundPlayer
                         soundIsPlaying = true;
                         handler.firePropertyChange("soundIsPlaying", false, true);
                         mp3Player.play();
+                        soundIsPlaying = false;
+                        handler.firePropertyChange("soundIsPlaying", true, false);
                         
                     }
                     catch (Exception ex)

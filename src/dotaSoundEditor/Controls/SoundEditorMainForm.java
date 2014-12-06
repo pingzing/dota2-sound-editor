@@ -65,6 +65,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         tabPane.add(new HeroPanel(vpkPath, installDir, cacheManager, soundPlayer));
         tabPane.add(new ItemPanel(vpkPath, installDir, cacheManager, soundPlayer));
         tabPane.add(new MusicPanel(vpkPath, installDir, cacheManager, soundPlayer));
+        tabPane.add(new VoicePanel(vpkPath, installDir, cacheManager, soundPlayer));
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
         this.setVisible(true);

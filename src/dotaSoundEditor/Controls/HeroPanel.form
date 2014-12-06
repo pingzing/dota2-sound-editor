@@ -25,12 +25,12 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <Component id="heroLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="heroSpellsDropdown" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" alignment="0" pref="465" max="32767" attributes="0"/>
+                  <Component id="heroPanelScrollFrame" alignment="0" pref="465" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       <Component id="heroImageLabel" min="-2" max="-2" attributes="0"/>
@@ -46,20 +46,20 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                  <Component id="heroLabel" min="-2" max="-2" attributes="0"/>
                   <Component id="heroSpellsDropdown" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="heroImageLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="369" max="32767" attributes="0"/>
+              <Component id="heroPanelScrollFrame" pref="369" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Component class="javax.swing.JLabel" name="jLabel1">
+    <Component class="javax.swing.JLabel" name="heroLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Hero:"/>
         <Property name="name" type="java.lang.String" value="heroLabel" noResource="true"/>
@@ -95,7 +95,7 @@
         <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="heroSpellsDropdownStateChanged"/>
       </Events>
     </Component>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane1">
+    <Container class="javax.swing.JScrollPane" name="heroPanelScrollFrame">
       <Properties>
         <Property name="name" type="java.lang.String" value="heroListFrame" noResource="true"/>
       </Properties>
