@@ -24,7 +24,7 @@ public class VoicePanel extends EditorPanel
 
     Executor e = Executors.newSingleThreadExecutor();
     PortraitFinder portraitFinder;
-    String voiceVpkPath;
+    Path voiceVpkPath;
 
     public VoicePanel()
     {
@@ -282,7 +282,7 @@ public class VoicePanel extends EditorPanel
     private String getScriptPathByVoiceName(String internalName)
     {
         String scriptPathString
-                = Paths.get(installDir, "/dota/scipts/voscripts/game_sounds_vo"
+                = Paths.get(installDir, "/dota/scripts/voscripts/game_sounds_vo_"
                         + internalName + ".txt").toString();
         File scriptFilePath = new File(scriptPathString);
         if (scriptFilePath.isFile())
@@ -330,19 +330,6 @@ public class VoicePanel extends EditorPanel
         cacheManager.putScript(scriptKey, internalPath, internalCrc);
     }
 
-//The following two methods are pretty much unacceptable for shipping.
-//For now, We're going to use this as a workaround, because EdtiorPanel's PlaySound
-//assumes that the sound lives in the pak01.vpk, while VO sounds live in their own VPK.
-//TODO: Fix this in EditorPanel to allow passing some kind of arg.
-    @Override
-    protected void playSoundButtonActionPerformed(ActionEvent evt)
-    {        
-        String originalVpkPath = vpkPath;
-        vpkPath = voiceVpkPath;
-        super.playSoundButtonActionPerformed(evt);
-        vpkPath = originalVpkPath;
-    }
-
     @Override
     protected void attachDoubleClickListenerToTree()
     {
@@ -356,20 +343,23 @@ public class VoicePanel extends EditorPanel
                 if (selRow != -1 && ((DefaultMutableTreeNode) selPath.getLastPathComponent()).isLeaf())
                 {
                     if (e.getClickCount() == 2)
-                    {
-                        String originalVpkPath = vpkPath;
-                        vpkPath = voiceVpkPath;
-                        playSelectedTreeSound(selPath);
-                        vpkPath = originalVpkPath;
+                    {                                                
+                        playSelectedTreeSound(selPath, voiceVpkPath);                        
                     }
                 }
             }
         };
         currentTree.addMouseListener(ml);
     }
+    
+    @Override
+    protected void playSoundButtonActionPerformed(ActionEvent evt)
+    {        
+        playSoundButtonActionPerformed(evt, voiceVpkPath);
+    }  
 
-    private String findVoiceVpkPath()
+    private Path findVoiceVpkPath()
     {
-        return Paths.get(installDir + "/dota/sound_vo_english_dir.vpk").toString();
+        return Paths.get(installDir + "/dota/sound_vo_english_dir.vpk");
     }
 }

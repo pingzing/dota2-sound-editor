@@ -26,6 +26,7 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Scanner;
+import javax.sound.sampled.AudioInputStream;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -119,6 +120,7 @@ public abstract class EditorPanel extends JPanel
         return null;
     }
 
+    //Overridden in VoicePanel, due to using a different VPK.
     protected void attachDoubleClickListenerToTree()
     {
         MouseListener ml = new MouseAdapter()
@@ -132,7 +134,7 @@ public abstract class EditorPanel extends JPanel
                 {
                     if (e.getClickCount() == 2)
                     {
-                        playSelectedTreeSound(selPath);
+                        playSelectedTreeSound(selPath, Paths.get(vpkPath));
                     }
                 }
             }
@@ -140,13 +142,13 @@ public abstract class EditorPanel extends JPanel
         currentTree.addMouseListener(ml);
     }
 
-    protected void playSelectedTreeSound(TreePath selPath)
+    protected void playSelectedTreeSound(TreePath selPath, Path vpkToPlayFrom)
     {
         try
         {
             DefaultMutableTreeNode selectedFile = ((DefaultMutableTreeNode) selPath.getLastPathComponent());
             String waveString = selectedFile.getUserObject().toString();
-            File soundFile = createSoundFileFromWaveString(waveString);
+            File soundFile = createSoundFileFromWaveString(waveString, vpkToPlayFrom);
             soundPlayer.loadSound(soundFile.getAbsolutePath());
             soundPlayer.playSound();
         }
@@ -193,14 +195,14 @@ public abstract class EditorPanel extends JPanel
         return wavePathsList;
     }
 
-    private File createSoundFileFromWaveString(String waveString)
+    private File createSoundFileFromWaveString(String waveString, Path vpkToPlayFrom)
     {
         if (!(waveString.contains(".wav") || (waveString.contains(".mp3"))))
         {
             return null;
         }
 
-        File file = new File(vpkPath);
+        File file = new File(vpkToPlayFrom.toString());
         VPKArchive vpk = new VPKArchive();
         File entryFile = new File("");
 
@@ -243,7 +245,7 @@ public abstract class EditorPanel extends JPanel
                 System.err.println("Can't open archive: " + ex.getMessage());
             }
             waveSubstring = "sound/" + waveSubstring;
-            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());
+            VPKEntry entry = vpk.getEntry(waveSubstring.toLowerCase());             
 
             entryFile = entry.getType().contains("wav")
                     ? new File(Paths.get(System.getProperty("user.dir") + "/scratch/scratch.wav").toString())
@@ -301,6 +303,7 @@ public abstract class EditorPanel extends JPanel
         String waveSubstring = selectedWaveString.substring(startIndex, endIndex + 1);
         waveSubstring = waveSubstring.replace(")", "");
         waveSubstring = waveSubstring.replace("\"", "");
+        waveSubstring = waveSubstring.replace("*", "");
         File soundFileToDelete = new File(Paths.get(installDir, "/dota/sound/" + waveSubstring).toString());
         if (soundFileToDelete.isFile())
         {
@@ -410,7 +413,7 @@ public abstract class EditorPanel extends JPanel
         for (Enumeration e = ((DefaultMutableTreeNode) oldRoot).depthFirstEnumeration(); e.hasMoreElements() && oldRoot != null;)
         {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
-            if (node.getUserObject().toString().contains("custom"))
+            if (node.getUserObject().toString().contains("custom\\") || node.getUserObject().toString().contains("custom/"))
             {
                 savedNodeList.add(node);
             }
@@ -546,6 +549,11 @@ public abstract class EditorPanel extends JPanel
 
     protected void revertButtonActionPerformed(ActionEvent evt)
     {
+        revertButtonActionPerformed(evt, Paths.get(vpkPath));
+    }
+    
+    protected void revertButtonActionPerformed(ActionEvent evt, Path vpkToRevert)
+    {
         //TODO: See if we can abstract away some of this functionality
         if (currentTree.getSelectionRows().length != 0 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
@@ -559,7 +567,7 @@ public abstract class EditorPanel extends JPanel
             VPKArchive vpk = new VPKArchive();
             try
             {
-                vpk.load(new File(this.vpkPath));
+                vpk.load(new File(vpkToRevert.toString()));
             }
             catch (IOException ex)
             {
@@ -610,13 +618,18 @@ public abstract class EditorPanel extends JPanel
             ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(replacementString);
             ((DefaultTreeModel) currentTree.getModel()).nodeChanged((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent());
         }
-    }
+    }   
 
     protected void playSoundButtonActionPerformed(ActionEvent evt)
     {
+        playSoundButtonActionPerformed(evt, Paths.get(vpkPath));
+    }
+    
+    protected void playSoundButtonActionPerformed(ActionEvent evt, Path vpkToPlayFrom)
+    {
         if (currentTree.getSelectionRows().length != 0 && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
-            this.playSelectedTreeSound(currentTree.getSelectionPath());
+            this.playSelectedTreeSound(currentTree.getSelectionPath(), vpkToPlayFrom);
         }
     }
 

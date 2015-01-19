@@ -232,7 +232,7 @@ public final class MusicPanel extends EditorPanel
         if (needsValidation)
         {
             String internalScriptPath = ((NamedMusic) currentDropdown.getSelectedItem()).getFilePath().toString().toLowerCase();
-            internalScriptPath = internalScriptPath.replace("/", "/");
+            internalScriptPath = internalScriptPath.replace("\\", "/");
             boolean isUpToDate = this.validateScriptFile(scriptKey, internalScriptPath);
             if (!isUpToDate)
             {

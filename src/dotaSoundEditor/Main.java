@@ -1,6 +1,6 @@
 //Features to add:
 //Roadmap to next release:    
-// - Hero VO
+// - Hero VO (In progress. Need to fix external vpk handling, or revert/advanced/revert all buttons)
 // - Rewrite prefs to not write to the registry. Just a local, serialized dictionary is a
 //    waaay better choice
 // - Write a migration method that removes old registry keys.
@@ -11,9 +11,12 @@
 // - Try to auto-find Dota install dir via Registry (if Windows). Might be at: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 570
 // - Or: Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam
 // - Automatically fill in the relevant console launch args for Dota 2. The file is in the same place as autoexec.cfg. (maybe)
-// - Find way to play sound files from memory instead of writing to local 
-//     filesys, then playing. ByteBuffer to byte[] to File, maybe?
+// - Related to above, add setting to enable/disable override-vpk from the app
+// - Fix crash on scrolling list too fast
 
+// - Find way to play sound files from memory instead of writing to local 
+//     filesys, then playing. ByteBuffer to byte[] to File, maybe? 
+//     PROGRESS: byte[] doesn't work so well, because apparently Java Audio can't interpret the header data
 // - Auto-updater / update notifier.
 // - Make multi-pressing play impossible
 // - Export/import functionality, so users can just export a lump of sounds and give them to friends
@@ -21,7 +24,6 @@
 // - Handle Advanced mode changes actually applying to tree (*note: make this 
 //     COMPLETELY BREAK automatic cache invalidation. I ain't regenerating dis shit)
 // - UI sounds
-// - Fix the libraries and dependencies to actually get into source control, so somebody cloning the repo can build right away
 // - Get sound length, display along bottom of window
 // - Fix ScriptParser's functions to not automatically fire when its constructors are called.
 // - Investigate scanning common install paths for Dota before asking the user
@@ -36,6 +38,7 @@
  *      - Fixed missing icons and incorrect names in items panel.
  *      - Fixed tree collapsing every time sound got replaced.
  *      - Fixed MP3s never reverting Play/Stop button back to Play mode.
+ *      - Item sounds should now always be replaced properly
  */
 package dotaSoundEditor;
 
