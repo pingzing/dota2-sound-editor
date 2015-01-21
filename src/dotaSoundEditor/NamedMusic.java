@@ -1,55 +1,20 @@
 package dotaSoundEditor;
 
 import dotaSoundEditor.Helpers.Utility;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 
-public class NamedMusic implements Comparable<NamedMusic>
+public final class NamedMusic extends NamedBase
 {
-
-    private String internalName;
-    private Path internalFilePath;
-    private String friendlyName;
-
     public NamedMusic(String _internalName, String _filePath)
     {
         internalName = _internalName;
         friendlyName = cleanUpName(internalName);
         internalFilePath = Paths.get(_filePath);
+        iconName = null;
     }
     
-    public String getFriendlyName()
-    {
-        return this.friendlyName;
-    }
-    
-    public Path getFilePath()
-    {
-        return this.internalFilePath;
-    }
-    
-    public String getInternalName()
-    {
-        return this.internalName;
-    }
-    
-    public void setInternalName(String _newIntName)
-    {
-        this.internalName = _newIntName;
-    }
-    
-    public void setFilePath(Path _newFP)
-    {
-        this.internalFilePath = _newFP;
-    }
-    
-    public void setFilePath(String _newFP)
-    {
-        this.internalFilePath = Paths.get(_newFP);
-    }
-
-    private String cleanUpName(String nameToClean)
+    @Override
+    protected String cleanUpName(String nameToClean)
     {
         nameToClean = nameToClean.replace("_", " ");
         nameToClean = Utility.capitalizeString(nameToClean);
@@ -57,7 +22,8 @@ public class NamedMusic implements Comparable<NamedMusic>
         return nameToClean;
     }
     
-    private String handleSpecialCases(String nameToClean)
+    @Override
+    protected String handleSpecialCases(String nameToClean)
     {
         switch(nameToClean)
         {
@@ -90,52 +56,12 @@ public class NamedMusic implements Comparable<NamedMusic>
         }
         
         return nameToClean;
-    }
-    
+    }        
+
     @Override
-    public String toString()
+    protected String generateIconName(String friendlyName)
     {
-        return this.friendlyName;
+        //May add icon support for music in the future, but not yet.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
-    
-    @Override
-    public int compareTo(NamedMusic o)
-    {
-        return this.friendlyName.compareTo(o.friendlyName);
-    }
-    
-    @Override
-    public boolean equals(Object other)
-    {
-        if (other == null)
-        {
-            return false;            
-        }
-        if(other == this)
-        {
-            return true;
-        }
-        if (!(other instanceof NamedMusic))
-        {
-            return false;
-        }
-        
-        NamedMusic otherNamedMusic = (NamedMusic) other;
-        if(otherNamedMusic.friendlyName.equals(this.friendlyName))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    
-    @Override
-    public int hashCode()
-    {
-        int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.friendlyName);
-        return hash;
-    }    
 }

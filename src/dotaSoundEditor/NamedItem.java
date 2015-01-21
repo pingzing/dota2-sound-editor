@@ -1,12 +1,10 @@
 package dotaSoundEditor;
 
 import dotaSoundEditor.Helpers.Utility;
+import java.nio.file.Paths;
 
-public class NamedItem
-{
-
-    private String internalName;    
-    private String friendlyName;
+public final class NamedItem extends NamedBase
+{   
     private String iconName;
     
     public NamedItem()
@@ -16,22 +14,13 @@ public class NamedItem
         iconName = "default";
     }
 
-    public NamedItem(String _internalName)
+    public NamedItem(String _internalName, String _filePath)
     {
         internalName = _internalName;
-        friendlyName = cleanUpName(internalName);        
-        iconName = setIconName();
-    }
-
-    public String getInternalName()
-    {
-        return this.internalName;
-    }
-
-    public String getFriendlyName()
-    {
-        return this.friendlyName;
-    }
+        friendlyName = cleanUpName(internalName);
+        internalFilePath = Paths.get(_filePath);
+        iconName = generateIconName(friendlyName);
+    }  
 
     public String getIconName()
     {
@@ -42,26 +31,19 @@ public class NamedItem
     {
         this.iconName = _iconName;
     }
-
-    public void setInternalName(String _internalName)
-    {
-        internalName = _internalName;
-        friendlyName = cleanUpName(internalName);
-    }
-
-    private String cleanUpName(String _nameToClean)
+    
+    @Override
+    protected String cleanUpName(String _nameToClean)
     {
         String nameToClean = _nameToClean;
-        /* For some reason, Hand of Midas' script name is completely different 
-         * than every other item's. Go figure. It follows the pattern 
-         * DOTA_Item.Hand_Of_Midas, whereas everything else 
-         * is DOTA_Item.<Name>.<Sound trigger>
+        /* Newer item sounds break naming conventions established by old sound names.
+         * The new convention is is DOTA_Item.<Name>.<Sound trigger>.
+         * Usually. Sometimes. Maybe?
          */
         if (nameToClean.contains("Midas"))
         {
             nameToClean = "Hand of Midas";
-        }
-        //Would you look at that, so is the Basher's. Sigh.
+        }        
         else if (nameToClean.contains("SkullBasher"))
         {
             nameToClean = "Skull Basher";
@@ -74,13 +56,13 @@ public class NamedItem
         {
             nameToClean = "Battle Fury";
         }
-        else if(nameToClean.contains("MKB"))
-        {
-            nameToClean = "Monkey King Bar";
-        }
         else if(nameToClean.contains("Desolator"))
         {
             nameToClean = "Desolator";
+        }
+        else if(nameToClean.contains("Maim"))        
+        {
+            nameToClean = "Sange (and S&Y)";
         }
         else
         {
@@ -103,7 +85,8 @@ public class NamedItem
         return nameToClean;
     }
 
-    private String handleSpecialCases(String nameToClean)
+    @Override
+    protected String handleSpecialCases(String nameToClean)
     {
         switch (nameToClean)
         {
@@ -123,6 +106,8 @@ public class NamedItem
                 break;
             case "Manta":               nameToClean = "Manta Style";
                 break;
+            case "MKB":                 nameToClean = "Monkey King Bar";
+                break;
             case "Orchid":              nameToClean = "Orchid Malevolence";
                 break;    
             case "Pipe":                nameToClean = "Pipe of Insight";
@@ -141,10 +126,11 @@ public class NamedItem
         return nameToClean;
     }
 
-    private String setIconName()
+    @Override
+    protected String generateIconName(String friendlyName)
     {
         String localIconName = "";
-        localIconName = this.friendlyName.toLowerCase();
+        localIconName = friendlyName.toLowerCase();
         localIconName = localIconName.replaceAll(" ", "_");
         switch (localIconName)
         {            
@@ -189,7 +175,8 @@ public class NamedItem
             case "daedalus":                    localIconName = "greater_crit";
                 break;
             case "battle_fury":                 localIconName = "bfury";
-                break;            
+                break;          
+            case "sange_(and_s&y)":             localIconName = "sange";
         }
         return localIconName;
     }

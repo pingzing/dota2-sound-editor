@@ -30,7 +30,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
     private CacheManager cacheManager = new CacheManager();
     
     public SoundEditorMainForm(String _fileName, String _installDir)
-    {       
+    {               
         initComponents();
         soundPlayer.addPropertyChangeListener(soundPlayingListener);
         Utility.setFrameIcon(this);
@@ -38,8 +38,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         installDir = _installDir;
         Utility.initPortraitFinder(vpkPath);
         portraitFinder = Utility.portraitFinder;
-        portraitFinder.buildHeroPortraits();
-        portraitFinder.buildItemPortraits();        
+        portraitFinder.buildPortraits();
         
          try
         {
@@ -68,7 +67,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
         tabPane.add(new VoicePanel(vpkPath, installDir, cacheManager, soundPlayer));
 
         currentTabPanel = (JPanel) tabPane.getComponentAt(tabPane.getSelectedIndex());
-        this.setVisible(true);
+        this.setVisible(true);        
     }
 
     @SuppressWarnings("unchecked")

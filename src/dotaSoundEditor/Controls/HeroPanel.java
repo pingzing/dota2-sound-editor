@@ -179,7 +179,7 @@ public class HeroPanel extends EditorPanel
         }
         try
         {
-            heroImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.getInternalName())));
+            heroImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.getIconName())));
         }
         catch (NullPointerException ex)
         {

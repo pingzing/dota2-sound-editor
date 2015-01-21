@@ -254,7 +254,7 @@ public final class ItemPanel extends EditorPanel
             node = (DefaultMutableTreeNode) node.getParent();
         }
 
-        NamedItem clickedItem = new NamedItem(node.getUserObject().toString());
+        NamedItem clickedItem = new NamedItem(node.getUserObject().toString(), this.getCurrentScriptString());
         fillImageFrame(clickedItem);
         itemLabel.setText("Item: " + clickedItem.getFriendlyName());
 

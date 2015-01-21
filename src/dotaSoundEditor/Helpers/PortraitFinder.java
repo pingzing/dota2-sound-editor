@@ -26,36 +26,39 @@ public class PortraitFinder
         fileName = _fileName;        
     }
     
-    public void buildHeroPortraits()
+    public void buildPortraits()
     {
         File file = new File(fileName);
-        VPKArchive vpk = new VPKArchive();                      
-
+        VPKArchive vpk = new VPKArchive();
         try
         {
-            vpk.load(file);
+            vpk.load(file);            
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             System.err.println("Can't open archive: " + ex.getMessage());
             return;
         }
+        buildHeroPortraits(vpk);
+        buildItemPortraits(vpk);
+        buildAnnouncerPortraits(vpk);        
+    }
+    
+    private void buildHeroPortraits(VPKArchive vpk)
+    {
 
         BufferedImage image = null;
-        for (VPKEntry entry : vpk.getEntries())
-        {
-            //Put criteria to search for here
-            if (entry.getPath().contains("resource/flash3/images/heroes/") && entry.getType().equals("png")
-                    && !(entry.getPath().contains("selection")))
+        for (VPKEntry entry : vpk.getEntriesForDir("resource/flash3/images/heroes/"))
+        {            
+            if (entry.getType().equals("png") && !(entry.getPath().contains("selection")))
             {
                 File imageFile = new File(entry.getPath());
 
                 try (FileChannel fc = FileUtils.openOutputStream(imageFile).getChannel())
                 {
                     fc.write(entry.getData());                    
-                    image = ImageIO.read(imageFile);
-                    String heroName = handleSpecialCaseHeroNames(entry.getName());                    
-                    portraitMap.put(heroName, image);
+                    image = ImageIO.read(imageFile);                    
+                    portraitMap.put(entry.getName(), image);
                 }
                 catch (IOException ex)
                 {
@@ -65,26 +68,13 @@ public class PortraitFinder
         }
     }        
 
-    public void buildItemPortraits()
+    private void buildItemPortraits(VPKArchive vpk)
     {
-        File file = new File(fileName);
-        VPKArchive vpk = new VPKArchive();                       
-
-        try
-        {
-            vpk.load(file);
-        }
-        catch (Exception ex)
-        {
-            System.err.println("Can't open archive: " + ex.getMessage());
-            return;
-        }
 
         BufferedImage image = null;
-        for (VPKEntry entry : vpk.getEntries())
-        {
-            //Put criteria to search for here
-            if (entry.getPath().contains("resource/flash3/images/items/") && entry.getType().equals("png"))     
+        for (VPKEntry entry : vpk.getEntriesForDir("resource/flash3/images/items/"))
+        {            
+            if (entry.getType().equals("png"))     
             {
                 File imageFile = new File(entry.getPath());
 
@@ -102,6 +92,33 @@ public class PortraitFinder
             }
         }        
     }
+    
+    private void buildAnnouncerPortraits(VPKArchive vpk)
+    {
+        
+        BufferedImage image = null;
+        for(VPKEntry entry : vpk.getEntriesForDir("resource/flash3/images/econ/announcer/"))
+        {
+            if (entry.getName().contains("large"))
+            {
+                continue; //don't grab the huge images, we won't use them.
+            }
+            
+            File imageFile = new File(entry.getPath());
+            
+            try (FileChannel fc = FileUtils.openOutputStream(imageFile).getChannel())
+            {
+                fc.write(entry.getData());
+                image = ImageIO.read(imageFile);
+                String announcer = entry.getName();
+                portraitMap.put(announcer, image);
+            }
+            catch (IOException ex)
+            {
+                System.err.println("Can't write " + entry.getPath() + ": " + ex.getMessage());
+            }
+        }
+    }
 
     public BufferedImage getPortrait(String portraitName)
     {
@@ -113,42 +130,5 @@ public class PortraitFinder
         {
             return portraitMap.get("default");
         }
-    }
-
-    //TODO: Refactor this into NamedHero as an iconName instance variable.
-    private String handleSpecialCaseHeroNames(String name)
-    {
-        //Make portrait hero names match internal hero names. Internal names don't have underscores
-        switch (name)
-        {
-            case "witch_doctor":
-                name = "witchdoctor";
-                break;
-            case "doom_bringer":
-                name = "doombringer";
-                break;
-            case "night_stalker":
-                name = "nightstalker";
-                break;
-            case "skeleton_king":
-                name = "skeletonking";
-                break;
-            case "shadow_shaman":
-                name = "shadowshaman";
-                break;
-            case "crystal_maiden":
-                name = "crystalmaiden";
-                break;
-            case "drow_ranger":
-                name = "drowranger";
-                break;
-            case "sand_king":
-                name = "sandking";
-                break;
-            case "storm_spirit":
-                name = "stormspirit";
-                break;
-        }
-        return name;
-    }
+    }   
 }

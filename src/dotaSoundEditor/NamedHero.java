@@ -1,59 +1,25 @@
 package dotaSoundEditor;
 
 import dotaSoundEditor.Helpers.Utility;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 
 /**
  *
  * @author Neil McAlister
  */
-public class NamedHero implements Comparable<NamedHero>
-{
-
-    private String internalName;
-    private Path internalFilePath;
-    private String friendlyName;
+public final class NamedHero extends NamedBase
+{   
 
     public NamedHero(String _internalName, String _filePath)
     {
         internalName = _internalName;
-        friendlyName = cleanUpName(internalName);
+        friendlyName = this.cleanUpName(internalName);
         internalFilePath = Paths.get(_filePath);
+        iconName = generateIconName(internalName);
     }
 
-       public String getFriendlyName()
-    {
-        return this.friendlyName;
-    }
-    
-    public Path getFilePath()
-    {
-        return this.internalFilePath;
-    }
-    
-    public String getInternalName()
-    {
-        return this.internalName;
-    }
-    
-    public void setInternalName(String _newIntName)
-    {
-        this.internalName = _newIntName;
-    }
-    
-    public void setFilePath(Path _newFP)
-    {
-        this.internalFilePath = _newFP;
-    }
-    
-    public void setFilePath(String _newFP)
-    {
-        this.internalFilePath = Paths.get(_newFP);
-    }
-
-    private String cleanUpName(String nameToClean)
+    @Override
+    protected String cleanUpName(String nameToClean)
     {
         nameToClean = nameToClean.replaceAll("_", " ");
         nameToClean = Utility.capitalizeString(nameToClean);
@@ -61,7 +27,9 @@ public class NamedHero implements Comparable<NamedHero>
         return nameToClean;
     }
 
-    private String handleSpecialCases(String nameToClean)
+    //TODO: Centralize these names in a class somewhere. Utility class maybe?
+    @Override
+    protected String handleSpecialCases(String nameToClean)
     {
         switch(nameToClean)
         {
@@ -119,53 +87,44 @@ public class NamedHero implements Comparable<NamedHero>
                 break;                
         }
         return nameToClean;
-    }  
-       
-    //Overrides what the dropdown box displays. Screw renderers! =D
-    @Override
-    public String toString()
-    {
-        return this.friendlyName;
-    }
+    }             
 
     @Override
-    public int compareTo(NamedHero other)
+    protected String generateIconName(String name)
     {
-        return this.friendlyName.compareTo(other.friendlyName);
-    }
-
-    @Override
-    public boolean equals(Object other)
-    {
-        if (other == null)
+        String localIconName = "";
+        localIconName = name.toLowerCase();
+        localIconName = localIconName.replaceAll(" ", "_");
+        switch (localIconName)
         {
-            return false;
+            case "witchdoctor":
+                localIconName = "witch_doctor";
+                break;
+            case "doombringer":
+                localIconName = "doom_bringer";
+                break;
+            case "nightstalker":
+                localIconName = "night_stalker";
+                break;
+            case "skeletonking":
+                localIconName = "skeleton_king";
+                break;
+            case "shadowshaman":
+                localIconName = "shadow_shaman";
+                break;
+            case "crystalmaiden":
+                localIconName = "crystal_maiden";
+                break;
+            case "drowranger":
+                localIconName = "drow_ranger";
+                break;
+            case "sandking":
+                localIconName = "sand_king";
+                break;
+            case "stormspirit":
+                localIconName = "storm_spirit";
+                break;
         }
-        if (other == this)
-        {
-            return true;
-        }
-        if (!(other instanceof NamedHero))
-        {
-            return false;
-        }
-
-        NamedHero otherNamedHero = (NamedHero) other;
-        if (otherNamedHero.friendlyName.equals(this.friendlyName))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.friendlyName);
-        return hash;
+        return localIconName;
     }
 }
