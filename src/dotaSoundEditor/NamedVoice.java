@@ -184,7 +184,7 @@ public final class NamedVoice extends NamedBase
                 break;
             case "megakill_announcer":
                 localIconName = "announcer_icon_default";
-                break;
+                break;                
             
             case "announcer_defensegrid":
                 localIconName = "announcer_dgrid";
@@ -194,7 +194,7 @@ public final class NamedVoice extends NamedBase
                 break;
                 
             case "announcer_diretide_2012":
-                localIconName = "announcer_icon_default";
+                localIconName = "announcer_death_prophet";
                 break; 
                 
             case "announcer_glados":

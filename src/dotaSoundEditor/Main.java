@@ -35,8 +35,9 @@
  *      - Added voice editing!
  *      - Fixed missing icons and incorrect names in items panel.
  *      - Fixed tree collapsing every time sound got replaced.
+ *      - Fix crash on attempting to Replace with nothing selected.
  *      - Fixed MP3s never reverting Play/Stop button back to Play mode.
- *      - Item sounds should now always be replaced properly
+ *      - Fix item sounds sometimes not being written correctly.
  *      - Lots of behind-the-scenes rewrites.
  */
 package dotaSoundEditor;
