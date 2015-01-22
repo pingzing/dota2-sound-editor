@@ -30,7 +30,7 @@
                       <Component id="voicePanelScrollFrame" alignment="0" pref="465" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Component id="voiceImageLabel" min="-2" max="-2" attributes="0"/>
+                          <Component id="voiceImageLabel" max="32767" attributes="0"/>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -50,9 +50,9 @@
                       <Component id="voiceDropdown" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="voiceImageLabel" min="-2" pref="96" max="-2" attributes="0"/>
+                  <Component id="voiceImageLabel" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="voicePanelScrollFrame" pref="345" max="32767" attributes="0"/>
+                  <Component id="voicePanelScrollFrame" pref="369" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>

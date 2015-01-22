@@ -635,7 +635,8 @@ public abstract class EditorPanel extends JPanel
 
     protected void replaceButtonActionPerformed(ActionEvent evt)
     {
-        if (currentTree.getSelectionRows() != null && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
+        if (currentTree.getSelectionRows() != null && currentTree.getSelectionRows().length != 0 
+                && ((TreeNode) currentTree.getSelectionPath().getLastPathComponent()).isLeaf())
         {
             TreeNode selectedFile = (TreeNode) currentTree.getSelectionPath().getLastPathComponent();
             promptUserForNewFile(selectedFile.toString());

@@ -4,7 +4,9 @@ import dotaSoundEditor.Helpers.*;
 import dotaSoundEditor.NamedVoice;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
+import java.awt.Dimension;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -99,7 +101,7 @@ public class VoicePanel extends EditorPanel
                         .addComponent(voicePanelScrollFrame, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
                         .addGroup(layout.createSequentialGroup()
                             .addGap(0, 0, Short.MAX_VALUE)
-                            .addComponent(voiceImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(voiceImageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGap(0, 0, Short.MAX_VALUE)))
                     .addContainerGap()))
         );
@@ -113,9 +115,9 @@ public class VoicePanel extends EditorPanel
                         .addComponent(voiceLabel)
                         .addComponent(voiceDropdown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(voiceImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(voiceImageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(voicePanelScrollFrame, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
+                    .addComponent(voicePanelScrollFrame, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                     .addContainerGap()))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -185,11 +187,10 @@ public class VoicePanel extends EditorPanel
         }
         try
         {
-            voiceImageLabel.setIcon(new ImageIcon(portraitFinder.getPortrait(selectedItem.getIconName())));
-            if(portraitFinder.getPortrait(selectedItem.getIconName()).equals(portraitFinder.getPortrait("")))
-            {
-                System.err.println("Icon not found for voice: " + selectedItem.getFriendlyName()+ " using internal name: " + selectedItem.getInternalName());
-            }
+            BufferedImage icon = portraitFinder.getPortrait(selectedItem.getIconName());
+            voiceImageLabel.setMaximumSize(new Dimension(icon.getWidth(), icon.getHeight()));
+            voiceImageLabel.setPreferredSize(new Dimension(icon.getWidth(), icon.getHeight()));            
+            voiceImageLabel.setIcon(new ImageIcon(icon));            
         }
         catch (NullPointerException ex)
         {

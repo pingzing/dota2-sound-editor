@@ -145,7 +145,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
             }
         });
 
-        playStopButton.setMnemonic('a');
+        playStopButton.setMnemonic('d');
         playStopButton.setText("Play Sound");
         playStopButton.addActionListener(new java.awt.event.ActionListener()
         {
@@ -469,7 +469,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 //Sound started playing. Change Play button to Stop butotn.
                 if ((boolean) evt.getNewValue() == true)
                 {
-                    playStopButton.setMnemonic('o');
+                    playStopButton.setMnemonic('d');
                     playStopButton.setText("Stop Sound");
                     removeActionListeners();
                     playStopButton.addActionListener(new java.awt.event.ActionListener()
@@ -484,7 +484,7 @@ public class SoundEditorMainForm extends javax.swing.JFrame
                 //Sound just stopped. Change it back to play button.
                 if ((boolean) evt.getNewValue() == false)
                 {
-                    playStopButton.setMnemonic('a');
+                    playStopButton.setMnemonic('d');
                     playStopButton.setText("Play Sound");
                     removeActionListeners();
                     playStopButton.addActionListener(new java.awt.event.ActionListener()
