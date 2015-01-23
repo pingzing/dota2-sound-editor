@@ -1,4 +1,4 @@
-jvpklib
+jvpklib by [ata4] (https://github.com/ata4/jvpklib)
 =======
 
 This is a simple Java library to read Valve's VPK archive files.

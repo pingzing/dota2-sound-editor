@@ -15,3 +15,5 @@ License
 ============
 The Dota 2 Sound Editor is licensed under the MIT License, the details of which can be found in LICENSE.txt in the root directory. Any included dependencies are licensed
 under their respective licenses, which can be found in their respective folders.
+
+Apache Commons IO is licensed under the [Apache License] (http://www.apache.org/licenses/LICENSE-2.0).
