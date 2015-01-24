@@ -162,6 +162,7 @@ public final class SoundPlayer
             }
             catch (Exception ex)
             {
+                JOptionPane.showMessageDialog(this.parentFrame, "Unable to play sound file.\nDetails: " + ex.getMessage(), "Sound Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
                 System.err.println("Failed to play WAV file.");
             }

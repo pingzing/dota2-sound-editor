@@ -93,7 +93,9 @@ public abstract class EditorPanel extends JPanel
         {
             DefaultMutableTreeNode selectedFile = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
             Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());
-            Path destPath = Paths.get(installDir, "/dota/sound/" + getCustomSoundPathString() + chosenFile.getFileName());
+            //Strip caps and spaces out of filenames. The item sound parser seems to have trouble with them.
+            String destFileName = chosenFile.getFileName().toString().toLowerCase().replace(" ", "_");
+            Path destPath = Paths.get(installDir, "/dota/sound/" + getCustomSoundPathString() + destFileName);
             UserPrefs.getInstance().setWorkingDirectory(chosenFile.getParent().toString());
 
             try
@@ -116,7 +118,7 @@ public abstract class EditorPanel extends JPanel
                 }
 
                 String waveSubstring = waveString.substring(startIndex, endIndex + 1);
-                waveString = waveString.replace(waveSubstring, "\"" + getCustomSoundPathString() + chosenFile.getFileName() + "\"");
+                waveString = waveString.replace(waveSubstring, "\"" + getCustomSoundPathString() + destFileName + "\"");
                 selectedFile.setUserObject(waveString);
 
                 //Write out modified tree to scriptfile.
