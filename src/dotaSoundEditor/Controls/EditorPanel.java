@@ -80,7 +80,7 @@ public abstract class EditorPanel extends JPanel
 
     abstract void updateCache(String scriptString, long internalCrc);
 
-    protected final File promptUserForNewFile(String wavePath)
+    protected File promptUserForNewFile(String wavePath)
     {
         JFileChooser chooser = new JFileChooser(new File(UserPrefs.getInstance().getWorkingDirectory()));
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MP3s and WAVs", "mp3", "wav");
@@ -117,8 +117,8 @@ public abstract class EditorPanel extends JPanel
                     endIndex = Utility.nthOccurrence(selectedFile.getUserObject().toString(), '\"', 1);
                 }
 
-                String waveSubstring = waveString.substring(startIndex, endIndex + 1);
-                waveString = waveString.replace(waveSubstring, "\"" + getCustomSoundPathString() + destFileName + "\"");
+                String waveStringFilePath = waveString.substring(startIndex, endIndex + 1);
+                waveString = waveString.replace(waveStringFilePath, "\"" + getCustomSoundPathString() + destFileName + "\"");
                 selectedFile.setUserObject(waveString);
 
                 //Write out modified tree to scriptfile.
@@ -249,7 +249,7 @@ public abstract class EditorPanel extends JPanel
         waveSubstring = waveSubstring.replace("#", "");
         waveSubstring = waveSubstring.replace("*", "");
 
-        if (!waveString.contains("custom"))
+        if (!waveString.contains("custom") && !waveString.contains("//Replaced"))
         {
             File localFile = new File(Paths.get(installDir + "/sound/" + waveSubstring).toString());
             if (localFile.isFile())

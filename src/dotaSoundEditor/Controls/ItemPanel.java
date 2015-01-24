@@ -31,14 +31,19 @@ import dotaSoundEditor.Helpers.*;
 import info.ata4.vpk.VPKArchive;
 import info.ata4.vpk.VPKEntry;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.*;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeSelectionModel;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  *
@@ -277,5 +282,80 @@ public final class ItemPanel extends EditorPanel
         fillImageFrame(clickedItem);
         itemLabel.setText("Item: " + clickedItem.getFriendlyName());
 
+    }
+
+    //For whatever reasons, item sounds replacements REFUSE to work unless the 
+    //filename remains unchanged, so we're overriding the logic here to copy the 
+    //custom sound, rename it and just note what it used to be in a wavestring 
+    //comment. Additionally, it limits the filetypes we're allowed to use, 
+    //because we have to use whatever the original was.
+    @Override
+    protected File promptUserForNewFile(String wavePath)
+    {
+        DefaultMutableTreeNode selectedTreeNode = (DefaultMutableTreeNode) getTreeNodeFromWavePath(wavePath);
+        String waveString = selectedTreeNode.getUserObject().toString();
+        String allowedExtension = FilenameUtils.getExtension(waveString).replace("\"", "");
+        
+        JFileChooser chooser = new JFileChooser(new File(UserPrefs.getInstance().getWorkingDirectory()));
+        FileNameExtensionFilter filter = allowedExtension.equals("wav")
+                ? new FileNameExtensionFilter("WAVs", "wav")
+                : new FileNameExtensionFilter("MP3s", "mp3");
+        chooser.setAcceptAllFileFilterUsed((false));
+        chooser.setFileFilter(filter);
+        chooser.setMultiSelectionEnabled(false);
+
+        int chooserRetVal = chooser.showOpenDialog(chooser);
+        if (chooserRetVal == JFileChooser.APPROVE_OPTION)
+        {            
+            Path chosenFile = Paths.get(chooser.getSelectedFile().getAbsolutePath());           
+
+            int startIndex = -1;
+            int endIndex = -1;
+            //Get the actual value for the wavestring key-value pair.
+            if (waveString.contains("\"wave\""))
+            {
+                startIndex = Utility.nthOccurrence(selectedTreeNode.getUserObject().toString(), '\"', 2);
+                endIndex = Utility.nthOccurrence(selectedTreeNode.getUserObject().toString(), '\"', 3);
+            }
+            else    //Some wavestrings don't have the "wave" at the beginning for some reason
+            {
+                startIndex = Utility.nthOccurrence(selectedTreeNode.getUserObject().toString(), '\"', 0);
+                endIndex = Utility.nthOccurrence(selectedTreeNode.getUserObject().toString(), '\"', 1);
+            }
+            String waveStringFilePath = waveString.substring(startIndex, endIndex + 1);            
+            String waveStringNormalizedFilePath = waveStringFilePath.substring(0, waveStringFilePath.lastIndexOf("\""));
+            waveStringNormalizedFilePath = waveStringNormalizedFilePath.replace(")", "");
+            waveStringNormalizedFilePath = waveStringNormalizedFilePath.replace("\"", "");
+                                    
+            Path destPath = Paths.get(installDir, "/dota/sound/" + waveStringNormalizedFilePath);
+            UserPrefs.getInstance().setWorkingDirectory(chosenFile.getParent().toString());
+
+            try
+            {
+                new File(destPath.toString()).mkdirs();
+                Files.copy(chosenFile, destPath, StandardCopyOption.REPLACE_EXISTING);
+
+                if (waveString.contains("//")) { waveString = waveString.replace(waveString.substring(waveString.indexOf("//"), waveString.length()), ""); }
+                waveString = waveString.replace(waveStringFilePath, "\"" + waveStringNormalizedFilePath + "\" //Replaced by: " + chosenFile.getFileName().toString());
+                selectedTreeNode.setUserObject(waveString);
+
+                //Write out modified tree to scriptfile.
+                ScriptParser parser = new ScriptParser(this.currentTreeModel);
+                String scriptString = getCurrentScriptString();
+                Path scriptPath = Paths.get(scriptString);
+                parser.writeModelToFile(scriptPath.toString());
+
+                //Update UI
+                ((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent()).setUserObject(waveString);
+                ((DefaultTreeModel) currentTree.getModel()).nodeChanged((DefaultMutableTreeNode) currentTree.getLastSelectedPathComponent());
+                JOptionPane.showMessageDialog(this, "Sound file successfully replaced.");
+
+            }
+            catch (IOException ex)
+            {
+                JOptionPane.showMessageDialog(null, "Unable to replace sound.\nDetails: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        return null;
     }
 }
