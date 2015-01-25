@@ -21,13 +21,14 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="itemLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="439" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane2" alignment="0" pref="465" max="32767" attributes="0"/>
+                  <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="120" max="32767" attributes="0"/>
                       <Component id="itemImageLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="38" max="32767" attributes="0"/>
+                      <Component id="itemHelpLabel" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -40,7 +41,10 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="itemLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="itemImageLabel" min="-2" pref="64" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="itemImageLabel" min="-2" pref="64" max="-2" attributes="0"/>
+                  <Component id="itemHelpLabel" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jScrollPane2" pref="383" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -77,6 +81,16 @@
     <Component class="javax.swing.JLabel" name="itemLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Item:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="itemHelpLabel">
+      <Properties>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="0" green="0" red="ff" type="rgb"/>
+        </Property>
+        <Property name="horizontalAlignment" type="int" value="4"/>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;p align=&quot;right&quot;&gt;Sounds not working?&lt;br&gt;Mouseover here!&lt;/p&gt;&lt;/html&gt;"/>
+        <Property name="toolTipText" type="java.lang.String" value="&lt;html&gt;Item sound replacements are more restricted than other sounds.&#xa;&lt;br&gt;Item sounds must be the same file type (WAV or MP3) as the original. &#xa;&lt;brIf the new sound is longer than the original, it will be cut off.&#xa;&lt;br&gt;They must  also match the bitrate (128 kpbs for MP3s, 1141 kbps for WAVs) and frequency (44.1KHz) of the original.&lt;/html&gt;"/>
       </Properties>
     </Component>
   </SubComponents>

@@ -36,6 +36,7 @@ import java.nio.file.*;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -73,6 +74,8 @@ public final class ItemPanel extends EditorPanel
         this.populateSoundList();
         initTreeSelectionListener();
         fillImageFrame("default");
+        ToolTipManager.sharedInstance().setDismissDelay(20000);
+        ToolTipManager.sharedInstance().setInitialDelay(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -84,6 +87,7 @@ public final class ItemPanel extends EditorPanel
         jScrollPane2 = new javax.swing.JScrollPane();
         itemTree = new javax.swing.JTree();
         itemLabel = new javax.swing.JLabel();
+        itemHelpLabel = new javax.swing.JLabel();
 
         itemImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         itemImageLabel.setMaximumSize(new java.awt.Dimension(128, 72));
@@ -94,6 +98,11 @@ public final class ItemPanel extends EditorPanel
 
         itemLabel.setText("Item:");
 
+        itemHelpLabel.setForeground(new java.awt.Color(255, 0, 0));
+        itemHelpLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        itemHelpLabel.setText("<html><p align=\"right\">Sounds not working?<br>Mouseover here!</p></html>");
+        itemHelpLabel.setToolTipText("<html>Item sound replacements are more restricted than other sounds.\n<br>Item sounds must be the same file type (WAV or MP3) as the original. \n<brIf the new sound is longer than the original, it will be cut off.\n<br>They must  also match the bitrate (128 kpbs for MP3s, 1141 kbps for WAVs) and frequency (44.1KHz) of the original.</html>");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -103,12 +112,13 @@ public final class ItemPanel extends EditorPanel
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(itemLabel)
-                        .addGap(0, 439, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 120, Short.MAX_VALUE)
                         .addComponent(itemImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 38, Short.MAX_VALUE)
+                        .addComponent(itemHelpLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -117,13 +127,16 @@ public final class ItemPanel extends EditorPanel
                 .addContainerGap()
                 .addComponent(itemLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(itemImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(itemImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(itemHelpLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel itemHelpLabel;
     private javax.swing.JLabel itemImageLabel;
     private javax.swing.JLabel itemLabel;
     private javax.swing.JTree itemTree;

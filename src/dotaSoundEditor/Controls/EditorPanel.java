@@ -194,9 +194,9 @@ public abstract class EditorPanel extends JPanel
                 while (innerE.hasMoreElements())
                 {
                     Object currentInnerElement = innerE.nextElement();
-                    if (currentInnerElement.toString().contains("\"wave\"")
+                    if ((currentInnerElement.toString().contains("\"wave\"")
                             || currentInnerElement.toString().contains(".wav")
-                            || currentInnerElement.toString().contains(".mp3")
+                            || currentInnerElement.toString().contains(".mp3"))
                             && !currentInnerElement.toString().trim().startsWith("//"))
                     {
                         //Maybe do some string massaging here before we just hand it back

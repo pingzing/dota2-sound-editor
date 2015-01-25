@@ -52,6 +52,8 @@ I can be reached at psychozagal [at-symbol] gmail [dot] com.
 
 <h2>My custom sounds aren't playing in game!</h2>
 <li>Make sure you have -override_vpk set, as described in <a href="#setting">Setting Up</a>.</li>
+<li>If you are replacing an item sound, ensure that it is the same file type (WAV or MP3) as the original,
+and that it matches the original's bitrate (1141 kbps for WAVs, 128 kbps for MP3s) and frequency (44.1KHz).</li>
 <li>Check that your sound file is a .WAV or .MP3 file. If it is, try re-encoding it at a lower 
 frequency or bitrate--it's possible that Dota 2 only supports sound files in certain encodings.</li>
 <li>Check that your sound was copied successfully. The program copies custom sounds to
@@ -64,13 +66,17 @@ section was pointed to <i>custom/abaddon/wilhelm.wav</i>.</li>
 <li>If all else fails, the nuclear solution that <i>might</i> work is to delete your sound.cache
 from <YOUR STEAM LOCATION>/Steam/steamapps/common/dota 2 beta/dota/sound, and then Verify the Integrity 
 of your Game Cache. To do this, open Steam -> right-click Dota 2 -> select
-Properties -> select the Local Files tab -> Click "Verify Integrity of Game Cache", and wait for it to complete.
+Properties -> select the Local Files tab -> Click <i>Verify Integrity of Game Cache</i>, and wait for it to complete.
 Afterward, try replacing the game sounds again.</li>
 <br>
 
+<h2>My custom item sounds are being cut off!</h2>
+This seems to be a limitation of item sound modding. Custom item sounds must be the same length as, 
+or shorter than, the sounds they are replacing. Sorry!
+
 <h2>Some of my regular game sounds aren't playing!</h2>
 Try verifying Dota's game cache. To do this, open Steam -> right-click Dota 2 -> select
-Properties -> select the Local Files tab -> Click "Verify Integrity of Game Cache", and wait for it to complete.
+Properties -> select the Local Files tab -> Click <i>Verify Integrity of Game Cache</i>, and wait for it to complete.
 <br><br>
 Alternately, this can happen if Valve adds a new sound for an existing action. To fix this, just open the sound 
 editor, and select the Hero/Item/Music from the dropdown box. When the program loads those sounds, it
